@@ -5,6 +5,7 @@
 PROJECT         := rogue-vita
 PROJECT_TITLE   := Rogue Vita
 PROJECT_TITLEID := VSDK00007
+EMUL_DEST := /mnt/c/Users/logan/Documents/Vita-Game
 
 # --- ANSI COLOR CODES ---
 GREEN        := \033[1;32m
@@ -12,7 +13,7 @@ RED          := \033[1;31m
 YELLOW       := \033[1;33m
 RESET        := \033[0m
 
-.PHONY: all package clean re
+.PHONY: all package clean re emul remul
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
@@ -81,3 +82,11 @@ clean:
 re:
 	$(MAKE) clean
 	$(MAKE) all
+
+emul:
+	$(MAKE) all
+	sh script/deploy_emul.sh $(PROJECT).vpk "$(EMUL_DEST)"
+
+remul:
+	$(MAKE) re
+	sh script/deploy_emul.sh $(PROJECT).vpk "$(EMUL_DEST)"
