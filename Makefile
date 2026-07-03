@@ -1,12 +1,17 @@
 # You should only use Makefile-based build if you know what you're doing.
 # For most vitasdk projects, CMake is a better choice. See CMakeLists.txt for an example.
 
-# --- CONFIGURATION DU PROJET ---
-PROJECT         := mon_projet_vita
-PROJECT_TITLE   := Hello World
+# --- PROJECT CONFIGURATION ---
+PROJECT         := rogue-vita
+PROJECT_TITLE   := Rogue Vita
 PROJECT_TITLEID := VSDK00007
 
-# Ajout de 're' ici pour qu'il soit reconnu comme une commande et non un fichier
+# --- ANSI COLOR CODES ---
+GREEN        := \033[1;32m
+RED          := \033[1;31m
+YELLOW       := \033[1;33m
+RESET        := \033[0m
+
 .PHONY: all package clean re
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
@@ -29,7 +34,12 @@ OBJ_DIRS := $(sort $(dir $(OBJS)))
 # Needed by psvDebugScreenPrintf
 LIBS += -lSceDisplay_stub
 
-all: package
+# --- MAIN RULE WITH COLOR OVERRAYS ---
+all: 
+	@echo "$(YELLOW)Starting build for $(PROJECT_TITLE)...$(RESET)"
+	@$(MAKE) package && \
+		echo "$(GREEN)✔ Success: $(PROJECT).vpk built successfully!$(RESET)" || \
+		(echo "$(RED)✘ Error: Compilation or packaging failed!$(RESET)"; exit 1)
 
 package: $(PROJECT).vpk
 
@@ -64,10 +74,10 @@ out/%.o : src/%.c | $(OBJ_DIRS)
 	arm-vita-eabi-gcc -c $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(PROJECT).velf $(PROJECT).elf $(PROJECT).vpk param.sfo eboot.bin $(OBJS)
+	@echo "$(YELLOW)Cleaning up build artifacts...$(RESET)"
+	rm -f *.velf *.elf *.vpk param.sfo eboot.bin $(OBJS)
 	rm -rf out/
 
-# La règle 're' corrigée et propre
 re:
 	$(MAKE) clean
-	$(MAKE)
+	$(MAKE) all

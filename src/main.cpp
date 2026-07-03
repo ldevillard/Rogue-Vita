@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 	psvDebugScreenInit();
 	psvDebugScreenPrintf("Hello World!");
 	
-	sceKernelDelayThread(3*1000000); // Wait for 3 seconds
+	sceKernelDelayThread(5 * 1000000); // Wait for 5 seconds
 	sceKernelExitProcess(0);
     return 0;
 }
