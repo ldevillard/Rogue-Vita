@@ -1,0 +1,14 @@
+[
+  {
+    "arguments": [
+      "/usr/local/vitasdk/bin/arm-vita-eabi-g++",
+      "-c",
+      "-o",
+      "out/common/debugScreen.o",
+      "src/common/debugScreen.c"
+    ],
+    "directory": "/home/logandev/Rogue-Vita",
+    "file": "/home/logandev/Rogue-Vita/src/common/debugScreen.c",
+    "output": "/home/logandev/Rogue-Vita/out/common/debugScreen.o"
+  }
+]

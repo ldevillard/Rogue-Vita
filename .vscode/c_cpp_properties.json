@@ -1,0 +1,41 @@
+{
+    "configurations": [
+        {
+            "name": "VitaSDK",
+            "compilerPath": "/usr/local/vitasdk/bin/arm-vita-eabi-g++",
+            "intelliSenseMode": "linux-gcc-arm",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/header",
+                "${workspaceFolder}/header/**",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/**",
+                "/usr/local/vitasdk/arm-vita-eabi/include",
+                "/usr/local/vitasdk/arm-vita-eabi/include/**",
+                "/usr/local/vitasdk/include",
+                "/usr/local/vitasdk/include/**",
+                "/usr/local/vitasdk/lib/gcc/arm-vita-eabi/15.2.0/include",
+                "/usr/local/vitasdk/lib/gcc/arm-vita-eabi/15.2.0/include-fixed"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/header",
+                    "${workspaceFolder}/header/**",
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/src/**",
+                    "/usr/local/vitasdk/arm-vita-eabi/include",
+                    "/usr/local/vitasdk/arm-vita-eabi/include/**",
+                    "/usr/local/vitasdk/include",
+                    "/usr/local/vitasdk/include/**"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "defines": [
+                "__vita__",
+                "__arm__"
+            ]
+        }
+    ],
+    "version": 4
+}
