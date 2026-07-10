@@ -32,8 +32,28 @@ SRC_CPP :=$(call rwildcard, src/, *.cpp)
 OBJS := $(addprefix out/, $(SRC_C:src/%.c=%.o)) $(addprefix out/, $(SRC_CPP:src/%.cpp=%.o))
 OBJ_DIRS := $(sort $(dir $(OBJS)))
 
-# Needed by psvDebugScreenPrintf
-LIBS += -lSceDisplay_stub
+VITA3K ?= 0
+
+ifeq ($(VITA3K),1)
+	VITAGL_LIB := -lvitaGL_vita3k
+else
+	VITAGL_LIB := -lvitaGL
+endif
+
+# debug log on screen and vitaGL libs
+LIBS += $(VITAGL_LIB) \
+		-lvitashark \
+		-lSceShaccCgExt \
+		-lSceShaccCg_stub \
+		-ltaihen_stub \
+		-lSceCommonDialog_stub \
+		-lSceGxm_stub \
+		-lSceDisplay_stub \
+		-lSceAppMgr_stub \
+		-lSceKernelDmacMgr_stub \
+		-lmathneon \
+		-lm \
+		-lc
 
 # --- MAIN RULE WITH COLOR OVERRAYS ---
 all: 
@@ -81,12 +101,9 @@ clean:
 
 re:
 	$(MAKE) clean
-	$(MAKE) all
+	$(MAKE) VITA3K=0
 
 emul:
-	$(MAKE) all
-	sh script/deploy_emul.sh $(PROJECT).vpk "$(EMUL_DEST)"
-
-remul:
-	$(MAKE) re
+	$(MAKE) clean
+	$(MAKE) VITA3K=1
 	sh script/deploy_emul.sh $(PROJECT).vpk "$(EMUL_DEST)"

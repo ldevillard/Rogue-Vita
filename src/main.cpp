@@ -1,19 +1,22 @@
-#include <psp2/kernel/processmgr.h>
-#include <sstream>
-#include <vector>
-
-#include <cstdio>
-
-#include <common/debugScreen.h>
-
-#define printf psvDebugScreenPrintf
+#include <vitaGL.h>
 
 int main(int argc, char *argv[]) 
 {
-	psvDebugScreenInit();
-	psvDebugScreenPrintf("Hello World!");
-	
-	sceKernelDelayThread(5 * 1000000); // Wait for 5 seconds
-	sceKernelExitProcess(0);
+	// graphic device init
+	vglInit(0x800000);
+
+	// vsync
+	vglWaitVblankStart(GL_TRUE);
+
+	// blue screen
+	glClearColor(0.118f, 0.353f, 0.706f, 1.0f);
+
+	while (true)
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		vglSwapBuffers(GL_FALSE);
+	}
+
     return 0;
 }
