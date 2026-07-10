@@ -5,7 +5,10 @@
 PROJECT         := rogue-vita
 PROJECT_TITLE   := Rogue Vita
 PROJECT_TITLEID := VSDK00007
+
 EMUL_DEST := /mnt/c/Users/logan/Documents/Vita-Game
+VITA3K_FS  := /mnt/c/Users/logan/AppData/Roaming/Vita3K/Vita3K
+VITA3K_EXE := /mnt/c/Users/logan/Documents/Vita-Emul/Vita3K.exe
 
 # --- ANSI COLOR CODES ---
 GREEN        := \033[1;32m
@@ -106,4 +109,4 @@ re:
 emul:
 	$(MAKE) clean
 	$(MAKE) VITA3K=1
-	sh script/deploy_emul.sh $(PROJECT).vpk "$(EMUL_DEST)"
+	./script/deploy_emul.sh "$(PROJECT).vpk" "$(PROJECT_TITLEID)" "$(VITA3K_FS)" "$(VITA3K_EXE)"
