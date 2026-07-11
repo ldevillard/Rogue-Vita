@@ -95,7 +95,8 @@ namespace dvl::internal
 
         _buffers.emplace(handle.id, buffer);
 
-        const std::string message = "Created buffer with ID: " + std::to_string(buffer.id) + ", size: " + std::to_string(desc.size);
+        const std::string message = "Created buffer handle: " + std::to_string(handle.id) + ", native ID: " 
+                                        + std::to_string(buffer.id) + ", size: " + std::to_string(desc.size);
         Log(LogLevel::Info, message.c_str());
 
         return handle;
