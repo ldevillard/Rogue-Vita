@@ -9,8 +9,8 @@
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/**",
-                "${workspaceFolder}/dvl_graphics/include",
-                "${workspaceFolder}/dvl_graphics/include/**",
+                "${workspaceFolder}/dvl/include",
+                "${workspaceFolder}/dvl/include/**",
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/src/**",
                 "/usr/local/vitasdk/arm-vita-eabi/include",
@@ -24,8 +24,8 @@
                 "path": [
                     "${workspaceFolder}/include",
                     "${workspaceFolder}/include/**",
-                    "${workspaceFolder}/dvl_graphics/include",
-                    "${workspaceFolder}/dvl_graphics/include/**",
+                    "${workspaceFolder}/dvl/include",
+                    "${workspaceFolder}/dvl/include/**",
                     "${workspaceFolder}/src",
                     "${workspaceFolder}/src/**",
                     "/usr/local/vitasdk/arm-vita-eabi/include",

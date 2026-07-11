@@ -24,14 +24,14 @@ CC := arm-vita-eabi-gcc
 CXX := arm-vita-eabi-g++
 STRIP := arm-vita-eabi-strip
 
-INCLUDES := -I../common -Iinclude -Idvl_graphics/include
+INCLUDES := -I../common -Iinclude -Idvl/include
 
 CFLAGS += -Wl,-q -Wall -Wextra -Werror $(INCLUDES)
 CXXFLAGS += -Wl,-q -std=c++17 -Wall -Wextra -Wpedantic -Werror $(INCLUDES)
 
 SRC_C :=$(call rwildcard, src/, *.c)
 SRC_CPP :=$(call rwildcard, src/, *.cpp)
-DVL_SRC_CPP :=$(call rwildcard, dvl_graphics/src/, *.cpp)
+DVL_SRC_CPP :=$(call rwildcard, dvl/src/, *.cpp)
 
 OBJS := $(addprefix out/, $(SRC_C:src/%.c=%.o)) \
 		$(addprefix out/, $(SRC_CPP:src/%.cpp=%.o)) \
@@ -100,7 +100,7 @@ out/%.o : src/%.cpp | $(OBJ_DIRS)
 out/%.o : src/%.c | $(OBJ_DIRS)
 	arm-vita-eabi-gcc -c $(CFLAGS) -o $@ $<
 
-out/dvl_graphics/%.o : dvl_graphics/%.cpp | $(OBJ_DIRS)
+out/dvl/%.o : dvl/%.cpp | $(OBJ_DIRS)
 	arm-vita-eabi-g++ -c $(CXXFLAGS) -o $@ $<
 
 clean:

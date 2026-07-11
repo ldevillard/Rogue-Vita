@@ -1,6 +1,8 @@
-#include "dvl_backend_factory.h"
+#include "backend_factory.h"
 
-#include "../backend/vitagl/vitagl_backend.h"
+#include "../vitagl/vitagl_backend.h"
+
+#include <dvl/log/log.h>
 
 namespace dvl::internal
 {
@@ -12,6 +14,7 @@ namespace dvl::internal
                 return std::make_unique<VitaGLBackend>();
         }
 
+        Log(LogLevel::Error, "Unsupported graphics API");
         return nullptr;
     }
 }
