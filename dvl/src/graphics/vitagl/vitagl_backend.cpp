@@ -28,6 +28,8 @@ namespace dvl::internal
 
     void VitaGLBackend::Shutdown()
     {
+        _pipelines.clear();
+
         for (const std::pair<const unsigned int, NativeBuffer>& buffer : _buffers)
         {
             glDeleteBuffers(1, &buffer.second.id);
@@ -62,12 +64,6 @@ namespace dvl::internal
 
     BufferHandle VitaGLBackend::CreateBuffer(const BufferDesc& desc)
     {
-        if (_nextBufferHandle == BufferHandle::Invalid)
-        {
-            Log(LogLevel::Error, "Buffer handle limit reached");
-            return {};
-        }
-
         NativeBuffer buffer;
         buffer.size = desc.size;
         
@@ -166,12 +162,6 @@ namespace dvl::internal
     
     ShaderHandle VitaGLBackend::CreateShader(const ShaderDesc& desc)
     {
-        if (_nextShaderHandle == ShaderHandle::Invalid)
-        {
-            Log(LogLevel::Error, "Shader handle limit reached");
-            return {};
-        }
-
         const GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, desc.vertex);
         if (vertexShader == 0)
         {
@@ -264,8 +254,38 @@ namespace dvl::internal
 
         NativePipeline pipeline;
         pipeline.program = shaderIt->second.program;
-        pipeline.attributes.assign(desc.attributes, desc.attributes + desc.attributeCount);
         pipeline.vertexStride = desc.vertexStride;
+        pipeline.topology = desc.topology;
+
+        for (std::size_t index = 0; index < desc.attributeCount; ++index)
+        {
+            const VertexAttribute& attribute = desc.attributes[index];
+            const GLint location = glGetAttribLocation(pipeline.program, attribute.name);
+
+            if (location == -1)
+            {
+                const std::string message = "Attribute not found in shader: " + std::string(attribute.name);
+                Log(LogLevel::Error, message.c_str());
+                return {};
+            }
+
+            NativePipeline::NativeVertexAttribute nativeAttribute;
+            nativeAttribute.location = location;
+            nativeAttribute.offset = attribute.offset;
+
+            switch (attribute.format)
+            {
+                case VertexFormat::Float3:
+                    nativeAttribute.componentCount = 3;
+                    break;
+
+                case VertexFormat::Float4:
+                    nativeAttribute.componentCount = 4;
+                    break;
+            }
+
+            pipeline.attributes.push_back(nativeAttribute);
+        }
 
         PipelineHandle handle;
         handle.id = _nextPipelineHandle++;
@@ -285,6 +305,17 @@ namespace dvl::internal
             return;
         }
 
+        if (_currentPipeline.id == handle.id)
+        {
+            for (const NativePipeline::NativeVertexAttribute& attribute : it->second.attributes)
+            {
+                glDisableVertexAttribArray(attribute.location);
+            }
+
+            _currentPipeline = {};
+            glUseProgram(0);
+        }
+
         _pipelines.erase(it);
     }
 
@@ -296,6 +327,16 @@ namespace dvl::internal
         {
             Log(LogLevel::Error, "Invalid pipeline handle");
             return;
+        }
+
+        const auto currentIt = _pipelines.find(_currentPipeline.id);
+
+        if (currentIt != _pipelines.end())
+        {
+            for (const NativePipeline::NativeVertexAttribute& attribute : currentIt->second.attributes)
+            {
+                glDisableVertexAttribArray(attribute.location);
+            }
         }
 
         const NativePipeline& pipeline = it->second;
@@ -327,35 +368,24 @@ namespace dvl::internal
             return;
         }
 
-        for (const VertexAttribute& attribute : pipelineIt->second.attributes)
+        for (const NativePipeline::NativeVertexAttribute& attribute : pipelineIt->second.attributes)
         {
-            const GLint location = glGetAttribLocation(pipelineIt->second.program, attribute.name);
+            glEnableVertexAttribArray(attribute.location);
 
-            if (location == -1)
-            {
-                Log(LogLevel::Error, ("Attribute not found in shader: " + std::string(attribute.name)).c_str());
-                continue;
-            }
-
-            int size = 0;
-            switch (attribute.format)
-            {
-                case VertexFormat::Float3:
-                    size = 3;
-                    break;
-
-                case VertexFormat::Float4:
-                    size = 4;
-                    break;
-            }
-
-            glEnableVertexAttribArray(location);
-
-            glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, 
+            glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE,
                                   static_cast<GLsizei>(pipelineIt->second.vertexStride), 
                                   reinterpret_cast<const void*>(attribute.offset));
         }
 
-        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
+        GLenum topology = GL_TRIANGLES;
+
+        switch (pipelineIt->second.topology)
+        {
+            case PrimitiveTopology::TriangleList:
+                topology = GL_TRIANGLES;
+                break;
+        }
+
+        glDrawArrays(topology, 0, static_cast<GLsizei>(vertexCount));
     }
 }

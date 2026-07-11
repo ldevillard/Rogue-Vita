@@ -2,9 +2,6 @@
 
 #include "shader.h"
 
-#include <string>
-#include <vector>
-
 namespace dvl
 {
     struct PipelineHandle
@@ -25,11 +22,16 @@ namespace dvl
         Float4,
     };
 
+    enum class PrimitiveTopology
+    {
+        TriangleList
+    };
+
     struct VertexAttribute
     {
         const char* name = nullptr;
-        VertexFormat format;
-        std::size_t offset;
+        VertexFormat format = VertexFormat::Float3;
+        std::size_t offset = 0;
     };
 
     struct PipelineDesc
@@ -40,5 +42,6 @@ namespace dvl
        
         std::size_t attributeCount = 0;
         std::size_t vertexStride = 0;
+        PrimitiveTopology topology = PrimitiveTopology::TriangleList;
     };
 }

@@ -3,6 +3,7 @@
 #include "../internal/backend.h"
 
 #include <unordered_map>
+#include <vector>
 
 namespace dvl::internal
 {
@@ -60,10 +61,18 @@ namespace dvl::internal
 
         struct NativePipeline
         {
+            struct NativeVertexAttribute
+            {
+                int location = -1;
+                int componentCount = 0;
+                std::size_t offset = 0;
+            };
+
             unsigned int program = 0;
 
-            std::vector<VertexAttribute> attributes;
+            std::vector<NativeVertexAttribute> attributes;
             std::size_t vertexStride = 0;
+            PrimitiveTopology topology = PrimitiveTopology::TriangleList;
         };
 
         std::unordered_map<unsigned int, NativePipeline> _pipelines;
