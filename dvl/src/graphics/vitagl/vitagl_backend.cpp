@@ -34,6 +34,13 @@ namespace dvl::internal
         }
 
         _buffers.clear();
+    
+        for (const std::pair<const unsigned int, NativeShader>& shader : _shaders)
+        {
+            glDeleteProgram(shader.second.program);
+        }
+
+        _shaders.clear();
     }
 
     void VitaGLBackend::BeginFrame(const Color& clearColor)
@@ -120,5 +127,129 @@ namespace dvl::internal
         Log(LogLevel::Info, message.c_str());
 
         _buffers.erase(it);
+    }
+
+    static GLuint CompileShader(GLenum shaderType, const ShaderCode& code)
+    {
+        GLuint shader = glCreateShader(shaderType);
+        
+        
+        if (shader == 0)
+        {
+            Log(LogLevel::Error, "Failed to create shader");
+            return 0;
+        }
+        
+        const GLint length = static_cast<GLint>(code.size);
+        glShaderSource(shader, 1, &code.data, &length);
+        glCompileShader(shader);
+        
+        GLint compileStatus = GL_FALSE;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+        
+        if (compileStatus != GL_TRUE)
+        {
+            GLint infoLogLength = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+            
+            std::string infoLog(infoLogLength, '\0');
+            glGetShaderInfoLog(shader, infoLogLength, nullptr, infoLog.data());
+            
+            Log(LogLevel::Error, ("Shader compilation failed: " + infoLog).c_str());
+            
+            glDeleteShader(shader);
+            return 0;
+        }
+        
+        return shader;
+    }
+    
+    ShaderHandle VitaGLBackend::CreateShader(const ShaderDesc& desc)
+    {
+        if (_nextShaderHandle == ShaderHandle::Invalid)
+        {
+            Log(LogLevel::Error, "Shader handle limit reached");
+            return {};
+        }
+
+        const GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, desc.vertex);
+        if (vertexShader == 0)
+        {
+            return {};
+        }
+        
+        const GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, desc.fragment);
+        if (fragmentShader == 0)
+        {
+            glDeleteShader(vertexShader);
+            return {};
+        }
+        
+        const GLuint program = glCreateProgram();
+        
+        if (program == 0)
+        {
+            Log(LogLevel::Error, "Failed to create shader program");
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            return {};
+        }
+        
+        glAttachShader(program, vertexShader);
+        glAttachShader(program, fragmentShader);
+        glLinkProgram(program);
+
+        glDeleteShader(vertexShader);
+        glDeleteShader(fragmentShader);
+
+        GLint success = GL_FALSE;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+        if (success != GL_TRUE)
+        {
+            GLint infoLogLength = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+            std::string infoLog(infoLogLength, '\0');
+            glGetProgramInfoLog(program, infoLogLength, nullptr, infoLog.data());
+
+            Log(LogLevel::Error, ("Shader program linking failed: " + infoLog).c_str());
+
+            glDeleteProgram(program);
+            return {};
+        }
+
+        ShaderHandle handle;
+        handle.id = _nextShaderHandle++;
+        
+        NativeShader shader;
+        shader.program = program;
+
+        _shaders.emplace(handle.id, shader);
+
+        const std::string message = "Created shader handle: " + std::to_string(handle.id) + ", program ID: " 
+                                        + std::to_string(shader.program);
+        Log(LogLevel::Info, message.c_str());
+        return handle;
+    }
+
+    void VitaGLBackend::DestroyShader(ShaderHandle handle)
+    {
+        const auto it = _shaders.find(handle.id);
+
+        if (it == _shaders.end())
+        {
+            Log(LogLevel::Error, "Invalid shader handle");
+            return;
+        }
+
+        NativeShader& shader = it->second;
+
+        glDeleteProgram(shader.program);
+
+        const std::string message = "Destroyed shader with program ID: " + std::to_string(shader.program);
+        Log(LogLevel::Info, message.c_str());
+
+        _shaders.erase(it);
     }
 }

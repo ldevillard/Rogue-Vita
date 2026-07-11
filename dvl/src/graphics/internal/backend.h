@@ -1,6 +1,7 @@
 #pragma once 
 
 #include <dvl/graphics/buffer.h>
+#include <dvl/graphics/shader.h>
 #include <dvl/graphics/types.h>
 
 namespace dvl::internal
@@ -20,5 +21,8 @@ namespace dvl::internal
 
         virtual BufferHandle CreateBuffer(const BufferDesc& desc) = 0;
         virtual void DestroyBuffer(BufferHandle handle) = 0;
+
+        virtual ShaderHandle CreateShader(const ShaderDesc& desc) = 0;
+        virtual void DestroyShader(ShaderHandle handle) = 0;
     };
 }

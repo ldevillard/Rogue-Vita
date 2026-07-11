@@ -127,4 +127,32 @@ namespace dvl
     
         _backend->DestroyBuffer(handle);
     }
+
+    ShaderHandle Device::CreateShader(const ShaderDesc& desc)
+    {
+        if (!_backend)
+        {
+            Log(LogLevel::Error, "Cannot create shader before device initialization");
+            return {};
+        }
+
+        if (desc.vertex.data == nullptr || desc.vertex.size == 0 ||
+            desc.fragment.data == nullptr || desc.fragment.size == 0)
+        {
+            Log(LogLevel::Error, "Invalid shader description");
+            return {};
+        }
+
+        return _backend->CreateShader(desc);
+    }
+
+    void Device::DestroyShader(ShaderHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->DestroyShader(handle);
+    }
 }

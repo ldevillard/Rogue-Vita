@@ -1,6 +1,7 @@
 #pragma once
 
 #include "buffer.h"
+#include "shader.h"
 #include "types.h"
 
 #include <memory>
@@ -33,6 +34,9 @@ namespace dvl
 
         BufferHandle CreateBuffer(const BufferDesc& desc);
         void DestroyBuffer(BufferHandle handle);
+
+        ShaderHandle CreateShader(const ShaderDesc& desc);
+        void DestroyShader(ShaderHandle handle);
 
     private:
         std::unique_ptr<internal::Backend> _backend;
