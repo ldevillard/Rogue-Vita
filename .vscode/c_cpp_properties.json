@@ -7,8 +7,10 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "includePath": [
-                "${workspaceFolder}/header",
-                "${workspaceFolder}/header/**",
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/dvl_graphics/include",
+                "${workspaceFolder}/dvl_graphics/include/**",
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/src/**",
                 "/usr/local/vitasdk/arm-vita-eabi/include",
@@ -20,8 +22,10 @@
             ],
             "browse": {
                 "path": [
-                    "${workspaceFolder}/header",
-                    "${workspaceFolder}/header/**",
+                    "${workspaceFolder}/include",
+                    "${workspaceFolder}/include/**",
+                    "${workspaceFolder}/dvl_graphics/include",
+                    "${workspaceFolder}/dvl_graphics/include/**",
                     "${workspaceFolder}/src",
                     "${workspaceFolder}/src/**",
                     "/usr/local/vitasdk/arm-vita-eabi/include",

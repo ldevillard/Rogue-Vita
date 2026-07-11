@@ -1,38 +1,28 @@
-#include <vitaGL.h>
+#include <dvl.h>
 
-int main(int argc, char *argv[]) 
+#include <iostream>
+
+#include <psp2/kernel/clib.h>
+
+int main()
 {
-	// graphic device init
-	vglInit(0x800000);
+	dvl::Device device;
+	dvl::DeviceDesc desc;
+	desc.api = dvl::GraphicsAPI::VitaGL;
+	desc.width = 960;
+	desc.height = 544;
+	desc.vsync = true;
 
-	// vsync
-	vglWaitVblankStart(GL_TRUE);
-
-	// blue screen with vita res
-	glViewport(0, 0, 960, 544);
-	glClearColor(0.118f, 0.353f, 0.706f, 1.0f);
+	if (!device.Initialize(desc))
+	{
+		return 1;
+	}
 
 	while (true)
 	{
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		// hello triangle
-		{
-			glBegin(GL_TRIANGLES);
-			
-			glColor3f(1.0f, 0.0f, 0.0f);
-			glVertex2f(-0.6f, -0.5f);
-			
-			glColor3f(0.0f, 1.0f, 0.0f);
-			glVertex2f(0.6f, -0.5f);
-			
-			glColor3f(0.0f, 0.0f, 1.0f);
-			glVertex2f(0.0f, 0.6f);
-			
-			glEnd();
-		}
-
-		vglSwapBuffers(GL_FALSE);
+		device.BeginFrame({ 0.118f, 0.353f, 0.706f, 1.0f });
+		
+		device.EndFrame();
 	}
 
     return 0;
