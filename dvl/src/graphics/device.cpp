@@ -155,4 +155,55 @@ namespace dvl
 
         _backend->DestroyShader(handle);
     }
+
+    PipelineHandle Device::CreatePipeline(const PipelineDesc& desc)
+    {
+        if (!_backend)
+        {
+            Log(LogLevel::Error, "Cannot create pipeline before device initialization");
+            return {};
+        }
+
+        return _backend->CreatePipeline(desc);
+    }
+
+    void Device::DestroyPipeline(PipelineHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->DestroyPipeline(handle);
+    }
+
+    void Device::SetPipeline(PipelineHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->SetPipeline(handle);
+    }
+
+    void Device::SetVertexBuffer(BufferHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->SetVertexBuffer(handle);
+    }
+
+    void Device::Draw(unsigned int vertexCount)
+    {
+        if (!_backend)
+        {
+            return;
+        }
+
+        _backend->Draw(vertexCount);
+    }
 }

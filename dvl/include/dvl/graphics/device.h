@@ -2,6 +2,7 @@
 
 #include "buffer.h"
 #include "shader.h"
+#include "pipeline.h"
 #include "types.h"
 
 #include <memory>
@@ -37,6 +38,14 @@ namespace dvl
 
         ShaderHandle CreateShader(const ShaderDesc& desc);
         void DestroyShader(ShaderHandle handle);
+
+        PipelineHandle CreatePipeline(const PipelineDesc& desc);
+        void DestroyPipeline(PipelineHandle handle);
+
+        void SetPipeline(PipelineHandle handle);
+        void SetVertexBuffer(BufferHandle handle);
+        
+        void Draw(unsigned int vertexCount);
 
     private:
         std::unique_ptr<internal::Backend> _backend;

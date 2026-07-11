@@ -252,4 +252,110 @@ namespace dvl::internal
 
         _shaders.erase(it);
     }
+
+    PipelineHandle VitaGLBackend::CreatePipeline(const PipelineDesc& desc)
+    {
+        const auto shaderIt = _shaders.find(desc.shader.id);
+        if (shaderIt == _shaders.end())
+        {
+            Log(LogLevel::Error, "Invalid shader handle");
+            return {};
+        }
+
+        NativePipeline pipeline;
+        pipeline.program = shaderIt->second.program;
+        pipeline.attributes.assign(desc.attributes, desc.attributes + desc.attributeCount);
+        pipeline.vertexStride = desc.vertexStride;
+
+        PipelineHandle handle;
+        handle.id = _nextPipelineHandle++;
+        
+        _pipelines.emplace(handle.id, pipeline);
+
+        return handle;
+    }
+
+    void VitaGLBackend::DestroyPipeline(PipelineHandle handle)
+    {
+        const auto it = _pipelines.find(handle.id);
+
+        if (it == _pipelines.end())
+        {
+            Log(LogLevel::Error, "Invalid pipeline handle");
+            return;
+        }
+
+        _pipelines.erase(it);
+    }
+
+    void VitaGLBackend::SetPipeline(PipelineHandle handle)
+    {
+        const auto it = _pipelines.find(handle.id);
+
+        if (it == _pipelines.end())
+        {
+            Log(LogLevel::Error, "Invalid pipeline handle");
+            return;
+        }
+
+        const NativePipeline& pipeline = it->second;
+
+        _currentPipeline = handle;
+        glUseProgram(pipeline.program);
+    }
+
+    void VitaGLBackend::SetVertexBuffer(BufferHandle handle)
+    {
+        const auto it = _buffers.find(handle.id);
+
+        if (it == _buffers.end())
+        {
+            Log(LogLevel::Error, "Invalid buffer handle");
+            return;
+        }
+
+        glBindBuffer(GL_ARRAY_BUFFER, it->second.id);
+    }
+
+    void VitaGLBackend::Draw(unsigned int vertexCount)
+    {
+        const auto pipelineIt = _pipelines.find(_currentPipeline.id);
+
+        if (pipelineIt == _pipelines.end())
+        {
+            Log(LogLevel::Error, "No pipeline is currently set");
+            return;
+        }
+
+        for (const VertexAttribute& attribute : pipelineIt->second.attributes)
+        {
+            const GLint location = glGetAttribLocation(pipelineIt->second.program, attribute.name);
+
+            if (location == -1)
+            {
+                Log(LogLevel::Error, ("Attribute not found in shader: " + std::string(attribute.name)).c_str());
+                continue;
+            }
+
+            int size = 0;
+            switch (attribute.format)
+            {
+                case VertexFormat::Float3:
+                    size = 3;
+                    break;
+
+                case VertexFormat::Float4:
+                    size = 4;
+                    break;
+            }
+
+            glEnableVertexAttribArray(location);
+
+            glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE, 
+                                  static_cast<GLsizei>(pipelineIt->second.vertexStride), 
+                                  reinterpret_cast<const void*>(attribute.offset));
+        }
+
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(vertexCount));
+    }
 }

@@ -23,6 +23,14 @@ namespace dvl::internal
         ShaderHandle CreateShader(const ShaderDesc& desc) override;
         void DestroyShader(ShaderHandle handle) override;
 
+        PipelineHandle CreatePipeline(const PipelineDesc& desc) override;
+        void DestroyPipeline(PipelineHandle handle) override;
+
+        void SetPipeline(PipelineHandle handle) override;
+        void SetVertexBuffer(BufferHandle handle) override;
+
+        void Draw(unsigned int vertexCount) override;
+
     private:
         // -- BUFFER --
 
@@ -47,5 +55,19 @@ namespace dvl::internal
         // Use a vector of generational slots if resource management needs to scale
         std::unordered_map<unsigned int, NativeShader> _shaders;
         unsigned int _nextShaderHandle = 0;
+
+        // -- PIPELINE --
+
+        struct NativePipeline
+        {
+            unsigned int program = 0;
+
+            std::vector<VertexAttribute> attributes;
+            std::size_t vertexStride = 0;
+        };
+
+        std::unordered_map<unsigned int, NativePipeline> _pipelines;
+        PipelineHandle _currentPipeline;
+        unsigned int _nextPipelineHandle = 0;
     };
 }
