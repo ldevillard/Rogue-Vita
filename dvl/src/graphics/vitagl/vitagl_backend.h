@@ -13,5 +13,6 @@ namespace dvl::internal
         void BeginFrame(const Color& clearColor) override;
         void EndFrame() override;
 
+        void SetViewport(const Viewport& viewport) override;
     };
 }

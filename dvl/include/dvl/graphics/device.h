@@ -28,6 +28,8 @@ namespace dvl
 
         bool IsInitialized() const;
 
+        void SetViewport(const Viewport& viewport);
+
     private:
         std::unique_ptr<internal::Backend> _backend;
     };

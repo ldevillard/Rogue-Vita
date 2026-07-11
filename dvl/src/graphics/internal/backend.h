@@ -14,5 +14,7 @@ namespace dvl::internal
 
         virtual void BeginFrame(const Color& clearColor) = 0;
         virtual void EndFrame() = 0;
+
+        virtual void SetViewport(const Viewport& viewport) = 0;
     };
 }

@@ -13,8 +13,13 @@ namespace dvl::internal
         vglInit(0x800000);
         
         vglWaitVblankStart(desc.vsync ? GL_TRUE : GL_FALSE);
-        glViewport(0, 0, desc.width, desc.height);
 
+        Viewport viewport;
+        viewport.width = desc.width;
+        viewport.height = desc.height;
+
+        SetViewport(viewport);
+        
         Log(LogLevel::Info, "VitaGL backend initialized");
         return true;
     }
@@ -33,5 +38,10 @@ namespace dvl::internal
     void VitaGLBackend::EndFrame()
     {
         vglSwapBuffers(GL_FALSE);
+    }
+
+    void VitaGLBackend::SetViewport(const Viewport& viewport)
+    {
+        glViewport(viewport.x, viewport.y, viewport.width, viewport.height);
     }
 }

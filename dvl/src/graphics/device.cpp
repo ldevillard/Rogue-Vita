@@ -77,4 +77,21 @@ namespace dvl
     {
         return _backend != nullptr;
     }
+
+    void Device::SetViewport(const Viewport& viewport)
+    {
+        if (!_backend)
+        {
+            Log(LogLevel::Error, "Cannot set viewport before device initialization");
+            return;
+        }
+
+        if (viewport.width <= 0 || viewport.height <= 0)
+        {
+            Log(LogLevel::Error, "Invalid viewport dimensions");
+            return;
+        }
+        
+        _backend->SetViewport(viewport);
+    }
 }

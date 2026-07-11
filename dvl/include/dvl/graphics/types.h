@@ -24,4 +24,12 @@ namespace dvl
         float b = 0.0f;
         float a = 1.0f;
     };
+
+    struct Viewport
+    {
+        int x = 0;
+        int y = 0;
+        int width = 960;
+        int height = 544;
+    };
 }
