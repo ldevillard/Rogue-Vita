@@ -94,4 +94,37 @@ namespace dvl
         
         _backend->SetViewport(viewport);
     }
+
+    BufferHandle Device::CreateBuffer(const BufferDesc& desc)
+    {
+        if (!_backend)
+        {
+            Log(LogLevel::Error, "Cannot create buffer before device initialization");
+            return {};
+        }
+
+        if (desc.size == 0)
+        {
+            Log(LogLevel::Error, "Invalid buffer description");
+            return {};
+        }
+
+        if (desc.usage == BufferUsage::Static && desc.data == nullptr)
+        {
+            Log(LogLevel::Error, "Static buffer requires initial data");
+            return {};
+        }
+        
+        return _backend->CreateBuffer(desc);
+    }
+
+    void Device::DestroyBuffer(BufferHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+    
+        _backend->DestroyBuffer(handle);
+    }
 }

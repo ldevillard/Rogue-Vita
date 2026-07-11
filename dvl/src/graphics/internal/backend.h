@@ -1,5 +1,6 @@
 #pragma once 
 
+#include <dvl/graphics/buffer.h>
 #include <dvl/graphics/types.h>
 
 namespace dvl::internal
@@ -16,5 +17,8 @@ namespace dvl::internal
         virtual void EndFrame() = 0;
 
         virtual void SetViewport(const Viewport& viewport) = 0;
+
+        virtual BufferHandle CreateBuffer(const BufferDesc& desc) = 0;
+        virtual void DestroyBuffer(BufferHandle handle) = 0;
     };
 }

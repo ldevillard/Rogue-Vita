@@ -2,6 +2,8 @@
 
 #include "../internal/backend.h"
 
+#include <unordered_map>
+
 namespace dvl::internal
 {
     class VitaGLBackend : public Backend
@@ -14,5 +16,20 @@ namespace dvl::internal
         void EndFrame() override;
 
         void SetViewport(const Viewport& viewport) override;
+
+        BufferHandle CreateBuffer(const BufferDesc& desc) override;
+        void DestroyBuffer(BufferHandle handle) override;
+
+    private:
+        struct NativeBuffer
+        {
+            unsigned int id = 0;
+
+            std::size_t size = 0;
+        };
+
+        // Use a vector of generational slots if resource management needs to scale
+        std::unordered_map<unsigned int, NativeBuffer> _buffers;
+        unsigned int _nextBufferHandle = 0;
     };
 }

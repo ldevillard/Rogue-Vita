@@ -1,5 +1,6 @@
 #pragma once
 
+#include "buffer.h"
 #include "types.h"
 
 #include <memory>
@@ -29,6 +30,9 @@ namespace dvl
         bool IsInitialized() const;
 
         void SetViewport(const Viewport& viewport);
+
+        BufferHandle CreateBuffer(const BufferDesc& desc);
+        void DestroyBuffer(BufferHandle handle);
 
     private:
         std::unique_ptr<internal::Backend> _backend;
