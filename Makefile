@@ -33,6 +33,10 @@ SRC_C :=$(call rwildcard, src/, *.c)
 SRC_CPP :=$(call rwildcard, src/, *.cpp)
 DVL_SRC_CPP :=$(call rwildcard, dvl/src/, *.cpp)
 
+SHADER_ASSET_DIR := asset/shader
+SHADER_ASSETS := $(shell find $(SHADER_ASSET_DIR) -type f)
+SHADER_VPK_ARGS := $(foreach file,$(SHADER_ASSETS),--add $(file)=assets/shaders/$(patsubst $(SHADER_ASSET_DIR)/%,%,$(file)))
+
 OBJS := $(addprefix out/, $(SRC_C:src/%.c=%.o)) \
 		$(addprefix out/, $(SRC_CPP:src/%.cpp=%.o)) \
 		$(addprefix out/, $(DVL_SRC_CPP:%.cpp=%.o))
@@ -70,12 +74,13 @@ all:
 
 package: $(PROJECT).vpk
 
-$(PROJECT).vpk: eboot.bin param.sfo
+$(PROJECT).vpk: eboot.bin param.sfo $(SHADER_ASSETS)
 	vita-pack-vpk -s param.sfo -b eboot.bin \
 		--add sce_sys/icon0.png=sce_sys/icon0.png \
 		--add sce_sys/livearea/contents/bg.png=sce_sys/livearea/contents/bg.png \
 		--add sce_sys/livearea/contents/startup.png=sce_sys/livearea/contents/startup.png \
 		--add sce_sys/livearea/contents/template.xml=sce_sys/livearea/contents/template.xml \
+		$(SHADER_VPK_ARGS) \
 		$(PROJECT).vpk
 
 eboot.bin: $(PROJECT).velf

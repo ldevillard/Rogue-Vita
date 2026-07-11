@@ -1,5 +1,6 @@
 #include <dvl/dvl.h>
 
+#include "renderer/shader_loader.h"
 #include "renderer/vertex.h"
 
 int main()
@@ -43,6 +44,30 @@ int main()
 		if (!vertexBuffer.IsValid())
 		{
 			dvl::Log(dvl::LogLevel::Error, "Failed to create vertex buffer");
+			return 1;
+		}
+	}
+
+	// Test of a simple shader creation
+	{
+		ShaderSource shaderSource;
+		if (!LoadShaderSource("app0:/assets/shaders/vertex.vert", "app0:/assets/shaders/fragment.frag", shaderSource))
+		{
+			dvl::Log(dvl::LogLevel::Error, "Failed to load shader source");
+			return 1;
+		}
+
+		dvl::ShaderDesc shaderDesc;
+		shaderDesc.vertex.data = shaderSource.vertex.c_str();
+		shaderDesc.vertex.size = shaderSource.vertex.size();
+		shaderDesc.fragment.data = shaderSource.fragment.c_str();
+		shaderDesc.fragment.size = shaderSource.fragment.size();
+
+		dvl::ShaderHandle shaderHandle = device.CreateShader(shaderDesc);
+
+		if (!shaderHandle.IsValid())
+		{
+			dvl::Log(dvl::LogLevel::Error, "Failed to create shader");
 			return 1;
 		}
 	}
