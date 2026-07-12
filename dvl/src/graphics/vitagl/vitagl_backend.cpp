@@ -51,7 +51,9 @@ namespace dvl::internal
     {
         glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClearDepthf(1.0f);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     void VitaGLBackend::EndFrame()
@@ -258,6 +260,7 @@ namespace dvl::internal
         pipeline.program = shaderIt->second.program;
         pipeline.vertexStride = desc.vertexStride;
         pipeline.topology = desc.topology;
+        pipeline.depthStencilState = desc.depthStencilState;
 
         for (std::size_t index = 0; index < desc.attributeCount; ++index)
         {
@@ -345,6 +348,18 @@ namespace dvl::internal
 
         _currentPipeline = handle;
         glUseProgram(pipeline.program);
+
+        if (pipeline.depthStencilState.depthTestEnabled)
+        {
+            glEnable(GL_DEPTH_TEST);
+            glDepthFunc(GL_LESS);
+        }
+        else
+        {
+            glDisable(GL_DEPTH_TEST);
+        }
+
+        glDepthMask(pipeline.depthStencilState.depthWriteEnabled ? GL_TRUE : GL_FALSE);
     }
 
     void VitaGLBackend::SetVertexBuffer(BufferHandle handle)

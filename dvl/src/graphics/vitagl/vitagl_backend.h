@@ -77,6 +77,8 @@ namespace dvl::internal
             std::vector<NativeVertexAttribute> attributes;
             std::size_t vertexStride = 0;
             PrimitiveTopology topology = PrimitiveTopology::TriangleList;
+
+            DepthStencilState depthStencilState;
         };
 
         std::unordered_map<unsigned int, NativePipeline> _pipelines;

@@ -34,6 +34,12 @@ namespace dvl
         std::size_t offset = 0;
     };
 
+    struct DepthStencilState
+    {
+        bool depthTestEnabled = false;
+        bool depthWriteEnabled = false;
+    };
+
     struct PipelineDesc
     {
         ShaderHandle shader;
@@ -43,5 +49,7 @@ namespace dvl
         std::size_t attributeCount = 0;
         std::size_t vertexStride = 0;
         PrimitiveTopology topology = PrimitiveTopology::TriangleList;
+
+        DepthStencilState depthStencilState;
     };
 }
