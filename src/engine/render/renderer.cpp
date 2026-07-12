@@ -1,6 +1,5 @@
 #include "engine/render/renderer.h"
 
-#include <cstdint>
 #include <glm/gtc/type_ptr.hpp>
 
 #include "engine/core/transform.h"
