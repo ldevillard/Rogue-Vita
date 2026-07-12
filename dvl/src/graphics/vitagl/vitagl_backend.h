@@ -30,6 +30,7 @@ namespace dvl::internal
         void SetPipeline(PipelineHandle handle) override;
         void SetVertexBuffer(BufferHandle handle) override;
 
+        // If VBO CPU overhead becomes an issue, think about VAO and caching the vertex attribute state
         void Draw(unsigned int vertexCount) override;
 
         ShaderParameterHandle GetShaderParameter(const ShaderParameter& desc) override;
