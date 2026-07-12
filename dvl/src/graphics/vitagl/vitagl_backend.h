@@ -32,6 +32,10 @@ namespace dvl::internal
 
         void Draw(unsigned int vertexCount) override;
 
+        ShaderParameterHandle GetShaderParameter(const ShaderParameter& desc) override;
+        void DestroyShaderParameter(ShaderParameterHandle handle) override;
+        void SetShaderParameter(ShaderParameterHandle handle, const void* data, unsigned int count) override;
+
     private:
         // -- BUFFER --
 
@@ -78,5 +82,16 @@ namespace dvl::internal
         std::unordered_map<unsigned int, NativePipeline> _pipelines;
         PipelineHandle _currentPipeline;
         unsigned int _nextPipelineHandle = 0;
+
+        // -- SHADER PARAMETERS --
+
+        struct NativeShaderParameter
+        {
+            int location = -1;
+            ShaderParameterType type = ShaderParameterType::Float;
+        };
+
+        std::unordered_map<unsigned int, NativeShaderParameter> _shaderParameters;
+        unsigned int _nextShaderParameterHandle = 0;
     };
 }

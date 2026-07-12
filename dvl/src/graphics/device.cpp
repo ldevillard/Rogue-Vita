@@ -206,4 +206,36 @@ namespace dvl
 
         _backend->Draw(vertexCount);
     }
+
+    ShaderParameterHandle Device::GetShaderParameter(const ShaderParameter& desc)
+    {
+        if (!_backend || !desc.shader.IsValid() || desc.name == nullptr)
+        {
+            Log(LogLevel::Error, "Invalid shader parameter description");
+            return {};
+        }
+
+        return _backend->GetShaderParameter(desc);
+    }
+
+    void Device::DestroyShaderParameter(ShaderParameterHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->DestroyShaderParameter(handle);
+    }
+
+    void Device::SetShaderParameter(ShaderParameterHandle handle, const void* data, unsigned int count)
+    {
+        if (!_backend || !handle.IsValid() || data == nullptr || count == 0)
+        {
+            Log(LogLevel::Error, "Invalid shader parameter set operation");
+            return;
+        }
+
+        _backend->SetShaderParameter(handle, data, count);
+    }
 }

@@ -47,6 +47,10 @@ namespace dvl
         
         void Draw(unsigned int vertexCount);
 
+        ShaderParameterHandle GetShaderParameter(const ShaderParameter& desc);
+        void DestroyShaderParameter(ShaderParameterHandle handle);
+        void SetShaderParameter(ShaderParameterHandle handle, const void* data, unsigned int count);
+
     private:
         std::unique_ptr<internal::Backend> _backend;
     };

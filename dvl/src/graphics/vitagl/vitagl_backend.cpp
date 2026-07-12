@@ -28,6 +28,8 @@ namespace dvl::internal
 
     void VitaGLBackend::Shutdown()
     {
+        _shaderParameters.clear();
+
         _pipelines.clear();
 
         for (const std::pair<const unsigned int, NativeBuffer>& buffer : _buffers)
@@ -387,5 +389,108 @@ namespace dvl::internal
         }
 
         glDrawArrays(topology, 0, static_cast<GLsizei>(vertexCount));
+    }
+
+    ShaderParameterHandle VitaGLBackend::GetShaderParameter(const ShaderParameter& desc)
+    {
+        const auto shaderIt = _shaders.find(desc.shader.id);
+        if (shaderIt == _shaders.end())
+        {
+            Log(LogLevel::Error, "Invalid shader handle");
+            return {};
+        }
+
+        const GLint location = glGetUniformLocation(shaderIt->second.program, desc.name);
+
+        if (location == -1)
+        {
+            const std::string message = "Shader parameter not found: " + std::string(desc.name);
+            Log(LogLevel::Error, message.c_str());
+            return {};
+        }
+
+        NativeShaderParameter parameter;
+        parameter.location = location;
+        parameter.type = desc.type;
+
+        ShaderParameterHandle handle;
+        handle.id = _nextShaderParameterHandle++;
+
+        _shaderParameters.emplace(handle.id, parameter);
+
+        return handle;
+    }
+
+    void VitaGLBackend::DestroyShaderParameter(ShaderParameterHandle handle)
+    {
+        const auto it = _shaderParameters.find(handle.id);
+
+        if (it == _shaderParameters.end())
+        {
+            Log(LogLevel::Error, "Invalid shader parameter handle");
+            return;
+        }
+
+        _shaderParameters.erase(it);
+    }
+
+    void VitaGLBackend::SetShaderParameter(ShaderParameterHandle handle, const void* data, unsigned int count)
+    {
+        const auto it = _shaderParameters.find(handle.id);
+
+        if (it == _shaderParameters.end())
+        {
+            Log(LogLevel::Error, "Invalid shader parameter handle");
+            return;
+        }
+
+        const NativeShaderParameter& parameter = it->second;
+
+        switch (parameter.type)
+        {
+            case ShaderParameterType::Int:
+                glUniform1iv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLint*>(data));
+                break;
+
+            case ShaderParameterType::Int2:
+                glUniform2iv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLint*>(data));
+                break;
+
+            case ShaderParameterType::Int3:
+                glUniform3iv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLint*>(data));
+                break;
+
+            case ShaderParameterType::Int4:
+                glUniform4iv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLint*>(data));
+                break;
+
+            case ShaderParameterType::Float:
+                glUniform1fv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Float2:
+                glUniform2fv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Float3:
+                glUniform3fv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Float4:
+                glUniform4fv(parameter.location, static_cast<GLsizei>(count), static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Mat2:
+                glUniformMatrix2fv(parameter.location, static_cast<GLsizei>(count), GL_FALSE, static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Mat3:
+                glUniformMatrix3fv(parameter.location, static_cast<GLsizei>(count), GL_FALSE, static_cast<const GLfloat*>(data));
+                break;
+
+            case ShaderParameterType::Mat4:
+                glUniformMatrix4fv(parameter.location, static_cast<GLsizei>(count), GL_FALSE, static_cast<const GLfloat*>(data));
+                break;
+        }
     }
 }
