@@ -40,6 +40,25 @@ namespace dvl
         bool depthWriteEnabled = false;
     };
 
+    enum class CullMode
+    {
+        None,
+        Front,
+        Back
+    };
+
+    enum class FillMode
+    {
+        Solid,
+        Wireframe
+    };
+
+    struct RasterizerState
+    {
+        FillMode fillMode = FillMode::Solid;
+        CullMode cullMode = CullMode::Back;
+    };
+
     struct PipelineDesc
     {
         ShaderHandle shader;
@@ -51,5 +70,6 @@ namespace dvl
         PrimitiveTopology topology = PrimitiveTopology::TriangleList;
 
         DepthStencilState depthStencilState;
+        RasterizerState rasterizerState;
     };
 }

@@ -143,17 +143,34 @@ int main()
 		{ "aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionColor, color) }
 	};
 
-	dvl::PipelineDesc pipelineDesc;
-	pipelineDesc.shader = shaderHandle;
-	pipelineDesc.attributes = attributes;
-	pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-	pipelineDesc.vertexStride = sizeof(VertexPositionColor);
-	pipelineDesc.topology = dvl::PrimitiveTopology::TriangleList;
-	pipelineDesc.depthStencilState.depthTestEnabled = true;
-	pipelineDesc.depthStencilState.depthWriteEnabled = true;
+	dvl::PipelineDesc pipelineDescSolid;
+	pipelineDescSolid.shader = shaderHandle;
+	pipelineDescSolid.attributes = attributes;
+	pipelineDescSolid.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
+	pipelineDescSolid.vertexStride = sizeof(VertexPositionColor);
+	pipelineDescSolid.topology = dvl::PrimitiveTopology::TriangleList;
+	pipelineDescSolid.depthStencilState.depthTestEnabled = true;
+	pipelineDescSolid.depthStencilState.depthWriteEnabled = true;
 
-	dvl::PipelineHandle pipelineHandle = device.CreatePipeline(pipelineDesc);
-	if (!pipelineHandle.IsValid())
+	dvl::PipelineHandle pipelineHandleSolid = device.CreatePipeline(pipelineDescSolid);
+	if (!pipelineHandleSolid.IsValid())
+	{
+		dvl::Log(dvl::LogLevel::Error, "Failed to create pipeline");
+		return 1;
+	}
+
+	dvl::PipelineDesc pipelineDescWireframe;
+	pipelineDescWireframe.shader = shaderHandle;
+	pipelineDescWireframe.attributes = attributes;
+	pipelineDescWireframe.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
+	pipelineDescWireframe.vertexStride = sizeof(VertexPositionColor);
+	pipelineDescWireframe.topology = dvl::PrimitiveTopology::TriangleList;
+	pipelineDescWireframe.depthStencilState.depthTestEnabled = true;
+	pipelineDescWireframe.depthStencilState.depthWriteEnabled = true;
+	pipelineDescWireframe.rasterizerState.fillMode = dvl::FillMode::Wireframe;
+
+	dvl::PipelineHandle pipelineHandleWireframe = device.CreatePipeline(pipelineDescWireframe);
+	if (!pipelineHandleWireframe.IsValid())
 	{
 		dvl::Log(dvl::LogLevel::Error, "Failed to create pipeline");
 		return 1;
@@ -176,7 +193,7 @@ int main()
 	{
 		device.BeginFrame({ 0.118f, 0.122f, 0.278f });
 		
-		device.SetPipeline(pipelineHandle);
+		device.SetPipeline(pipelineHandleSolid);
 		device.SetVertexBuffer(vertexBuffer);
 
 		// rotation of the cube over time
@@ -198,6 +215,8 @@ int main()
 		spinY = glm::rotate(glm::mat4(1.0f), -rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
 		modelMatrix = translation * spinY * tiltX * tiltZ;
 		mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+
+		device.SetPipeline(pipelineHandleWireframe);
 
 		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
 		

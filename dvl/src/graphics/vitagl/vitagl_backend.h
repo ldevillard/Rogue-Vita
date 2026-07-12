@@ -80,6 +80,7 @@ namespace dvl::internal
             PrimitiveTopology topology = PrimitiveTopology::TriangleList;
 
             DepthStencilState depthStencilState;
+            RasterizerState rasterizerState;
         };
 
         std::unordered_map<unsigned int, NativePipeline> _pipelines;

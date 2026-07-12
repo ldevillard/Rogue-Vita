@@ -261,6 +261,7 @@ namespace dvl::internal
         pipeline.vertexStride = desc.vertexStride;
         pipeline.topology = desc.topology;
         pipeline.depthStencilState = desc.depthStencilState;
+        pipeline.rasterizerState = desc.rasterizerState;
 
         for (std::size_t index = 0; index < desc.attributeCount; ++index)
         {
@@ -360,6 +361,20 @@ namespace dvl::internal
         }
 
         glDepthMask(pipeline.depthStencilState.depthWriteEnabled ? GL_TRUE : GL_FALSE);
+
+        const RasterizerState& rasterizerState = pipeline.rasterizerState;
+        
+        glPolygonMode(GL_FRONT_AND_BACK, rasterizerState.fillMode == FillMode::Solid ? GL_FILL : GL_LINE);
+        glCullFace(rasterizerState.cullMode == CullMode::Front ? GL_FRONT : GL_BACK);
+
+        if (rasterizerState.cullMode == CullMode::None)
+        {
+            glDisable(GL_CULL_FACE);
+        }
+        else
+        {
+            glEnable(GL_CULL_FACE);
+        }
     }
 
     void VitaGLBackend::SetVertexBuffer(BufferHandle handle)
