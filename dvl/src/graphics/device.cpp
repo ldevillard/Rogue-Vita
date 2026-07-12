@@ -197,6 +197,16 @@ namespace dvl
         _backend->SetVertexBuffer(handle);
     }
 
+    void Device::SetIndexBuffer(BufferHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->SetIndexBuffer(handle);
+    }
+
     void Device::Draw(unsigned int vertexCount)
     {
         if (!_backend)
@@ -205,6 +215,16 @@ namespace dvl
         }
 
         _backend->Draw(vertexCount);
+    }
+
+    void Device::DrawIndexed(unsigned int indexCount)
+    {
+        if (!_backend)
+        {
+            return;
+        }
+
+        _backend->DrawIndexed(indexCount);
     }
 
     ShaderParameterHandle Device::GetShaderParameter(const ShaderParameter& desc)

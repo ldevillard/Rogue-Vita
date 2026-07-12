@@ -70,6 +70,7 @@ namespace dvl::internal
     {
         NativeBuffer buffer;
         buffer.size = desc.size;
+        buffer.type = desc.type;
         
         glGenBuffers(1, &buffer.id);
 
@@ -92,10 +93,11 @@ namespace dvl::internal
                 break;
         }
 
-        glBindBuffer(GL_ARRAY_BUFFER, buffer.id);
-        glBufferData(GL_ARRAY_BUFFER, desc.size, desc.data, usage);
+        const GLenum target = desc.type == BufferType::Index ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(target, buffer.id);
+        glBufferData(target, desc.size, desc.data, usage);
+        glBindBuffer(target, 0);
 
         BufferHandle handle;
         handle.id = _nextBufferHandle++;
@@ -387,7 +389,32 @@ namespace dvl::internal
             return;
         }
 
+        if (it->second.type != BufferType::Vertex)
+        {
+            Log(LogLevel::Error, "Cannot set a non-vertex buffer as vertex buffer");
+            return;
+        }
+
         glBindBuffer(GL_ARRAY_BUFFER, it->second.id);
+    }
+
+    void VitaGLBackend::SetIndexBuffer(BufferHandle handle)
+    {
+        const auto it = _buffers.find(handle.id);
+
+        if (it == _buffers.end())
+        {
+            Log(LogLevel::Error, "Invalid buffer handle");
+            return;
+        }
+
+        if (it->second.type != BufferType::Index)
+        {
+            Log(LogLevel::Error, "Cannot set a non-index buffer as index buffer");
+            return;
+        }
+
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.id);
     }
 
     void VitaGLBackend::Draw(unsigned int vertexCount)
@@ -419,6 +446,37 @@ namespace dvl::internal
         }
 
         glDrawArrays(topology, 0, static_cast<GLsizei>(vertexCount));
+    }
+
+    void VitaGLBackend::DrawIndexed(unsigned int indexCount)
+    {
+        const auto pipelineIt = _pipelines.find(_currentPipeline.id);
+
+        if (pipelineIt == _pipelines.end())
+        {
+            Log(LogLevel::Error, "No pipeline is currently set");
+            return;
+        }
+
+        for (const NativePipeline::NativeVertexAttribute& attribute : pipelineIt->second.attributes)
+        {
+            glEnableVertexAttribArray(attribute.location);
+
+            glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE,
+                                  static_cast<GLsizei>(pipelineIt->second.vertexStride),
+                                  reinterpret_cast<const void*>(attribute.offset));
+        }
+
+        GLenum topology = GL_TRIANGLES;
+
+        switch (pipelineIt->second.topology)
+        {
+            case PrimitiveTopology::TriangleList:
+                topology = GL_TRIANGLES;
+                break;
+        }
+
+        glDrawElements(topology, static_cast<GLsizei>(indexCount), GL_UNSIGNED_SHORT, nullptr);
     }
 
     ShaderParameterHandle VitaGLBackend::GetShaderParameter(const ShaderParameter& desc)

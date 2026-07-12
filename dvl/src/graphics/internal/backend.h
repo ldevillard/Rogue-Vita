@@ -31,8 +31,10 @@ namespace dvl::internal
 
         virtual void SetPipeline(PipelineHandle handle) = 0;
         virtual void SetVertexBuffer(BufferHandle handle) = 0;
+        virtual void SetIndexBuffer(BufferHandle handle) = 0;
 
         virtual void Draw(unsigned int vertexCount) = 0;
+        virtual void DrawIndexed(unsigned int indexCount) = 0;
 
         virtual ShaderParameterHandle GetShaderParameter(const ShaderParameter& desc) = 0;
         virtual void DestroyShaderParameter(ShaderParameterHandle handle) = 0;

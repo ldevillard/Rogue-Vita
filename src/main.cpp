@@ -28,91 +28,84 @@ int main()
 
 	dvl::Log(dvl::LogLevel::Info, "Graphics device initialized");
 
-	// -- BUFFER --
-	const dvl::Color bottomLeftBack = {0.0f, 0.0f, 0.0f, 1.0f};
-	const dvl::Color bottomRightBack = {1.0f, 0.0f, 0.0f, 1.0f};
-	const dvl::Color topLeftBack = {0.0f, 1.0f, 0.0f, 1.0f};
-	const dvl::Color topRightBack = {1.0f, 1.0f, 0.0f, 1.0f};
-	const dvl::Color bottomLeftFront = {0.0f, 0.0f, 1.0f, 1.0f};
-	const dvl::Color bottomRightFront = {1.0f, 0.0f, 1.0f, 1.0f};
-	const dvl::Color topLeftFront = {0.0f, 1.0f, 1.0f, 1.0f};
-	const dvl::Color topRightFront = {1.0f, 1.0f, 1.0f, 1.0f};
-
-	VertexPositionColor vertices[] = 
+	// -- VERTEX BUFFER --
+	VertexPositionColor vertices[] =
 	{
-		// Front face
-		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
-		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
-		{ 0.5f,  0.5f,  0.5f, topRightFront},
+	    // Back
+	    {-0.5f, -0.5f, -0.5f, {0.0f, 0.0f, 0.0f, 1.0f}}, // 0
+	    { 0.5f, -0.5f, -0.5f, {1.0f, 0.0f, 0.0f, 1.0f}}, // 1
+	    {-0.5f,  0.5f, -0.5f, {0.0f, 1.0f, 0.0f, 1.0f}}, // 2
+	    { 0.5f,  0.5f, -0.5f, {1.0f, 1.0f, 0.0f, 1.0f}}, // 3
 
-		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
-		{ 0.5f,  0.5f,  0.5f, topRightFront},
-		{-0.5f,  0.5f,  0.5f, topLeftFront},
-
-		// Back face
-		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
-		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
-		{-0.5f,  0.5f, -0.5f, topLeftBack},
-
-		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
-		{-0.5f,  0.5f, -0.5f, topLeftBack},
-		{ 0.5f,  0.5f, -0.5f, topRightBack},
-
-		// Left face
-		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
-		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
-		{-0.5f,  0.5f,  0.5f, topLeftFront},
-
-		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
-		{-0.5f,  0.5f,  0.5f, topLeftFront},
-		{-0.5f,  0.5f, -0.5f, topLeftBack},
-
-		// Right face
-		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
-		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
-		{ 0.5f,  0.5f, -0.5f, topRightBack},
-
-		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
-		{ 0.5f,  0.5f, -0.5f, topRightBack},
-		{ 0.5f,  0.5f,  0.5f, topRightFront},
-
-		// Top face
-		{-0.5f,  0.5f,  0.5f, topLeftFront},
-		{ 0.5f,  0.5f,  0.5f, topRightFront},
-		{ 0.5f,  0.5f, -0.5f, topRightBack},
-
-		{-0.5f,  0.5f,  0.5f, topLeftFront},
-		{ 0.5f,  0.5f, -0.5f, topRightBack},
-		{-0.5f,  0.5f, -0.5f, topLeftBack},
-
-		// Bottom face
-		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
-		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
-		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
-
-		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
-		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
-		{-0.5f, -0.5f,  0.5f, bottomLeftFront}
+	    // Front
+	    {-0.5f, -0.5f,  0.5f, {0.0f, 0.0f, 1.0f, 1.0f}}, // 4
+	    { 0.5f, -0.5f,  0.5f, {1.0f, 0.0f, 1.0f, 1.0f}}, // 5
+	    {-0.5f,  0.5f,  0.5f, {0.0f, 1.0f, 1.0f, 1.0f}}, // 6
+	    { 0.5f,  0.5f,  0.5f, {1.0f, 1.0f, 1.0f, 1.0f}}  // 7
 	};
 
-	unsigned int vertexCount = sizeof(vertices) / sizeof(VertexPositionColor);
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), static_cast<float>(desc.width) / static_cast<float>(desc.height), 0.1f, 100.0f);
+	dvl::BufferDesc vertexBufferDesc;
+	vertexBufferDesc.type = dvl::BufferType::Vertex;
+	vertexBufferDesc.usage = dvl::BufferUsage::Static;
+	vertexBufferDesc.size = sizeof(vertices);
+	vertexBufferDesc.data = vertices;
 
-	dvl::BufferDesc bufferDesc;
-	bufferDesc.type = dvl::BufferType::Vertex;
-	bufferDesc.usage = dvl::BufferUsage::Static;
-	bufferDesc.size = sizeof(vertices);
-	bufferDesc.data = vertices;
-
-	dvl::BufferHandle vertexBuffer = device.CreateBuffer(bufferDesc);
+	dvl::BufferHandle vertexBuffer = device.CreateBuffer(vertexBufferDesc);
 
 	if (!vertexBuffer.IsValid())
 	{
 		dvl::Log(dvl::LogLevel::Error, "Failed to create vertex buffer");
 		return 1;
 	}
+
+
+	// -- INDEX BUFFER --
+	std::uint16_t indices[] =
+	{
+	    // Front
+	    4, 5, 7,
+	    4, 7, 6,
+
+	    // Back
+	    1, 0, 2,
+	    1, 2, 3,
+
+	    // Left
+	    0, 4, 6,
+	    0, 6, 2,
+
+	    // Right
+	    5, 1, 3,
+	    5, 3, 7,
+
+	    // Top
+	    6, 7, 3,
+	    6, 3, 2,
+
+	    // Bottom
+	    0, 1, 5,
+	    0, 5, 4
+	};
+
+	const unsigned int indexCount = sizeof(indices) / sizeof(indices[0]);
+
+	dvl::BufferDesc indexBufferDesc;
+	indexBufferDesc.type = dvl::BufferType::Index;
+	indexBufferDesc.usage = dvl::BufferUsage::Static;
+	indexBufferDesc.size = sizeof(indices);
+	indexBufferDesc.data = indices;
+
+	dvl::BufferHandle indexBuffer = device.CreateBuffer(indexBufferDesc);
+
+	if (!indexBuffer.IsValid())
+	{
+		dvl::Log(dvl::LogLevel::Error, "Failed to create index buffer");
+		return 1;
+	}
+
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), static_cast<float>(desc.width) / static_cast<float>(desc.height), 0.1f, 100.0f);
 
 	// -- SHADER --
 	ShaderSource shaderSource;
@@ -194,7 +187,9 @@ int main()
 		device.BeginFrame({ 0.118f, 0.122f, 0.278f });
 		
 		device.SetPipeline(pipelineHandleSolid);
+
 		device.SetVertexBuffer(vertexBuffer);
+		device.SetIndexBuffer(indexBuffer);
 
 		// rotation of the cube over time
 		static float rotationAngle = 0.0f;
@@ -209,7 +204,7 @@ int main()
 		glm::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
 		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
 
-		device.Draw(vertexCount);
+		device.DrawIndexed(indexCount);
 
 		translation = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
 		spinY = glm::rotate(glm::mat4(1.0f), -rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -220,7 +215,7 @@ int main()
 
 		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
 		
-		device.Draw(vertexCount);
+		device.DrawIndexed(indexCount);
 
 		device.EndFrame();
 	}

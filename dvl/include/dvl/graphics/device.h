@@ -44,8 +44,10 @@ namespace dvl
 
         void SetPipeline(PipelineHandle handle);
         void SetVertexBuffer(BufferHandle handle);
+        void SetIndexBuffer(BufferHandle handle);
         
         void Draw(unsigned int vertexCount);
+        void DrawIndexed(unsigned int indexCount);
 
         ShaderParameterHandle GetShaderParameter(const ShaderParameter& desc);
         void DestroyShaderParameter(ShaderParameterHandle handle);

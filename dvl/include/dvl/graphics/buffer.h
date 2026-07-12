@@ -18,7 +18,8 @@ namespace dvl
 
     enum class BufferType
     {
-        Vertex
+        Vertex,
+        Index
     };
 
     enum class BufferUsage
