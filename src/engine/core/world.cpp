@@ -46,28 +46,7 @@ const Entity* World::FindEntity(unsigned int id) const
     return nullptr;
 }
     
-std::vector<Entity*> World::GetEntities()
+const std::vector<std::unique_ptr<Entity>>& World::GetEntities() const
 {
-    std::vector<Entity*> entities;
-    entities.reserve(_entities.size());
-
-    for (const std::unique_ptr<Entity>& entity : _entities)
-    {
-        entities.push_back(entity.get());
-    }
-
-    return entities;
-}
-
-const std::vector<const Entity*> World::GetEntities() const
-{
-    std::vector<const Entity*> entities;
-    entities.reserve(_entities.size());
-
-    for (const std::unique_ptr<Entity>& entity : _entities)
-    {
-        entities.push_back(entity.get());
-    }
-
-    return entities;
+    return _entities;
 }

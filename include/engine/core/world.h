@@ -13,8 +13,7 @@ public:
     Entity* FindEntity(unsigned int id);
     const Entity* FindEntity(unsigned int id) const;
     
-    std::vector<Entity*> GetEntities();
-    const std::vector<const Entity*> GetEntities() const;
+    const std::vector<std::unique_ptr<Entity>>& GetEntities() const;
 
 private:
     unsigned int _nextId = 1;

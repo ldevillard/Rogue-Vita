@@ -74,7 +74,7 @@ int main()
         renderer.BeginFrame({0.118f, 0.122f, 0.278f});
         renderer.BeginScene(camera);
 
-        for (const Entity* entity : world.GetEntities())
+        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
             const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
             if (meshRenderer == nullptr || !meshRenderer->IsValid())
