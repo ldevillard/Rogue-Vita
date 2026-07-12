@@ -1,5 +1,9 @@
 #include <dvl/dvl.h>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include "renderer/shader_loader.h"
 #include "renderer/vertex.h"
 
@@ -25,12 +29,76 @@ int main()
 	dvl::Log(dvl::LogLevel::Info, "Graphics device initialized");
 
 	// -- BUFFER --
-	VertexPositionColor vertices[3] = 
+	const dvl::Color bottomLeftBack = {0.0f, 0.0f, 0.0f, 1.0f};
+	const dvl::Color bottomRightBack = {1.0f, 0.0f, 0.0f, 1.0f};
+	const dvl::Color topLeftBack = {0.0f, 1.0f, 0.0f, 1.0f};
+	const dvl::Color topRightBack = {1.0f, 1.0f, 0.0f, 1.0f};
+	const dvl::Color bottomLeftFront = {0.0f, 0.0f, 1.0f, 1.0f};
+	const dvl::Color bottomRightFront = {1.0f, 0.0f, 1.0f, 1.0f};
+	const dvl::Color topLeftFront = {0.0f, 1.0f, 1.0f, 1.0f};
+	const dvl::Color topRightFront = {1.0f, 1.0f, 1.0f, 1.0f};
+
+	VertexPositionColor vertices[] = 
 	{
-		{ -0.5f, -0.5f, 0.0f, { 1.0f, 0.0f, 0.0f, 1.0f } },
-		{  0.5f, -0.5f, 0.0f, { 0.0f, 1.0f, 0.0f, 1.0f } },
-		{  0.0f,  0.5f, 0.0f, { 0.0f, 0.0f, 1.0f, 1.0f } }
+		// Front face
+		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
+		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
+		{ 0.5f,  0.5f,  0.5f, topRightFront},
+
+		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
+		{ 0.5f,  0.5f,  0.5f, topRightFront},
+		{-0.5f,  0.5f,  0.5f, topLeftFront},
+
+		// Back face
+		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
+		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
+		{-0.5f,  0.5f, -0.5f, topLeftBack},
+
+		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
+		{-0.5f,  0.5f, -0.5f, topLeftBack},
+		{ 0.5f,  0.5f, -0.5f, topRightBack},
+
+		// Left face
+		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
+		{-0.5f, -0.5f,  0.5f, bottomLeftFront},
+		{-0.5f,  0.5f,  0.5f, topLeftFront},
+
+		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
+		{-0.5f,  0.5f,  0.5f, topLeftFront},
+		{-0.5f,  0.5f, -0.5f, topLeftBack},
+
+		// Right face
+		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
+		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
+		{ 0.5f,  0.5f, -0.5f, topRightBack},
+
+		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
+		{ 0.5f,  0.5f, -0.5f, topRightBack},
+		{ 0.5f,  0.5f,  0.5f, topRightFront},
+
+		// Top face
+		{-0.5f,  0.5f,  0.5f, topLeftFront},
+		{ 0.5f,  0.5f,  0.5f, topRightFront},
+		{ 0.5f,  0.5f, -0.5f, topRightBack},
+
+		{-0.5f,  0.5f,  0.5f, topLeftFront},
+		{ 0.5f,  0.5f, -0.5f, topRightBack},
+		{-0.5f,  0.5f, -0.5f, topLeftBack},
+
+		// Bottom face
+		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
+		{ 0.5f, -0.5f, -0.5f, bottomRightBack},
+		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
+
+		{-0.5f, -0.5f, -0.5f, bottomLeftBack},
+		{ 0.5f, -0.5f,  0.5f, bottomRightFront},
+		{-0.5f, -0.5f,  0.5f, bottomLeftFront}
 	};
+
+	unsigned int vertexCount = sizeof(vertices) / sizeof(VertexPositionColor);
+	glm::mat4 modelMatrix = glm::mat4(1.0f);
+	glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+	glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), static_cast<float>(desc.width) / static_cast<float>(desc.height), 0.1f, 100.0f);
 
 	dvl::BufferDesc bufferDesc;
 	bufferDesc.type = dvl::BufferType::Vertex;
@@ -80,6 +148,9 @@ int main()
 	pipelineDesc.attributes = attributes;
 	pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
 	pipelineDesc.vertexStride = sizeof(VertexPositionColor);
+	pipelineDesc.topology = dvl::PrimitiveTopology::TriangleList;
+	pipelineDesc.depthStencilState.depthTestEnabled = true;
+	pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
 	dvl::PipelineHandle pipelineHandle = device.CreatePipeline(pipelineDesc);
 	if (!pipelineHandle.IsValid())
@@ -88,13 +159,49 @@ int main()
 		return 1;
 	}
 
+	// -- SHADER PARAMETER --
+
+	dvl::ShaderParameter shaderParameterDesc;
+	shaderParameterDesc.shader = shaderHandle;
+	shaderParameterDesc.name = "mvpMatrix";
+	shaderParameterDesc.type = dvl::ShaderParameterType::Mat4;
+	dvl::ShaderParameterHandle shaderParameterHandle = device.GetShaderParameter(shaderParameterDesc);
+	if (!shaderParameterHandle.IsValid())
+	{
+		dvl::Log(dvl::LogLevel::Error, "Failed to get shader parameter");
+		return 1;
+	}
+
 	while (true)
 	{
-		device.BeginFrame({ 0.118f, 0.353f, 0.706f, 1.0f });
+		device.BeginFrame({ 0.118f, 0.122f, 0.278f });
 		
 		device.SetPipeline(pipelineHandle);
 		device.SetVertexBuffer(vertexBuffer);
-		device.Draw(3);
+
+		// rotation of the cube over time
+		static float rotationAngle = 0.0f;
+		rotationAngle += 0.05f; // Adjust the rotation speed as needed
+
+		glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		const glm::mat4 tiltZ = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		const glm::mat4 tiltX = glm::rotate(glm::mat4(1.0f), glm::radians(35.264f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 spinY = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = translation * spinY * tiltX * tiltZ;
+
+		glm::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
+
+		device.Draw(vertexCount);
+
+		translation = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
+		spinY = glm::rotate(glm::mat4(1.0f), -rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
+		modelMatrix = translation * spinY * tiltX * tiltZ;
+		mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
+
+		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
+		
+		device.Draw(vertexCount);
 
 		device.EndFrame();
 	}
