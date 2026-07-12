@@ -1,224 +1,176 @@
 #include <dvl/dvl.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 
-#include "renderer/shader_loader.h"
-#include "renderer/vertex.h"
+#include <cstdint>
+
+#include "engine/component/mesh_renderer.h"
+#include "engine/core/transform.h"
+#include "engine/core/world.h"
+#include "engine/render/camera.h"
+#include "engine/render/material.h"
+#include "engine/render/mesh.h"
+#include "engine/render/render_pipeline.h"
+#include "engine/render/renderer.h"
+#include "engine/render/vertex.h"
 
 int main()
 {
-	dvl::Log(dvl::LogLevel::Info, "Application starting");
+    dvl::Log(dvl::LogLevel::Info, "Application starting");
 
-	dvl::Device device;
-	dvl::DeviceDesc desc;
-	desc.api = dvl::GraphicsAPI::VitaGL;
-	desc.width = 960;
-	desc.height = 544;
-	desc.vsync = true;
+    constexpr int screenWidth = 960;
+    constexpr int screenHeight = 544;
 
-	dvl::Log(dvl::LogLevel::Info, "Initializing graphics device");
+    Renderer renderer;
+    if (!renderer.Initialize(screenWidth, screenHeight))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to initialize renderer");
+        return 1;
+    }
 
-	if (!device.Initialize(desc))
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to initialize graphics device");
-		return 1;
-	}
+    Mesh cubeMesh;
+    Material solidMaterial;
+    Material wireframeMaterial;
+    World world;
 
-	dvl::Log(dvl::LogLevel::Info, "Graphics device initialized");
+    const VertexPositionColor vertices[] =
+    {
+        // Back
+        {-0.5f, -0.5f, -0.5f, {0.0f, 0.0f, 0.0f, 1.0f}}, // 0
+        { 0.5f, -0.5f, -0.5f, {1.0f, 0.0f, 0.0f, 1.0f}}, // 1
+        {-0.5f,  0.5f, -0.5f, {0.0f, 1.0f, 0.0f, 1.0f}}, // 2
+        { 0.5f,  0.5f, -0.5f, {1.0f, 1.0f, 0.0f, 1.0f}}, // 3
 
-	// -- VERTEX BUFFER --
-	VertexPositionColor vertices[] =
-	{
-	    // Back
-	    {-0.5f, -0.5f, -0.5f, {0.0f, 0.0f, 0.0f, 1.0f}}, // 0
-	    { 0.5f, -0.5f, -0.5f, {1.0f, 0.0f, 0.0f, 1.0f}}, // 1
-	    {-0.5f,  0.5f, -0.5f, {0.0f, 1.0f, 0.0f, 1.0f}}, // 2
-	    { 0.5f,  0.5f, -0.5f, {1.0f, 1.0f, 0.0f, 1.0f}}, // 3
+        // Front
+        {-0.5f, -0.5f,  0.5f, {0.0f, 0.0f, 1.0f, 1.0f}}, // 4
+        { 0.5f, -0.5f,  0.5f, {1.0f, 0.0f, 1.0f, 1.0f}}, // 5
+        {-0.5f,  0.5f,  0.5f, {0.0f, 1.0f, 1.0f, 1.0f}}, // 6
+        { 0.5f,  0.5f,  0.5f, {1.0f, 1.0f, 1.0f, 1.0f}}  // 7
+    };
 
-	    // Front
-	    {-0.5f, -0.5f,  0.5f, {0.0f, 0.0f, 1.0f, 1.0f}}, // 4
-	    { 0.5f, -0.5f,  0.5f, {1.0f, 0.0f, 1.0f, 1.0f}}, // 5
-	    {-0.5f,  0.5f,  0.5f, {0.0f, 1.0f, 1.0f, 1.0f}}, // 6
-	    { 0.5f,  0.5f,  0.5f, {1.0f, 1.0f, 1.0f, 1.0f}}  // 7
-	};
+    const std::uint16_t indices[] =
+    {
+        // Front
+        4, 5, 7,
+        4, 7, 6,
 
-	dvl::BufferDesc vertexBufferDesc;
-	vertexBufferDesc.type = dvl::BufferType::Vertex;
-	vertexBufferDesc.usage = dvl::BufferUsage::Static;
-	vertexBufferDesc.size = sizeof(vertices);
-	vertexBufferDesc.data = vertices;
+        // Back
+        1, 0, 2,
+        1, 2, 3,
 
-	dvl::BufferHandle vertexBuffer = device.CreateBuffer(vertexBufferDesc);
+        // Left
+        0, 4, 6,
+        0, 6, 2,
 
-	if (!vertexBuffer.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to create vertex buffer");
-		return 1;
-	}
+        // Right
+        5, 1, 3,
+        5, 3, 7,
 
+        // Top
+        6, 7, 3,
+        6, 3, 2,
 
-	// -- INDEX BUFFER --
-	std::uint16_t indices[] =
-	{
-	    // Front
-	    4, 5, 7,
-	    4, 7, 6,
+        // Bottom
+        0, 1, 5,
+        0, 5, 4
+    };
 
-	    // Back
-	    1, 0, 2,
-	    1, 2, 3,
+    MeshDesc meshDesc;
+    meshDesc.vertexData = vertices;
+    meshDesc.vertexDataSize = sizeof(vertices);
+    meshDesc.indices = indices;
+    meshDesc.indexCount = sizeof(indices) / sizeof(indices[0]);
 
-	    // Left
-	    0, 4, 6,
-	    0, 6, 2,
+    if (!renderer.CreateMesh(meshDesc, cubeMesh))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to create cube mesh");
+        renderer.Shutdown();
+        return 1;
+    }
 
-	    // Right
-	    5, 1, 3,
-	    5, 3, 7,
+    const dvl::VertexAttribute attributes[] =
+    {
+        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionColor, x)},
+        {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionColor, color)}
+    };
 
-	    // Top
-	    6, 7, 3,
-	    6, 3, 2,
+    RenderPipelineDesc pipelineDesc;
+    pipelineDesc.vertexShaderPath = "app0:/assets/shaders/vertex.vert";
+    pipelineDesc.fragmentShaderPath = "app0:/assets/shaders/fragment.frag";
+    pipelineDesc.attributes = attributes;
+    pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
+    pipelineDesc.vertexStride = sizeof(VertexPositionColor);
+    pipelineDesc.depthStencilState.depthTestEnabled = true;
+    pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
-	    // Bottom
-	    0, 1, 5,
-	    0, 5, 4
-	};
+    solidMaterial.pipeline = renderer.CreateRenderPipeline(pipelineDesc);
+    if (!solidMaterial.pipeline.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to create solid material pipeline");
+        renderer.Shutdown();
+        return 1;
+    }
+    
+    pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
 
-	const unsigned int indexCount = sizeof(indices) / sizeof(indices[0]);
+    wireframeMaterial.pipeline = renderer.CreateRenderPipeline(pipelineDesc);
+    if (!wireframeMaterial.pipeline.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to create wireframe material pipeline");
+        renderer.Shutdown();
+        return 1;
+    }
 
-	dvl::BufferDesc indexBufferDesc;
-	indexBufferDesc.type = dvl::BufferType::Index;
-	indexBufferDesc.usage = dvl::BufferUsage::Static;
-	indexBufferDesc.size = sizeof(indices);
-	indexBufferDesc.data = indices;
+    Camera camera(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
 
-	dvl::BufferHandle indexBuffer = device.CreateBuffer(indexBufferDesc);
+    Entity* solidEntity = world.CreateEntity();
+    solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
+    solidEntity->transform.rotation.x = glm::radians(35.264f);
+    solidEntity->transform.rotation.z = glm::radians(45.0f);
 
-	if (!indexBuffer.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to create index buffer");
-		return 1;
-	}
+    solidEntity->AddComponent<MeshRenderer>(&cubeMesh, &solidMaterial);
 
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	glm::mat4 viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-	glm::mat4 projectionMatrix = glm::perspective(glm::radians(60.0f), static_cast<float>(desc.width) / static_cast<float>(desc.height), 0.1f, 100.0f);
+    Entity* wireframeEntity = world.CreateEntity();
+    wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
+    wireframeEntity->transform.rotation.x = glm::radians(35.264f);
+    wireframeEntity->transform.rotation.z = glm::radians(45.0f);
 
-	// -- SHADER --
-	ShaderSource shaderSource;
-	if (!LoadShaderSource("app0:/assets/shaders/vertex.vert", "app0:/assets/shaders/fragment.frag", shaderSource))
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to load shader source");
-		return 1;
-	}
+    wireframeEntity->AddComponent<MeshRenderer>(&cubeMesh, &wireframeMaterial);
 
-	dvl::ShaderDesc shaderDesc;
-	shaderDesc.vertex.data = shaderSource.vertex.c_str();
-	shaderDesc.vertex.size = shaderSource.vertex.size();
-	shaderDesc.fragment.data = shaderSource.fragment.c_str();
-	shaderDesc.fragment.size = shaderSource.fragment.size();
+    float rotationAngle = 0.0f;
 
-	dvl::ShaderHandle shaderHandle = device.CreateShader(shaderDesc);
+    while (true)
+    {
+        rotationAngle += 0.05f;
 
-	if (!shaderHandle.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to create shader");
-		return 1;
-	}
+        if (Entity* entity = world.FindEntity(solidEntity->id))
+            entity->transform.rotation.y = rotationAngle;
 
-	// -- PIPELINE --
-	const dvl::VertexAttribute attributes[] = 
-	{
-		{ "aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionColor, x) },
-		{ "aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionColor, color) }
-	};
+        if (Entity* entity = world.FindEntity(wireframeEntity->id))
+            entity->transform.rotation.y = -rotationAngle;
 
-	dvl::PipelineDesc pipelineDescSolid;
-	pipelineDescSolid.shader = shaderHandle;
-	pipelineDescSolid.attributes = attributes;
-	pipelineDescSolid.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-	pipelineDescSolid.vertexStride = sizeof(VertexPositionColor);
-	pipelineDescSolid.topology = dvl::PrimitiveTopology::TriangleList;
-	pipelineDescSolid.depthStencilState.depthTestEnabled = true;
-	pipelineDescSolid.depthStencilState.depthWriteEnabled = true;
+        renderer.BeginFrame({0.118f, 0.122f, 0.278f});
+        renderer.BeginScene(camera);
 
-	dvl::PipelineHandle pipelineHandleSolid = device.CreatePipeline(pipelineDescSolid);
-	if (!pipelineHandleSolid.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to create pipeline");
-		return 1;
-	}
+        for (const Entity* entity : world.GetEntities())
+        {
+            const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
+            if (meshRenderer == nullptr || meshRenderer->mesh == nullptr ||  meshRenderer->material == nullptr)
+            {
+                continue;
+            }
 
-	dvl::PipelineDesc pipelineDescWireframe;
-	pipelineDescWireframe.shader = shaderHandle;
-	pipelineDescWireframe.attributes = attributes;
-	pipelineDescWireframe.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-	pipelineDescWireframe.vertexStride = sizeof(VertexPositionColor);
-	pipelineDescWireframe.topology = dvl::PrimitiveTopology::TriangleList;
-	pipelineDescWireframe.depthStencilState.depthTestEnabled = true;
-	pipelineDescWireframe.depthStencilState.depthWriteEnabled = true;
-	pipelineDescWireframe.rasterizerState.fillMode = dvl::FillMode::Wireframe;
+            renderer.Draw(*meshRenderer->mesh, *meshRenderer->material, entity->transform);
+        }
 
-	dvl::PipelineHandle pipelineHandleWireframe = device.CreatePipeline(pipelineDescWireframe);
-	if (!pipelineHandleWireframe.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to create pipeline");
-		return 1;
-	}
+        renderer.EndFrame();
+    }
 
-	// -- SHADER PARAMETER --
-
-	dvl::ShaderParameter shaderParameterDesc;
-	shaderParameterDesc.shader = shaderHandle;
-	shaderParameterDesc.name = "mvpMatrix";
-	shaderParameterDesc.type = dvl::ShaderParameterType::Mat4;
-	dvl::ShaderParameterHandle shaderParameterHandle = device.GetShaderParameter(shaderParameterDesc);
-	if (!shaderParameterHandle.IsValid())
-	{
-		dvl::Log(dvl::LogLevel::Error, "Failed to get shader parameter");
-		return 1;
-	}
-
-	while (true)
-	{
-		device.BeginFrame({ 0.118f, 0.122f, 0.278f });
-		
-		device.SetPipeline(pipelineHandleSolid);
-
-		device.SetVertexBuffer(vertexBuffer);
-		device.SetIndexBuffer(indexBuffer);
-
-		// rotation of the cube over time
-		static float rotationAngle = 0.0f;
-		rotationAngle += 0.05f; // Adjust the rotation speed as needed
-
-		glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		const glm::mat4 tiltZ = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		const glm::mat4 tiltX = glm::rotate(glm::mat4(1.0f), glm::radians(35.264f), glm::vec3(1.0f, 0.0f, 0.0f));
-		glm::mat4 spinY = glm::rotate(glm::mat4(1.0f), rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = translation * spinY * tiltX * tiltZ;
-
-		glm::mat4 mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
-		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
-
-		device.DrawIndexed(indexCount);
-
-		translation = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f, 0.0f, 0.0f));
-		spinY = glm::rotate(glm::mat4(1.0f), -rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-		modelMatrix = translation * spinY * tiltX * tiltZ;
-		mvpMatrix = projectionMatrix * viewMatrix * modelMatrix;
-
-		device.SetPipeline(pipelineHandleWireframe);
-
-		device.SetShaderParameter(shaderParameterHandle, &mvpMatrix, 1);
-		
-		device.DrawIndexed(indexCount);
-
-		device.EndFrame();
-	}
+    world.GetEntities().clear();
+    renderer.DestroyRenderPipeline(wireframeMaterial.pipeline);
+    renderer.DestroyRenderPipeline(solidMaterial.pipeline);
+    renderer.DestroyMesh(cubeMesh);
+    renderer.Shutdown();
 
     return 0;
 }
