@@ -14,8 +14,8 @@ class Transform;
 class Renderer
 {
 public:
-    bool Initialize(int screenWidth, int screenHeight);
-    void Shutdown();
+    Renderer(int screenWidth, int screenHeight);
+    ~Renderer();
 
     bool CreateMesh(const MeshDesc& desc, Mesh& mesh);
     void DestroyMesh(Mesh& mesh);

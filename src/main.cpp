@@ -18,12 +18,7 @@ int main()
     constexpr int screenWidth = 960;
     constexpr int screenHeight = 544;
 
-    Renderer renderer;
-    if (!renderer.Initialize(screenWidth, screenHeight))
-    {
-        dvl::Log(dvl::LogLevel::Error, "Failed to initialize renderer");
-        return 1;
-    }
+    Renderer renderer = Renderer(screenWidth, screenHeight);
 
     Material solidMaterial;
     Material wireframeMaterial;
@@ -85,8 +80,6 @@ int main()
 
         renderer.EndFrame();
     }
-
-    renderer.Shutdown();
 
     return 0;
 }

@@ -9,7 +9,7 @@
 #include "engine/render/render_pipeline.h"
 #include "engine/render/shader_loader.h"
 
-bool Renderer::Initialize(int screenWidth, int screenHeight)
+Renderer::Renderer(int screenWidth, int screenHeight)
 {
 	dvl::DeviceDesc desc;
 	desc.api = dvl::GraphicsAPI::VitaGL;
@@ -22,15 +22,13 @@ bool Renderer::Initialize(int screenWidth, int screenHeight)
 	if (!_device.Initialize(desc))
 	{
 		dvl::Log(dvl::LogLevel::Error, "Failed to initialize graphics device");
-        return false;
     }
 
 	_activeCamera = nullptr;
 	dvl::Log(dvl::LogLevel::Info, "Graphics device initialized");
-    return true;
 }
     
-void Renderer::Shutdown()
+Renderer::~Renderer()
 {
     _activeCamera = nullptr;
     _device.Shutdown();
