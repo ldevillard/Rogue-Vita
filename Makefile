@@ -6,6 +6,8 @@ PROJECT         := rogue-vita
 PROJECT_TITLE   := Rogue Vita
 PROJECT_TITLEID := VSDK00007
 
+MAKEFLAGS += -j$(shell nproc)
+
 EMUL_DEST := /mnt/c/Users/logan/Documents/Vita-Game
 VITA3K_FS  := /mnt/c/Users/logan/AppData/Roaming/Vita3K/Vita3K
 VITA3K_EXE := /mnt/c/Users/logan/Documents/Vita-Emul/Vita3K.exe
