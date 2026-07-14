@@ -1,7 +1,6 @@
 #include "engine/render/renderer.h"
 
-#include <glm/gtc/type_ptr.hpp>
-
+#include "engine/component/directional_light.h"
 #include "engine/core/transform.h"
 #include "engine/render/camera.h"
 #include "engine/render/material.h"
@@ -92,7 +91,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
 
     if (desc.vertexShaderPath == nullptr || desc.fragmentShaderPath == nullptr ||
         desc.attributes == nullptr || desc.attributeCount == 0 || desc.vertexStride == 0 ||
-        desc.mvpParameterName == nullptr)
+        desc.viewProjectionParameterName == nullptr || desc.modelParameterName == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid render pipeline description");
         return {};
@@ -135,23 +134,58 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
 
     dvl::ShaderParameter parameterDesc;
     parameterDesc.shader = shader;
-    parameterDesc.name = desc.mvpParameterName;
+    parameterDesc.name = desc.viewProjectionParameterName;
     parameterDesc.type = dvl::ShaderParameterType::Mat4;
 
-    const dvl::ShaderParameterHandle mvpParameter = _device.GetShaderParameter(parameterDesc);
-    if (!mvpParameter.IsValid())
+    const dvl::ShaderParameterHandle viewProjectionParameter = _device.GetShaderParameter(parameterDesc);
+    if (!viewProjectionParameter.IsValid())
     {
         _device.DestroyPipeline(pipeline);
         _device.DestroyShader(shader);
         return {};
     }
 
-    return {shader, pipeline, mvpParameter};
+    parameterDesc.name = desc.modelParameterName;
+    parameterDesc.type = dvl::ShaderParameterType::Mat4;
+    const dvl::ShaderParameterHandle modelParameter = _device.GetShaderParameter(parameterDesc);
+
+    parameterDesc.name = "lightCount";
+    parameterDesc.type = dvl::ShaderParameterType::Int;
+    const dvl::ShaderParameterHandle lightCountParameter = _device.GetShaderParameter(parameterDesc);
+
+    parameterDesc.name = "lightDirections";
+    parameterDesc.type = dvl::ShaderParameterType::Float4;
+    const dvl::ShaderParameterHandle lightDirectionsParameter = _device.GetShaderParameter(parameterDesc);
+
+    parameterDesc.name = "lightColors";
+    parameterDesc.type = dvl::ShaderParameterType::Float4;
+    const dvl::ShaderParameterHandle lightColorsParameter = _device.GetShaderParameter(parameterDesc);
+
+    parameterDesc.name = "cameraPosition";
+    parameterDesc.type = dvl::ShaderParameterType::Float3;
+    const dvl::ShaderParameterHandle cameraPositionParameter = _device.GetShaderParameter(parameterDesc);
+
+    RenderPipeline renderPipeline = {};
+    renderPipeline.shader = shader;
+    renderPipeline.pipeline = pipeline;
+    renderPipeline.viewProjectionParameter = viewProjectionParameter;
+    renderPipeline.modelParameter = modelParameter;
+    renderPipeline.lightCountParameter = lightCountParameter;
+    renderPipeline.lightDirectionsParameter = lightDirectionsParameter;
+    renderPipeline.lightColorsParameter = lightColorsParameter;
+    renderPipeline.cameraPositionParameter = cameraPositionParameter;
+
+    return renderPipeline;
 }
 
 void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
 {
-    _device.DestroyShaderParameter(renderPipeline.mvpParameter);
+    _device.DestroyShaderParameter(renderPipeline.cameraPositionParameter);
+    _device.DestroyShaderParameter(renderPipeline.lightCountParameter);
+    _device.DestroyShaderParameter(renderPipeline.lightColorsParameter);
+    _device.DestroyShaderParameter(renderPipeline.lightDirectionsParameter);
+    _device.DestroyShaderParameter(renderPipeline.modelParameter);
+    _device.DestroyShaderParameter(renderPipeline.viewProjectionParameter);
     _device.DestroyPipeline(renderPipeline.pipeline);
     _device.DestroyShader(renderPipeline.shader);
     renderPipeline = {};
@@ -170,11 +204,23 @@ void Renderer::EndFrame()
 void Renderer::BeginScene(const Camera& camera)
 {
     _activeCamera = &camera;
+    _lightCount = 0;
 }
 
-void Renderer::Draw(const Mesh& mesh, 
-            const Material& material, 
-            const Transform& transform)
+void Renderer::SubmitLight(const DirectionalLight& light)
+{
+    if (!light.IsValid() || _lightCount >= MAX_LIGHTS)
+    {
+        return;
+    }
+
+    const glm::vec3 direction = glm::normalize(light.direction);
+    _lightDirections[_lightCount] = glm::vec4(direction, 0.0f);
+    _lightColors[_lightCount] = glm::vec4(light.color, light.intensity);
+    _lightCount++;
+}
+
+void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform& transform)
 {
     if (_activeCamera == nullptr)
     {
@@ -190,13 +236,23 @@ void Renderer::Draw(const Mesh& mesh,
 
     const glm::mat4 modelMatrix = transform.GetMatrix();
 
-    const glm::mat4 mvpMatrix = _activeCamera->GetProjectionMatrix() *
-                                _activeCamera->GetViewMatrix() *
-                                modelMatrix;
-
     _device.SetPipeline(material.renderPipeline->pipeline);
 
-    _device.SetShaderParameter(material.renderPipeline->mvpParameter, glm::value_ptr(mvpMatrix), 1);
+    const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
+    _device.SetShaderParameter(material.renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
+
+    const glm::vec3 cameraPosition = glm::vec3(glm::inverse(_activeCamera->GetViewMatrix())[3]);
+    _device.SetShaderParameter(material.renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
+
+    _device.SetShaderParameter(material.renderPipeline->lightCountParameter, &_lightCount, 1);
+    
+    if (_lightCount > 0)
+    {
+        _device.SetShaderParameter(material.renderPipeline->lightDirectionsParameter, &_lightDirections[0][0], _lightCount);
+        _device.SetShaderParameter(material.renderPipeline->lightColorsParameter, &_lightColors[0][0], _lightCount);
+    }
+
+    _device.SetShaderParameter(material.renderPipeline->modelParameter, &modelMatrix[0][0], 1);
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
     _device.SetIndexBuffer(mesh.indexBuffer);

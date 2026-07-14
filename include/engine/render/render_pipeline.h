@@ -40,7 +40,8 @@ struct RenderPipelineDesc
     dvl::DepthStencilState depthStencilState;
     dvl::RasterizerState rasterizerState;
 
-    const char* mvpParameterName = "mvpMatrix";
+    const char* viewProjectionParameterName = "viewProjectionMatrix";
+    const char* modelParameterName = "modelMatrix";
 };
 
 struct RenderPipeline
@@ -48,10 +49,21 @@ struct RenderPipeline
     dvl::ShaderHandle shader;
     dvl::PipelineHandle pipeline;
 
-    dvl::ShaderParameterHandle mvpParameter;
+    dvl::ShaderParameterHandle viewProjectionParameter;
+    dvl::ShaderParameterHandle modelParameter;
+
+    dvl::ShaderParameterHandle lightCountParameter;
+    dvl::ShaderParameterHandle lightDirectionsParameter;
+    dvl::ShaderParameterHandle lightColorsParameter;
+    dvl::ShaderParameterHandle cameraPositionParameter;
 
     bool IsValid() const
     {
-        return shader.IsValid() && pipeline.IsValid() && mvpParameter.IsValid();
+        return shader.IsValid() && pipeline.IsValid() &&
+               viewProjectionParameter.IsValid() && modelParameter.IsValid() &&
+               lightCountParameter.IsValid() &&
+               lightDirectionsParameter.IsValid() &&
+               lightColorsParameter.IsValid() &&
+               cameraPositionParameter.IsValid();
     }
 };

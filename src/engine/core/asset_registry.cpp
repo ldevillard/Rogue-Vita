@@ -64,46 +64,70 @@ const Material& AssetRegistry::GetWireframeMaterial() const
 
 void AssetRegistry::loadCubePrimitive()
 {
-    const VertexPositionColor CubeVertices[] =
+    const VertexPositionNormalColor CubeVertices[] =
     {
-        // Back
-        {-0.5f, -0.5f, -0.5f, {0.0f, 0.0f, 0.0f, 1.0f}},
-        { 0.5f, -0.5f, -0.5f, {1.0f, 0.0f, 0.0f, 1.0f}},
-        {-0.5f,  0.5f, -0.5f, {0.0f, 1.0f, 0.0f, 1.0f}},
-        { 0.5f,  0.5f, -0.5f, {1.0f, 1.0f, 0.0f, 1.0f}},
-
         // Front
-        {-0.5f, -0.5f,  0.5f, {0.0f, 0.0f, 1.0f, 1.0f}},
-        { 0.5f, -0.5f,  0.5f, {1.0f, 0.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f,  0.5f, {0.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f,  0.5f, {1.0f, 1.0f, 1.0f, 1.0f}}
+        {-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+
+        // Back
+        { 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+
+        // Left
+        {-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+
+        // Right
+        { 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+
+        // Top
+        {-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+
+        // Bottom
+        {-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}}
     };
 
     const std::uint16_t CubeIndices[] =
     {
         // Front
+        0, 1, 3,
+        0, 3, 2,
+    
+        // Back
         4, 5, 7,
         4, 7, 6,
     
-        // Back
-        1, 0, 2,
-        1, 2, 3,
-    
         // Left
-        0, 4, 6,
-        0, 6, 2,
+        8, 9, 11,
+        8, 11, 10,
     
         // Right
-        5, 1, 3,
-        5, 3, 7,
+        12, 13, 15,
+        12, 15, 14,
     
         // Top
-        6, 7, 3,
-        6, 3, 2,
+        16, 17, 19,
+        16, 19, 18,
     
         // Bottom
-        0, 1, 5,
-        0, 5, 4
+        20, 21, 23,
+        20, 23, 22
     };
 
     MeshDesc desc = {};
@@ -125,8 +149,9 @@ void AssetRegistry::loadMaterials()
 {
     const dvl::VertexAttribute attributes[] =
     {
-        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionColor, x)},
-        {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionColor, color)}
+        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalColor, x)},
+        {"aNormal", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalColor, nx)},
+        {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionNormalColor, color)}
     };
 
     Material solidMaterial = {};
@@ -137,7 +162,7 @@ void AssetRegistry::loadMaterials()
     pipelineDesc.fragmentShaderPath = "app0:/assets/shaders/fragment.frag";
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-    pipelineDesc.vertexStride = sizeof(VertexPositionColor);
+    pipelineDesc.vertexStride = sizeof(VertexPositionNormalColor);
     pipelineDesc.depthStencilState.depthTestEnabled = true;
     pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
@@ -154,8 +179,8 @@ void AssetRegistry::loadMaterials()
     _pipelines.emplace(solidPipelineHandle, solidRenderPipeline);
     _pipelines.emplace(wireframePipelineHandle, wireframeRenderPipeline);
     
-    solidMaterial.renderPipeline = &solidRenderPipeline;
-    wireframeMaterial.renderPipeline = &wireframeRenderPipeline;
+    solidMaterial.renderPipeline = &_pipelines.at(solidPipelineHandle);
+    wireframeMaterial.renderPipeline = &_pipelines.at(wireframePipelineHandle);
 
     _solidMaterialHandle.id = _nextMaterialId++;
     _wireframeMaterialHandle.id = _nextMaterialId++;

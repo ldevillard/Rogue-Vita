@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include "engine/component/mesh_renderer.h"
+#include "engine/component/directional_light.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
@@ -38,17 +39,29 @@ int main()
     wireframeEntity->transform.rotation.z = glm::radians(45.0f);
     wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), &assetRegistry.GetWireframeMaterial());
 
+    Entity* lightEntity = world.CreateEntity();
+    DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
+    light.direction = glm::normalize(glm::vec3{0.0f, -1.0f, 0.0f});
+    light.intensity = 1;
+
     float rotationAngle = 0.0f;
 
     while (true)
     {
-        rotationAngle += 0.05f;
+        rotationAngle += 0.01f;
 
         solidEntity->transform.rotation.y = rotationAngle;
         wireframeEntity->transform.rotation.y = -rotationAngle;
 
         renderer.BeginFrame({0.118f, 0.122f, 0.278f});
         renderer.BeginScene(camera);
+
+        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+        {
+            const DirectionalLight* directionalLight = entity->GetComponent<DirectionalLight>();
+            if (directionalLight != nullptr)
+                renderer.SubmitLight(*directionalLight);
+        }
 
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
