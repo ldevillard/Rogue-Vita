@@ -2,7 +2,8 @@
 
 #include <glm/glm.hpp>
 
-#include "engine/component/cube_mesh_renderer.h"
+#include "engine/component/mesh_renderer.h"
+#include "engine/core/asset_registry.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
 #include "engine/render/camera.h"
@@ -20,28 +21,8 @@ int main()
 
     Renderer renderer = Renderer(screenWidth, screenHeight);
 
-    Material solidMaterial;
-    Material wireframeMaterial;
-    World world;
-
-    const dvl::VertexAttribute attributes[] =
-    {
-        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionColor, x)},
-        {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionColor, color)}
-    };
-
-    RenderPipelineDesc pipelineDesc;
-    pipelineDesc.vertexShaderPath = "app0:/assets/shaders/vertex.vert";
-    pipelineDesc.fragmentShaderPath = "app0:/assets/shaders/fragment.frag";
-    pipelineDesc.attributes = attributes;
-    pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-    pipelineDesc.vertexStride = sizeof(VertexPositionColor);
-    pipelineDesc.depthStencilState.depthTestEnabled = true;
-    pipelineDesc.depthStencilState.depthWriteEnabled = true;
-
-    solidMaterial.pipeline = renderer.CreateRenderPipeline(pipelineDesc);
-    pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
-    wireframeMaterial.pipeline = renderer.CreateRenderPipeline(pipelineDesc);
+    World world = {};
+    AssetRegistry assetRegistry = AssetRegistry(renderer);
 
     Camera camera(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
 
@@ -49,13 +30,13 @@ int main()
     solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
     solidEntity->transform.rotation.x = glm::radians(35.264f);
     solidEntity->transform.rotation.z = glm::radians(45.0f);
-    solidEntity->AddComponent<CubeMeshRenderer>(renderer, &solidMaterial);
+    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMesh(), assetRegistry.GetSolidMaterial());
 
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
     wireframeEntity->transform.rotation.x = glm::radians(35.264f);
     wireframeEntity->transform.rotation.z = glm::radians(45.0f);
-    wireframeEntity->AddComponent<CubeMeshRenderer>(renderer, &wireframeMaterial);
+    wireframeEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMesh(), assetRegistry.GetWireframeMaterial());
 
     float rotationAngle = 0.0f;
 
