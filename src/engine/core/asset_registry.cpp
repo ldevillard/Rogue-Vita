@@ -6,6 +6,8 @@
 AssetRegistry::AssetRegistry(Renderer& renderer) 
     : _renderer(renderer)
 {
+    loadCubePrimitive();
+    loadMaterials();
 }
 
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
