@@ -2,41 +2,46 @@ varying vec4 vColor;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 
-const int MAX_LIGHTS = 4;
+uniform vec4 materialColor;
 
 uniform int lightCount;
 uniform vec4 lightDirections[4];
 uniform vec4 lightColors[4];
 uniform vec3 cameraPosition;
 
+const int MAX_LIGHTS = 4;
+
 void main()
 {
+    vec3 objectColor = vColor.rgb * materialColor.rgb;
     vec3 normal = normalize(vNormal);
     vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
-    vec3 lighting = vec3(0.1);
-
-    const float specularStrength = 0.5;
-    const float shininess = 32.0;
+    vec3 result = vec3(0.0);
 
     for (int i = 0; i < MAX_LIGHTS; ++i)
     {
-        if (i < lightCount)
-        {
-            vec3 lightDirection = normalize(-lightDirections[i].xyz);
-            vec3 halfDirection = normalize(lightDirection + viewDirection);
-            vec3 radiance = lightColors[i].rgb * lightColors[i].a;
+        if (i >= lightCount)
+            continue;
 
-            float diffuse = max(dot(normal, lightDirection), 0.0);
-            float specular = 0.0;
+        vec3 lightColor = lightColors[i].rgb * lightColors[i].a;
 
-            if (diffuse > 0.0)
-            {
-                specular = pow(max(dot(normal, halfDirection), 0.0), shininess);
-            }
+        // Ambient
+        float ambientStrength = 0.1;
+        vec3 ambient = ambientStrength * lightColor;
 
-            lighting += radiance * (diffuse + specularStrength * specular);
-        }
+        // Diffuse
+        vec3 lightDirection = normalize(-lightDirections[i].xyz);
+        float diffuseFactor = max(dot(normal, lightDirection), 0.0);
+        vec3 diffuse = diffuseFactor * lightColor;
+
+        // Specular (Phong)
+        float specularStrength = 0.5;
+        vec3 reflectDirection = reflect(-lightDirection, normal);
+        float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 32.0);
+        vec3 specular = specularStrength * specularFactor * lightColor;
+
+        result += (ambient + diffuse + specular) * objectColor;
     }
 
-    gl_FragColor = vec4(vColor.rgb * lighting, vColor.a);
+    gl_FragColor = vec4(result, vColor.a * materialColor.a);
 }

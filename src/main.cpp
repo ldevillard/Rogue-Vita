@@ -22,22 +22,32 @@ int main()
 
     Renderer renderer = Renderer(screenWidth, screenHeight);
 
-    World world = {};
     AssetRegistry assetRegistry = AssetRegistry(renderer);
+    World world = {};
 
     Camera camera(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
+    camera.LookAt(glm::vec3{0.0f, 2.0f, -5.0f}, glm::vec3{0.0f, 0.0f, 0.0f});
 
     Entity* solidEntity = world.CreateEntity();
     solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
     solidEntity->transform.rotation.x = glm::radians(35.264f);
     solidEntity->transform.rotation.z = glm::radians(45.0f);
-    solidEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), &assetRegistry.GetSolidMaterial());
+    Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
+    redSolidMaterial.color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    solidEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), redSolidMaterial);
 
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
     wireframeEntity->transform.rotation.x = glm::radians(35.264f);
     wireframeEntity->transform.rotation.z = glm::radians(45.0f);
-    wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), &assetRegistry.GetWireframeMaterial());
+    wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), assetRegistry.GetWireframeMaterialInstance());
+
+    Entity* planeEntity = world.CreateEntity();
+    planeEntity->transform.position = {0.0f, -1.0f, 0.0f};
+    planeEntity->transform.scale = {5.0f, 0.1f, 5.0f};
+    Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
+    planeMaterial.color = {0.35f, 0.35f, 0.4f, 1.0f};
+    planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
@@ -48,7 +58,7 @@ int main()
 
     while (true)
     {
-        rotationAngle += 0.01f;
+        rotationAngle += 0.025f;
 
         solidEntity->transform.rotation.y = rotationAngle;
         wireframeEntity->transform.rotation.y = -rotationAngle;
@@ -69,7 +79,7 @@ int main()
             if (meshRenderer == nullptr || !meshRenderer->IsValid())
                 continue;
 
-            renderer.Draw(*meshRenderer->mesh, *meshRenderer->material, entity->transform);
+            renderer.Draw(*meshRenderer->mesh, meshRenderer->material, entity->transform);
         }
 
         renderer.EndFrame();

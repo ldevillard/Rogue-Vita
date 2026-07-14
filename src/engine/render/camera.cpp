@@ -9,6 +9,11 @@ Camera::Camera(const float screenWidth, const float screenHeight)
 
 }
 
+void Camera::LookAt(const glm::vec3& position, const glm::vec3& target)
+{
+    _view = glm::lookAt(position, target, glm::vec3{0.0f, 1.0f, 0.0f});
+}
+
 const glm::mat4& Camera::GetViewMatrix() const
 {
     return _view;

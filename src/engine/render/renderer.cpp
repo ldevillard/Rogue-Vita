@@ -90,8 +90,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
 {
 
     if (desc.vertexShaderPath == nullptr || desc.fragmentShaderPath == nullptr ||
-        desc.attributes == nullptr || desc.attributeCount == 0 || desc.vertexStride == 0 ||
-        desc.viewProjectionParameterName == nullptr || desc.modelParameterName == nullptr)
+        desc.attributes == nullptr || desc.attributeCount == 0 || desc.vertexStride == 0)
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid render pipeline description");
         return {};
@@ -134,7 +133,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
 
     dvl::ShaderParameter parameterDesc;
     parameterDesc.shader = shader;
-    parameterDesc.name = desc.viewProjectionParameterName;
+    parameterDesc.name = "viewProjectionMatrix";
     parameterDesc.type = dvl::ShaderParameterType::Mat4;
 
     const dvl::ShaderParameterHandle viewProjectionParameter = _device.GetShaderParameter(parameterDesc);
@@ -145,9 +144,13 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
         return {};
     }
 
-    parameterDesc.name = desc.modelParameterName;
+    parameterDesc.name = "modelMatrix";
     parameterDesc.type = dvl::ShaderParameterType::Mat4;
     const dvl::ShaderParameterHandle modelParameter = _device.GetShaderParameter(parameterDesc);
+
+    parameterDesc.name = "materialColor";
+    parameterDesc.type = dvl::ShaderParameterType::Float4;
+    const dvl::ShaderParameterHandle materialColorParameter = _device.GetShaderParameter(parameterDesc);
 
     parameterDesc.name = "lightCount";
     parameterDesc.type = dvl::ShaderParameterType::Int;
@@ -170,6 +173,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
     renderPipeline.pipeline = pipeline;
     renderPipeline.viewProjectionParameter = viewProjectionParameter;
     renderPipeline.modelParameter = modelParameter;
+    renderPipeline.materialColorParameter = materialColorParameter;
     renderPipeline.lightCountParameter = lightCountParameter;
     renderPipeline.lightDirectionsParameter = lightDirectionsParameter;
     renderPipeline.lightColorsParameter = lightColorsParameter;
@@ -181,6 +185,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
 void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
 {
     _device.DestroyShaderParameter(renderPipeline.cameraPositionParameter);
+    _device.DestroyShaderParameter(renderPipeline.materialColorParameter);
     _device.DestroyShaderParameter(renderPipeline.lightCountParameter);
     _device.DestroyShaderParameter(renderPipeline.lightColorsParameter);
     _device.DestroyShaderParameter(renderPipeline.lightDirectionsParameter);
@@ -243,6 +248,8 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
 
     const glm::vec3 cameraPosition = glm::vec3(glm::inverse(_activeCamera->GetViewMatrix())[3]);
     _device.SetShaderParameter(material.renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
+
+    _device.SetShaderParameter(material.renderPipeline->materialColorParameter, &material.color.r, 1);
 
     _device.SetShaderParameter(material.renderPipeline->lightCountParameter, &_lightCount, 1);
     

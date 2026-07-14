@@ -22,8 +22,8 @@ public:
     const Mesh& GetCubeMesh() const;
 
     // materials
-    const Material& GetSolidMaterial() const;
-    const Material& GetWireframeMaterial() const;
+    const Material GetSolidMaterialInstance() const;
+    const Material GetWireframeMaterialInstance() const;
 
 private:
     void loadCubePrimitive();

@@ -7,10 +7,10 @@
 class MeshRenderer : public Component
 {
 public:
-    MeshRenderer(const Mesh* mesh, const Material* material);
+    MeshRenderer(const Mesh* mesh, const Material& material);
 
     bool IsValid() const override;
 
     const Mesh* mesh = nullptr;
-    const Material* material = nullptr;
+    const Material material;
 };

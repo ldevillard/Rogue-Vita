@@ -52,12 +52,12 @@ const Mesh& AssetRegistry::GetCubeMesh() const
     return _meshes.at(_cubeMeshHandle);
 }
 
-const Material& AssetRegistry::GetSolidMaterial() const
+const Material AssetRegistry::GetSolidMaterialInstance() const
 {
     return _materials.at(_solidMaterialHandle);
 }
 
-const Material& AssetRegistry::GetWireframeMaterial() const
+const Material AssetRegistry::GetWireframeMaterialInstance() const
 {
     return _materials.at(_wireframeMaterialHandle);
 }

@@ -7,6 +7,8 @@ class Camera
 public:
     Camera(const float screenWidth, const float screenHeight);
 
+    void LookAt(const glm::vec3& position, const glm::vec3& target);
+
     const glm::mat4& GetViewMatrix() const;
     const glm::mat4& GetProjectionMatrix() const;
 

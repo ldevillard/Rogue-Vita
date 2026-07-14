@@ -39,9 +39,6 @@ struct RenderPipelineDesc
     dvl::PrimitiveTopology topology = dvl::PrimitiveTopology::TriangleList;
     dvl::DepthStencilState depthStencilState;
     dvl::RasterizerState rasterizerState;
-
-    const char* viewProjectionParameterName = "viewProjectionMatrix";
-    const char* modelParameterName = "modelMatrix";
 };
 
 struct RenderPipeline
@@ -52,6 +49,8 @@ struct RenderPipeline
     dvl::ShaderParameterHandle viewProjectionParameter;
     dvl::ShaderParameterHandle modelParameter;
 
+    dvl::ShaderParameterHandle materialColorParameter;
+
     dvl::ShaderParameterHandle lightCountParameter;
     dvl::ShaderParameterHandle lightDirectionsParameter;
     dvl::ShaderParameterHandle lightColorsParameter;
@@ -61,6 +60,7 @@ struct RenderPipeline
     {
         return shader.IsValid() && pipeline.IsValid() &&
                viewProjectionParameter.IsValid() && modelParameter.IsValid() &&
+               materialColorParameter.IsValid() &&
                lightCountParameter.IsValid() &&
                lightDirectionsParameter.IsValid() &&
                lightColorsParameter.IsValid() &&
