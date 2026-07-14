@@ -10,6 +10,16 @@ AssetRegistry::AssetRegistry(Renderer& renderer)
     loadMaterials();
 }
 
+AssetRegistry::~AssetRegistry()
+{
+    for (std::pair<const MeshHandle, Mesh>& meshPair : _meshes)
+    {
+        _renderer.DestroyMesh(meshPair.second);
+    }
+
+    // TODO: destroy pipelines
+}
+
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
 {
     const auto it = _meshes.find(meshHandle);
@@ -34,19 +44,19 @@ const Material* AssetRegistry::GetMaterial(const MaterialHandle& materialHandle)
     return nullptr;
 }
 
-const Mesh* AssetRegistry::GetCubeMesh() const
+const Mesh& AssetRegistry::GetCubeMesh() const
 {
-    return &_meshes.at(_cubeMeshHandle);
+    return _meshes.at(_cubeMeshHandle);
 }
 
-const Material* AssetRegistry::GetSolidMaterial() const
+const Material& AssetRegistry::GetSolidMaterial() const
 {
-    return &_materials.at(_solidMaterialHandle);
+    return _materials.at(_solidMaterialHandle);
 }
 
-const Material* AssetRegistry::GetWireframeMaterial() const
+const Material& AssetRegistry::GetWireframeMaterial() const
 {
-    return &_materials.at(_wireframeMaterialHandle);
+    return _materials.at(_wireframeMaterialHandle);
 }
 
 void AssetRegistry::loadCubePrimitive()

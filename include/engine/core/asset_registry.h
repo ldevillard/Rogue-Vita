@@ -10,16 +10,20 @@ class AssetRegistry
 {
 public:
     AssetRegistry(Renderer& Renderer);
+    ~AssetRegistry();
+
+    // TODO: Load
+    // TODO: Unload
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
 
     // primitives
-    const Mesh* GetCubeMesh() const;
+    const Mesh& GetCubeMesh() const;
 
     // materials
-    const Material* GetSolidMaterial() const;
-    const Material* GetWireframeMaterial() const;
+    const Material& GetSolidMaterial() const;
+    const Material& GetWireframeMaterial() const;
 
 private:
     void loadCubePrimitive();

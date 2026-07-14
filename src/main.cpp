@@ -30,13 +30,13 @@ int main()
     solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
     solidEntity->transform.rotation.x = glm::radians(35.264f);
     solidEntity->transform.rotation.z = glm::radians(45.0f);
-    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMesh(), assetRegistry.GetSolidMaterial());
+    solidEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), &assetRegistry.GetSolidMaterial());
 
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
     wireframeEntity->transform.rotation.x = glm::radians(35.264f);
     wireframeEntity->transform.rotation.z = glm::radians(45.0f);
-    wireframeEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMesh(), assetRegistry.GetWireframeMaterial());
+    wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), &assetRegistry.GetWireframeMaterial());
 
     float rotationAngle = 0.0f;
 
