@@ -2,6 +2,31 @@
 
 #include <dvl/dvl.h>
 
+struct RenderPipelineHandle
+{
+    static constexpr unsigned int Invalid = std::numeric_limits<unsigned int>::max();
+    
+    unsigned int id = Invalid;
+    
+    bool IsValid() const
+    {
+        return id != Invalid;
+    }
+
+    bool operator==(const RenderPipelineHandle& other) const
+    {
+        return id == other.id;
+    }
+
+    struct Hasher
+    {
+        std::size_t operator()(const RenderPipelineHandle& handle) const
+        {
+            return std::hash<unsigned int>{}(handle.id);
+        }
+    };
+};
+
 struct RenderPipelineDesc
 {
     const char* vertexShaderPath = nullptr;

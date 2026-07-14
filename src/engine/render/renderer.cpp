@@ -182,22 +182,21 @@ void Renderer::Draw(const Mesh& mesh,
         return;
     }
 
-    if (!mesh.IsValid() || !material.pipeline.IsValid())
+    if (!mesh.IsValid() || material.renderPipeline == nullptr || !material.renderPipeline->IsValid())
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
         return;
     }
 
-    const RenderPipeline& renderPipeline = material.pipeline;
     const glm::mat4 modelMatrix = transform.GetMatrix();
 
     const glm::mat4 mvpMatrix = _activeCamera->GetProjectionMatrix() *
                                 _activeCamera->GetViewMatrix() *
                                 modelMatrix;
 
-    _device.SetPipeline(renderPipeline.pipeline);
+    _device.SetPipeline(material.renderPipeline->pipeline);
 
-    _device.SetShaderParameter(renderPipeline.mvpParameter, glm::value_ptr(mvpMatrix), 1);
+    _device.SetShaderParameter(material.renderPipeline->mvpParameter, glm::value_ptr(mvpMatrix), 1);
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
     _device.SetIndexBuffer(mesh.indexBuffer);

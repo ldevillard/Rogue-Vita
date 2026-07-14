@@ -17,7 +17,10 @@ AssetRegistry::~AssetRegistry()
         _renderer.DestroyMesh(meshPair.second);
     }
 
-    // TODO: destroy pipelines
+    for (std::pair<const RenderPipelineHandle, RenderPipeline>& pipelinePair : _pipelines)
+    {
+        _renderer.DestroyRenderPipeline(pipelinePair.second);
+    }
 }
 
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
@@ -138,12 +141,24 @@ void AssetRegistry::loadMaterials()
     pipelineDesc.depthStencilState.depthTestEnabled = true;
     pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
-    solidMaterial.pipeline = _renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline solidRenderPipeline = _renderer.CreateRenderPipeline(pipelineDesc);
     pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
-    wireframeMaterial.pipeline = _renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline wireframeRenderPipeline= _renderer.CreateRenderPipeline(pipelineDesc);
+    
+    RenderPipelineHandle solidPipelineHandle = {};
+    solidPipelineHandle.id = _nextPipelineId++;
+    
+    RenderPipelineHandle wireframePipelineHandle = {};
+    wireframePipelineHandle.id = _nextPipelineId++;
+    
+    _pipelines.emplace(solidPipelineHandle, solidRenderPipeline);
+    _pipelines.emplace(wireframePipelineHandle, wireframeRenderPipeline);
+    
+    solidMaterial.renderPipeline = &solidRenderPipeline;
+    wireframeMaterial.renderPipeline = &wireframeRenderPipeline;
 
     _solidMaterialHandle.id = _nextMaterialId++;
-    _wireframeMaterialHandle.id = _nextMaterialId;
+    _wireframeMaterialHandle.id = _nextMaterialId++;
 
     _materials.emplace(_solidMaterialHandle, solidMaterial);
     _materials.emplace(_wireframeMaterialHandle, wireframeMaterial);

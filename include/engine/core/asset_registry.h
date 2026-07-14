@@ -39,7 +39,8 @@ private:
     std::unordered_map<MeshHandle, Mesh, MeshHandle::Hasher> _meshes;
     int _nextMeshId = 1;
 
-    // TODO: register pipelines in an unordered_map
+    std::unordered_map<RenderPipelineHandle, RenderPipeline, RenderPipelineHandle::Hasher> _pipelines;
+    int _nextPipelineId = 1;
 
     std::unordered_map<MaterialHandle, Material, MaterialHandle::Hasher> _materials;
     int _nextMaterialId = 1;

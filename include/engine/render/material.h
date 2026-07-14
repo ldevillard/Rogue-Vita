@@ -31,7 +31,7 @@ struct MaterialHandle
 
 struct Material
 {
-    RenderPipeline pipeline;
+    RenderPipeline* renderPipeline;
 
     dvl::Color color {1.0f, 1.0f, 1.0f, 1.0f};
 };
