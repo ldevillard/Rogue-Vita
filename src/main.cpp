@@ -2,12 +2,12 @@
 
 #include <glm/glm.hpp>
 
+#include "engine/component/camera.h"
 #include "engine/component/mesh_renderer.h"
 #include "engine/component/directional_light.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
-#include "engine/render/camera.h"
 #include "engine/render/material.h"
 #include "engine/render/render_pipeline.h"
 #include "engine/render/renderer.h"
@@ -25,8 +25,10 @@ int main()
     AssetRegistry assetRegistry = AssetRegistry(renderer);
     World world = {};
 
-    Camera camera(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
-    camera.LookAt(glm::vec3{0.0f, 2.0f, -5.0f}, glm::vec3{0.0f, 0.0f, 0.0f});
+    Entity* cameraEntity = world.CreateEntity();
+    Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(screenWidth), static_cast<float>(screenHeight));
+    cameraEntity->transform.position = {0.0f, 2.0f, -5.0f};
+    cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
 
     Entity* solidEntity = world.CreateEntity();
     solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
@@ -64,7 +66,7 @@ int main()
         wireframeEntity->transform.rotation.y = -rotationAngle;
 
         renderer.BeginFrame({0.118f, 0.122f, 0.278f});
-        renderer.BeginScene(camera);
+        renderer.BeginScene(mainCamera);
 
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {

@@ -1,8 +1,9 @@
 #include "engine/render/renderer.h"
 
+#include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
+#include "engine/core/entity.h"
 #include "engine/core/transform.h"
-#include "engine/render/camera.h"
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
 #include "engine/render/render_pipeline.h"
@@ -246,7 +247,8 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
     _device.SetShaderParameter(material.renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
 
-    const glm::vec3 cameraPosition = glm::vec3(glm::inverse(_activeCamera->GetViewMatrix())[3]);
+    // TODO: Remove #include entity.h and use a getter when it will be available
+    const glm::vec3 cameraPosition = _activeCamera->entity->transform.position;
     _device.SetShaderParameter(material.renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
 
     _device.SetShaderParameter(material.renderPipeline->materialColorParameter, &material.color.r, 1);
