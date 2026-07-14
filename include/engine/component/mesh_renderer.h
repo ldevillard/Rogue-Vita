@@ -11,6 +11,7 @@ public:
 
     bool IsValid() const override;
 
+    // TODO: Use handle instead
     const Mesh* mesh = nullptr;
     const Material material;
 };

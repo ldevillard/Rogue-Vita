@@ -43,6 +43,7 @@ struct RenderPipelineDesc
 
 struct RenderPipeline
 {
+    // TODO: Make params open to extension and close to modification (map or vector of params)
     dvl::ShaderHandle shader;
     dvl::PipelineHandle pipeline;
 
