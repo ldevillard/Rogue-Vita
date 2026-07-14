@@ -61,6 +61,7 @@ LIBS += $(VITAGL_LIB) \
 		-lSceCommonDialog_stub \
 		-lSceGxm_stub \
 		-lSceDisplay_stub \
+		-lSceCtrl_stub \
 		-lSceAppMgr_stub \
 		-lSceKernelDmacMgr_stub \
 		-lmathneon \
