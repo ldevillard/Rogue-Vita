@@ -29,7 +29,7 @@ int main()
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(screenWidth), static_cast<float>(screenHeight), Camera::Orthographic);
-    cameraEntity->transform.position = {0.0f, 2.0f, -5.0f};
+    cameraEntity->transform.position = {-5.0f, 5.0f, -5.0f};
     cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
 
     Entity* solidEntity = world.CreateEntity();

@@ -19,7 +19,7 @@ Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType
         
     case Orthographic:
     {
-        constexpr float orthographicSize = 5.0f;
+        constexpr float orthographicSize = 8.0f;
         const float halfHeight = orthographicSize * 0.5f;
         const float halfWidth = halfHeight * aspectRatio;
 
