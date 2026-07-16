@@ -7,7 +7,13 @@
 class Camera : public Component
 {
 public:
-    Camera(const float screenWidth, const float screenHeight);
+    enum ProjectionType
+    {
+        Perspective,
+        Orthographic
+    };
+
+    Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType = Perspective);
 
     bool IsValid() const override;
 

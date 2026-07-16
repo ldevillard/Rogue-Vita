@@ -4,9 +4,33 @@
 
 #include "engine/core/entity.h"
 
-Camera::Camera(const float screenWidth, const float screenHeight)
+Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType)
 {
-	_projection = glm::perspective(glm::radians(60.0f), static_cast<float>(screenWidth) / static_cast<float>(screenHeight), 0.1f, 100.0f);
+    constexpr float nearPlane = 0.1f;
+    constexpr float farPlane = 100.0f;
+    
+    const float aspectRatio = screenWidth / screenHeight;
+    
+    switch (projectionType)
+    {
+    case Perspective:
+        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, nearPlane, farPlane);
+        break;
+        
+    case Orthographic:
+    {
+        constexpr float orthographicSize = 5.0f;
+        const float halfHeight = orthographicSize * 0.5f;
+        const float halfWidth = halfHeight * aspectRatio;
+
+        _projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, nearPlane, farPlane);
+        break;
+    }
+
+    default:
+        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, nearPlane, farPlane);
+        break;
+    }
 }
 
 bool Camera::IsValid() const
