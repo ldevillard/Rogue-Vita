@@ -7,6 +7,5 @@ MeshRenderer::MeshRenderer(const Mesh* mesh, const Material& material)
 
 bool MeshRenderer::IsValid() const
 {
-    return mesh != nullptr && mesh->IsValid() &&
-           material.renderPipeline != nullptr && material.renderPipeline->IsValid();
+    return mesh != nullptr && mesh->IsValid() && material.renderPipelineHandle.IsValid();
 }

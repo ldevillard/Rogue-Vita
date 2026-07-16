@@ -31,8 +31,7 @@ struct MaterialHandle
 
 struct Material
 {
-    // TODO: Use handle instead
-    RenderPipeline* renderPipeline;
+    RenderPipelineHandle renderPipelineHandle;
 
     dvl::Color color {1.0f, 1.0f, 1.0f, 1.0f};
 };

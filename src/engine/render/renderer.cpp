@@ -2,6 +2,7 @@
 
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
+#include "engine/core/asset_registry.h"
 #include "engine/core/entity.h"
 #include "engine/core/transform.h"
 #include "engine/render/material.h"
@@ -9,7 +10,8 @@
 #include "engine/render/render_pipeline.h"
 #include "engine/render/shader_loader.h"
 
-Renderer::Renderer(int screenWidth, int screenHeight)
+Renderer::Renderer(int screenWidth, int screenHeight, const AssetRegistry& assetRegistry)
+    : _assetRegistry(assetRegistry)
 {
 	dvl::DeviceDesc desc;
 	desc.api = dvl::GraphicsAPI::VitaGL;
@@ -234,7 +236,9 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
         return;
     }
 
-    if (!mesh.IsValid() || material.renderPipeline == nullptr || !material.renderPipeline->IsValid())
+    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.renderPipelineHandle);
+
+    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid())
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
         return;
@@ -242,26 +246,26 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
 
     const glm::mat4 modelMatrix = transform.GetMatrix();
 
-    _device.SetPipeline(material.renderPipeline->pipeline);
+    _device.SetPipeline(renderPipeline->pipeline);
 
     const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
-    _device.SetShaderParameter(material.renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
+    _device.SetShaderParameter(renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
 
     // TODO: Remove #include entity.h and use a getter when it will be available
     const glm::vec3 cameraPosition = _activeCamera->entity->transform.position;
-    _device.SetShaderParameter(material.renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
+    _device.SetShaderParameter(renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
 
-    _device.SetShaderParameter(material.renderPipeline->materialColorParameter, &material.color.r, 1);
+    _device.SetShaderParameter(renderPipeline->materialColorParameter, &material.color.r, 1);
 
-    _device.SetShaderParameter(material.renderPipeline->lightCountParameter, &_lightCount, 1);
+    _device.SetShaderParameter(renderPipeline->lightCountParameter, &_lightCount, 1);
     
     if (_lightCount > 0)
     {
-        _device.SetShaderParameter(material.renderPipeline->lightDirectionsParameter, &_lightDirections[0][0], _lightCount);
-        _device.SetShaderParameter(material.renderPipeline->lightColorsParameter, &_lightColors[0][0], _lightCount);
+        _device.SetShaderParameter(renderPipeline->lightDirectionsParameter, &_lightDirections[0][0], _lightCount);
+        _device.SetShaderParameter(renderPipeline->lightColorsParameter, &_lightColors[0][0], _lightCount);
     }
 
-    _device.SetShaderParameter(material.renderPipeline->modelParameter, &modelMatrix[0][0], 1);
+    _device.SetShaderParameter(renderPipeline->modelParameter, &modelMatrix[0][0], 1);
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
     _device.SetIndexBuffer(mesh.indexBuffer);

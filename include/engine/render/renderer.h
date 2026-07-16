@@ -10,6 +10,7 @@ struct Material;
 struct RenderPipeline;
 struct RenderPipelineDesc;
 
+class AssetRegistry;
 class Camera;
 class DirectionalLight;
 class Transform;
@@ -17,7 +18,8 @@ class Transform;
 class Renderer
 {
 public:
-    Renderer(int screenWidth, int screenHeight);
+    // TODO: Create a RenderSystem that will resolve asset handles
+    Renderer(int screenWidth, int screenHeight, const AssetRegistry& assetRegistry);
     ~Renderer();
 
     bool CreateMesh(const MeshDesc& desc, Mesh& mesh);
@@ -39,7 +41,8 @@ private:
 
     dvl::Device _device;
     const Camera* _activeCamera = nullptr;
-    
+    const AssetRegistry& _assetRegistry;
+
     glm::vec4 _lightDirections[MAX_LIGHTS]{};
     glm::vec4 _lightColors[MAX_LIGHTS]{};
 

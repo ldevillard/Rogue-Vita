@@ -20,9 +20,11 @@ int main()
     constexpr int screenWidth = 960;
     constexpr int screenHeight = 544;
 
-    Renderer renderer = Renderer(screenWidth, screenHeight);
+    AssetRegistry assetRegistry = {};
+    Renderer renderer = Renderer(screenWidth, screenHeight, assetRegistry);
 
-    AssetRegistry assetRegistry = AssetRegistry(renderer);
+    assetRegistry.Initialize(renderer);
+
     World world = {};
 
     Entity* cameraEntity = world.CreateEntity();
@@ -86,6 +88,8 @@ int main()
 
         renderer.EndFrame();
     }
+
+    assetRegistry.Shutdown(renderer);
 
     return 0;
 }

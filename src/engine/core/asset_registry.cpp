@@ -1,25 +1,25 @@
 #include "engine/core/asset_registry.h"
 
 #include "engine/render/vertex.h"
+#include "engine/render/renderer.h"
 #include "engine/render/render_pipeline.h"
 
-AssetRegistry::AssetRegistry(Renderer& renderer) 
-    : _renderer(renderer)
+void AssetRegistry::Initialize(Renderer& renderer)
 {
-    loadCubePrimitive();
-    loadMaterials();
+    loadCubePrimitive(renderer);
+    loadMaterials(renderer);
 }
 
-AssetRegistry::~AssetRegistry()
+void AssetRegistry::Shutdown(Renderer& renderer)
 {
     for (std::pair<const MeshHandle, Mesh>& meshPair : _meshes)
     {
-        _renderer.DestroyMesh(meshPair.second);
+        renderer.DestroyMesh(meshPair.second);
     }
 
     for (std::pair<const RenderPipelineHandle, RenderPipeline>& pipelinePair : _pipelines)
     {
-        _renderer.DestroyRenderPipeline(pipelinePair.second);
+        renderer.DestroyRenderPipeline(pipelinePair.second);
     }
 }
 
@@ -47,6 +47,18 @@ const Material* AssetRegistry::GetMaterial(const MaterialHandle& materialHandle)
     return nullptr;
 }
 
+const RenderPipeline* AssetRegistry::GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const
+{
+     const auto it = _pipelines.find(renderPipelineHandle);
+
+    if (it != _pipelines.end())
+    {
+        return &it->second;
+    }
+
+    return nullptr;
+}
+
 const Mesh& AssetRegistry::GetCubeMesh() const
 {
     return _meshes.at(_cubeMeshHandle);
@@ -62,7 +74,7 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
     return _materials.at(_wireframeMaterialHandle);
 }
 
-void AssetRegistry::loadCubePrimitive()
+void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
     const VertexPositionNormalColor CubeVertices[] =
     {
@@ -138,14 +150,14 @@ void AssetRegistry::loadCubePrimitive()
 
     Mesh cubeMesh = {};
 
-    if (_renderer.CreateMesh(desc, cubeMesh))
+    if (renderer.CreateMesh(desc, cubeMesh))
     {
         _cubeMeshHandle.id = _nextMeshId++;
         _meshes.emplace(_cubeMeshHandle, cubeMesh);
     }
 }
 
-void AssetRegistry::loadMaterials()
+void AssetRegistry::loadMaterials(Renderer& renderer)
 {
     const dvl::VertexAttribute attributes[] =
     {
@@ -166,9 +178,9 @@ void AssetRegistry::loadMaterials()
     pipelineDesc.depthStencilState.depthTestEnabled = true;
     pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
-    RenderPipeline solidRenderPipeline = _renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline solidRenderPipeline = renderer.CreateRenderPipeline(pipelineDesc);
     pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
-    RenderPipeline wireframeRenderPipeline= _renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline wireframeRenderPipeline= renderer.CreateRenderPipeline(pipelineDesc);
     
     RenderPipelineHandle solidPipelineHandle = {};
     solidPipelineHandle.id = _nextPipelineId++;
@@ -179,8 +191,8 @@ void AssetRegistry::loadMaterials()
     _pipelines.emplace(solidPipelineHandle, solidRenderPipeline);
     _pipelines.emplace(wireframePipelineHandle, wireframeRenderPipeline);
     
-    solidMaterial.renderPipeline = &_pipelines.at(solidPipelineHandle);
-    wireframeMaterial.renderPipeline = &_pipelines.at(wireframePipelineHandle);
+    solidMaterial.renderPipelineHandle = solidPipelineHandle;
+    wireframeMaterial.renderPipelineHandle = wireframePipelineHandle;
 
     _solidMaterialHandle.id = _nextMaterialId++;
     _wireframeMaterialHandle.id = _nextMaterialId++;

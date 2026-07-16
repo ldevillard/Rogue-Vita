@@ -4,19 +4,21 @@
 
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
-#include "engine/render/renderer.h"
+
+class Renderer;
 
 class AssetRegistry
 {
 public:
-    AssetRegistry(Renderer& Renderer);
-    ~AssetRegistry();
+    void Initialize(Renderer& renderer);
+    void Shutdown(Renderer& renderer);
 
     // TODO: Load
     // TODO: Unload
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
+    const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;
 
     // primitives
     const Mesh& GetCubeMesh() const;
@@ -26,8 +28,8 @@ public:
     const Material GetWireframeMaterialInstance() const;
 
 private:
-    void loadCubePrimitive();
-    void loadMaterials();
+    void loadCubePrimitive(Renderer& renderer);
+    void loadMaterials(Renderer& renderer);
 
     // primitives
     MeshHandle _cubeMeshHandle;
@@ -44,6 +46,4 @@ private:
 
     std::unordered_map<MaterialHandle, Material, MaterialHandle::Hasher> _materials;
     int _nextMaterialId = 1;
-
-    Renderer& _renderer;
 };
