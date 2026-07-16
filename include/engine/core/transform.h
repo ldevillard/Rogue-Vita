@@ -2,9 +2,9 @@
 
 #include <glm/glm.hpp>
 
-// TODO: Make a class instead of a struct
-struct Transform
+class Transform
 {
+public:
     glm::vec3 position {0.0f};
     // TODO: Support quat to avoid gimball lock
     glm::vec3 rotation {0.0f};
