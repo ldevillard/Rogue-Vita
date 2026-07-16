@@ -17,10 +17,12 @@ public:
 
     bool IsValid() const override;
 
-    // TODO: should return a reference, the view matrix should be updated once per frame
-    glm::mat4 GetViewMatrix() const;
+    void UpdateViewMatrix();
+
+    const glm::mat4& GetViewMatrix() const;
     const glm::mat4& GetProjectionMatrix() const;
 
 private:
+    glm::mat4 _view;
     glm::mat4 _projection;
 };

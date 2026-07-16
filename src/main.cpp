@@ -62,10 +62,16 @@ int main()
 
     while (true)
     {
-        rotationAngle += 0.025f;
+        // Gameplay logic
+        {
+            // TODO: Check if camera need to be updated by the renderer or in the gameplay logic
+            mainCamera.UpdateViewMatrix();
 
-        solidEntity->transform.rotation.y = rotationAngle;
-        wireframeEntity->transform.rotation.y = -rotationAngle;
+            rotationAngle += 0.025f;
+
+            solidEntity->transform.rotation.y = rotationAngle;
+            wireframeEntity->transform.rotation.y = -rotationAngle;
+        }
 
         renderer.BeginFrame({0.118f, 0.122f, 0.278f});
         renderer.BeginScene(mainCamera);

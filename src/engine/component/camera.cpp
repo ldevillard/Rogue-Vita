@@ -2,6 +2,8 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <dvl/log/log.h>
+
 #include "engine/core/entity.h"
 
 Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType)
@@ -31,6 +33,8 @@ Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType
         _projection = glm::perspective(glm::radians(60.0f), aspectRatio, nearPlane, farPlane);
         break;
     }
+
+    _view = glm::mat4{1.0f};
 }
 
 bool Camera::IsValid() const
@@ -38,13 +42,20 @@ bool Camera::IsValid() const
     return entity != nullptr;
 }
 
-glm::mat4 Camera::GetViewMatrix() const
+void Camera::UpdateViewMatrix()
 {
     if (entity == nullptr)
-        return glm::mat4{1.0f};
+    {
+        dvl::Log(dvl::LogLevel::Error, "Couldn't update camera's view matrix since its associated entity is null!");
+        return;
+    }
 
-    // TODO: Cache the view matrix and update it once per frame
-    return glm::inverse(entity->transform.GetMatrix());
+    _view = glm::inverse(entity->transform.GetMatrix());
+}
+
+const glm::mat4& Camera::GetViewMatrix() const
+{
+    return _view;
 }
 
 const glm::mat4& Camera::GetProjectionMatrix() const
