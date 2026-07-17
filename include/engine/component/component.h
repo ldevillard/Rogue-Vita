@@ -9,6 +9,13 @@ public:
 
     virtual bool IsValid() const = 0;
 
-    // TODO: Protect entity
+    const Entity* GetEntity() const;
+
+protected:
     Entity* entity = nullptr;
+
+private:
+    friend class Entity;
+
+    void SetEntity(Entity* entity);
 };

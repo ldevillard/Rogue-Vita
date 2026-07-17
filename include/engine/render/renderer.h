@@ -37,14 +37,14 @@ public:
     void Draw(const Mesh& mesh, const Material& material, const Transform& transform);
 
 private:
-    static constexpr int MAX_LIGHTS = 4;
+    static constexpr int MaxLights = 4;
 
     dvl::Device _device;
     const Camera* _activeCamera = nullptr;
     const AssetRegistry& _assetRegistry;
 
-    glm::vec4 _lightDirections[MAX_LIGHTS]{};
-    glm::vec4 _lightColors[MAX_LIGHTS]{};
+    glm::vec4 _lightDirections[MaxLights]{};
+    glm::vec4 _lightColors[MaxLights]{};
 
     int _lightCount = 0;
 };

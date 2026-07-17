@@ -217,7 +217,7 @@ void Renderer::BeginScene(const Camera& camera)
 
 void Renderer::SubmitLight(const DirectionalLight& light)
 {
-    if (!light.IsValid() || _lightCount >= MAX_LIGHTS)
+    if (!light.IsValid() || _lightCount >= MaxLights)
     {
         return;
     }
@@ -244,6 +244,13 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
         return;
     }
 
+    const Entity* cameraEntity = _activeCamera->GetEntity();
+    if (cameraEntity == nullptr)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid active camera entity!");
+        return;
+    }
+
     const glm::mat4 modelMatrix = transform.GetMatrix();
 
     _device.SetPipeline(renderPipeline->pipeline);
@@ -251,8 +258,7 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
     _device.SetShaderParameter(renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
 
-    // TODO: Remove #include entity.h and use a getter when it will be available
-    const glm::vec3 cameraPosition = _activeCamera->entity->transform.position;
+    const glm::vec3 cameraPosition = cameraEntity->transform.position;
     _device.SetShaderParameter(renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
 
     _device.SetShaderParameter(renderPipeline->materialColorParameter, &material.color.r, 1);

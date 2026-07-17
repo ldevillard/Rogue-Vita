@@ -19,7 +19,7 @@ public:
         std::unique_ptr<T> component = std::make_unique<T>(std::forward<Args>(args)...);
         T& componentReference = *component;
 
-        component->entity = this;
+        component->SetEntity(this);
 
         _components.push_back(std::move(component));
 
