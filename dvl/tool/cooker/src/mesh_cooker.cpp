@@ -5,6 +5,7 @@
 #include <assimp/scene.h>
 
 #include <fstream>
+#include <limits>
 #include <vector>
 
 #include "dvl/asset/mesh_format.h"
@@ -40,6 +41,13 @@ namespace dvl
 
             const std::size_t baseVertex = vertices.size();
             const std::size_t resultingVertexCount = baseVertex + mesh->mNumVertices;
+
+            if (resultingVertexCount > std::numeric_limits<std::uint16_t>::max())
+            {
+                const std::string message = "Mesh '" + source.string() + "' exceeds the 65,535 vertex limit";
+                Log(LogLevel::Error, message.c_str());
+                return false;
+            }
 
             vertices.reserve(resultingVertexCount);
             for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
