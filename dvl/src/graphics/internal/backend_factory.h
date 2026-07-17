@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dvl/graphics/types.h>
+#include "dvl/graphics/types.h"
 
 #include <memory>
 

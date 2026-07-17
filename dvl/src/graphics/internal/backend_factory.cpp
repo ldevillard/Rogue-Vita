@@ -2,7 +2,7 @@
 
 #include "../vitagl/vitagl_backend.h"
 
-#include <dvl/log/log.h>
+#include "dvl/log/log.h"
 
 namespace dvl::internal
 {

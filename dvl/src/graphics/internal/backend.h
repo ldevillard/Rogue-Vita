@@ -1,9 +1,9 @@
 #pragma once 
 
-#include <dvl/graphics/buffer.h>
-#include <dvl/graphics/shader.h>
-#include <dvl/graphics/pipeline.h>
-#include <dvl/graphics/types.h>
+#include "dvl/graphics/buffer.h"
+#include "dvl/graphics/shader.h"
+#include "dvl/graphics/pipeline.h"
+#include "dvl/graphics/types.h"
 
 namespace dvl::internal
 {
