@@ -35,7 +35,7 @@ CXXFLAGS += -Wl,-q -std=c++17 -Wall -Wextra -Wpedantic -Werror $(INCLUDES)
 
 SRC_C :=$(call rwildcard, src/, *.c)
 SRC_CPP :=$(call rwildcard, src/, *.cpp)
-DVL_SRC_CPP :=$(call rwildcard, dvl/src/, *.cpp)
+DVL_SRC_CPP := $(filter-out dvl/src/log/desktop/%, $(call rwildcard, dvl/src/, *.cpp))
 
 SHADER_ASSET_DIR := asset/shader
 SHADER_ASSETS := $(shell find $(SHADER_ASSET_DIR) -type f)
