@@ -17,18 +17,18 @@ int main()
 {
     dvl::Log(dvl::LogLevel::Info, "Application starting");
 
-    constexpr int screenWidth = 960;
-    constexpr int screenHeight = 544;
+    constexpr int ScreenWidth = 960;
+    constexpr int ScreenHeight = 544;
 
     AssetRegistry assetRegistry = {};
-    Renderer renderer = Renderer(screenWidth, screenHeight, assetRegistry);
+    Renderer renderer = Renderer(ScreenWidth, ScreenHeight, assetRegistry);
 
     assetRegistry.Initialize(renderer);
 
     World world = {};
 
     Entity* cameraEntity = world.CreateEntity();
-    Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(screenWidth), static_cast<float>(screenHeight), Camera::Orthographic);
+    Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
     cameraEntity->transform.position = {-5.0f, 5.0f, -5.0f};
     cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
 
