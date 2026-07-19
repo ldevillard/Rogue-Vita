@@ -2,6 +2,21 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+glm::vec3 Transform::GetForward() const 
+{
+    return -glm::normalize(glm::vec3(GetMatrix()[2]));
+}
+
+glm::vec3 Transform::GetRight() const 
+{
+    return glm::normalize(glm::vec3(GetMatrix()[0]));
+}
+
+glm::vec3 Transform::GetUp() const 
+{
+    return glm::normalize(glm::vec3(GetMatrix()[1]));
+}
+
 void Transform::LookAt(const glm::vec3& target)
 {
     const glm::vec3 delta = target - position;
