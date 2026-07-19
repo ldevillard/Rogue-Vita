@@ -8,29 +8,29 @@
 
 Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType)
 {
-    constexpr float nearPlane = 0.1f;
-    constexpr float farPlane = 100.0f;
+    constexpr float NearPlane = 0.1f;
+    constexpr float FarPlane = 100.0f;
     
     const float aspectRatio = screenWidth / screenHeight;
     
     switch (projectionType)
     {
     case Perspective:
-        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, nearPlane, farPlane);
+        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, NearPlane, FarPlane);
         break;
         
     case Orthographic:
     {
-        constexpr float orthographicSize = 8.0f;
-        const float halfHeight = orthographicSize * 0.5f;
+        constexpr float OrthographicSize = 8.0f;
+        const float halfHeight = OrthographicSize * 0.5f;
         const float halfWidth = halfHeight * aspectRatio;
 
-        _projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, nearPlane, farPlane);
+        _projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, NearPlane, FarPlane);
         break;
     }
 
     default:
-        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, nearPlane, farPlane);
+        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, NearPlane, FarPlane);
         break;
     }
 

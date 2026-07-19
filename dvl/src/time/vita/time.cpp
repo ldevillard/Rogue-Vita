@@ -17,14 +17,14 @@ namespace dvl
 
     void Time::Update()
     {
-        constexpr float microsecondsToSeconds = 1.0f / 1'000'000.0f;
-        constexpr float maximumDeltaTime = 0.1f;
+        constexpr float MicrosecondsToSeconds = 1.0f / 1'000'000.0f;
+        constexpr float MaximumDeltaTime = 0.1f;
 
         const std::uint64_t currentTime = sceKernelGetProcessTimeWide();
         const std::uint64_t elapsedTime = currentTime - _previousTime;
 
         _previousTime = currentTime;
-        _deltaTime = std::min(static_cast<float>(elapsedTime) * microsecondsToSeconds, maximumDeltaTime);
+        _deltaTime = std::min(static_cast<float>(elapsedTime) * MicrosecondsToSeconds, MaximumDeltaTime);
     }
 
     float Time::GetDeltaTime()
