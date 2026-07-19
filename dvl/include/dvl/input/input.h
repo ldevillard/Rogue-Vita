@@ -7,18 +7,18 @@ namespace dvl
     class Input
     {
     public:
-        bool Initialize();
-        void Shutdown();
+        static bool Initialize();
+        static void Shutdown();
 
-        void Update();
+        static void Update();
     
-        const GamepadState& GetState() const;
+        static const GamepadState& GetState();
     
-        bool IsButtonHeld(GamepadButton button) const;
-        bool IsButtonDown(GamepadButton button) const;
-        bool IsButtonUp(GamepadButton button) const;
+        static bool IsButtonHeld(GamepadButton button);
+        static bool IsButtonDown(GamepadButton button);
+        static bool IsButtonUp(GamepadButton button);
 
     private:
-        GamepadState _state {};
+        static GamepadState _state;
     };
 }
