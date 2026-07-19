@@ -20,10 +20,10 @@ public:
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
     const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;
 
-    // primitives
+    // Primitives
     const Mesh& GetCubeMesh() const;
 
-    // materials
+    // Materials
     const Material GetSolidMaterialInstance() const;
     const Material GetWireframeMaterialInstance() const;
 
@@ -31,10 +31,10 @@ private:
     void loadCubePrimitive(Renderer& renderer);
     void loadMaterials(Renderer& renderer);
 
-    // primitives
+    // Primitives
     MeshHandle _cubeMeshHandle;
 
-    // materials
+    // Materials
     MaterialHandle _solidMaterialHandle;
     MaterialHandle _wireframeMaterialHandle;
 

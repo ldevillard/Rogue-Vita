@@ -28,11 +28,11 @@ void PlayerController::Update(float deltaTime)
     // Avoid moving faster diagonally
     input /= std::max(1.0f, glm::length(input));
 
-    // Projection on xz plane
+    // Projection on XZ plane
     glm::vec3 forward = _camera.GetEntity()->transform.GetForward();
     forward = glm::normalize(glm::vec3{forward.x, 0.0f, forward.z});
 
-    // Projection on xz plane
+    // Projection on XZ plane
     glm::vec3 right = _camera.GetEntity()->transform.GetRight();
     right = glm::normalize(glm::vec3{right.x, 0.0f, right.z});
 
