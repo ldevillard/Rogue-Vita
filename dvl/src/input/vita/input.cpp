@@ -6,6 +6,8 @@
 
 namespace dvl
 {
+    GamepadState Input::_state {};
+
     std::uint32_t ToMask(GamepadButton button)
     {
         return static_cast<std::uint32_t>(button);
@@ -89,24 +91,24 @@ namespace dvl
             _state.buttons |= ToMask(GamepadButton::Select);
     }
 
-    const GamepadState& Input::GetState() const
+    const GamepadState& Input::GetState()
     {
         return _state;
     }
 
-    bool Input::IsButtonHeld(GamepadButton button) const
+    bool Input::IsButtonHeld(GamepadButton button)
     {
         return (_state.buttons & ToMask(button)) != 0;
     }
 
-    bool Input::IsButtonDown(GamepadButton button) const
+    bool Input::IsButtonDown(GamepadButton button)
     {
         const std::uint32_t mask = ToMask(button);
 
         return (_state.buttons & mask) != 0 && (_state.previousButtons & mask) == 0;
     }
 
-    bool Input::IsButtonUp(GamepadButton button) const
+    bool Input::IsButtonUp(GamepadButton button)
     {
         const std::uint32_t mask = ToMask(button);
 
