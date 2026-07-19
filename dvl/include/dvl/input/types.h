@@ -23,7 +23,7 @@ namespace dvl
         Select   = 1u << 11
     };
 
-    // states between 0 and 1
+    // States between 0 and 1
     struct StickState
     {
         float x = 0.0f;
