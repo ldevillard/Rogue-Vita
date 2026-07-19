@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 
 #include "engine/component/camera.h"
-#include "engine/component/mesh_renderer.h"
 #include "engine/component/directional_light.h"
+#include "engine/component/mesh_renderer.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
@@ -12,6 +12,8 @@
 #include "engine/render/render_pipeline.h"
 #include "engine/render/renderer.h"
 #include "engine/render/vertex.h"
+
+#include "game/component/player_controller.h"
 
 int main()
 {
@@ -25,6 +27,9 @@ int main()
 
     assetRegistry.Initialize(renderer);
 
+    dvl::Input::Initialize();
+    dvl::Time::Initialize();
+
     World world = {};
 
     Entity* cameraEntity = world.CreateEntity();
@@ -33,12 +38,12 @@ int main()
     cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
 
     Entity* solidEntity = world.CreateEntity();
-    solidEntity->transform.position = {1.0f, 0.0f, 0.0f};
-    solidEntity->transform.rotation.x = glm::radians(35.264f);
-    solidEntity->transform.rotation.z = glm::radians(45.0f);
+    solidEntity->transform.position = {0.0f, -0.5f, 0.0f};
+    solidEntity->transform.scale = { 0.5f, 0.5f, 0.5f };
     Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
     redSolidMaterial.color = { 1.0f, 0.0f, 0.0f, 1.0f };
     solidEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), redSolidMaterial);
+    PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
@@ -55,8 +60,8 @@ int main()
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
-    light.direction = glm::normalize(glm::vec3{0.0f, -1.0f, 0.0f});
-    light.intensity = 1;
+    light.direction = { 0.0f, -1.0f, 0.0f };
+    light.intensity = 1.5f;
 
     float rotationAngle = 0.0f;
 
@@ -64,13 +69,17 @@ int main()
     {
         // Gameplay logic
         {
-            // TODO: Check if camera need to be updated by the renderer or in the gameplay logic
-            mainCamera.UpdateViewMatrix();
+            dvl::Time::Update();
+            dvl::Input::Update();
+
+            const float deltaTime = dvl::Time::GetDeltaTime();
+            playerController.Update(deltaTime);
 
             rotationAngle += 0.025f;
-
-            solidEntity->transform.rotation.y = rotationAngle;
             wireframeEntity->transform.rotation.y = -rotationAngle;
+
+            // TODO: Check if camera need to be updated by the renderer or in the gameplay logic
+            mainCamera.UpdateViewMatrix();
         }
 
         renderer.BeginFrame({0.118f, 0.122f, 0.278f});
