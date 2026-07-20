@@ -140,6 +140,7 @@ run: eboot.bin
 	@VITA_IP="$(VITA_IP)" \
 	TITLE_ID="$(PROJECT_TITLEID)" \
 	EBOOT_PATH="$(CURDIR)/eboot.bin" \
+	ASSET_PATH="$(CURDIR)/asset" \
 	./script/deploy_vita.sh
 
 rrun:
