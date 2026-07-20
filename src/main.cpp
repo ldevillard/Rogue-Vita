@@ -40,27 +40,28 @@ int main()
     cameraEntity->transform.LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 
     Entity* solidEntity = world.CreateEntity();
-    solidEntity->transform.scale = glm::vec3(3);
-    solidEntity->transform.rotation = { glm::radians(-90.0f), glm::radians(0.0f), glm::radians(-130.0f) };
-    Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
-    redSolidMaterial.color = { 1.0f, 1.0f, 1.0f, 1.0f };
-    const dvl::TextureHandle texture = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
-    redSolidMaterial.textureHandle = texture;
+    solidEntity->transform.position = glm::vec3(0.75f, 0.0f, -0.75f);
+    solidEntity->transform.scale = glm::vec3(2.5f);
+    solidEntity->transform.rotation = glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f);
+    Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
+    solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);;
 
-    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), redSolidMaterial);
+    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), solidMaterial);
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
     Entity* wireframeEntity = world.CreateEntity();
-    wireframeEntity->transform.position = glm::vec3(-1.0f, 0.0f, 0.0f);
-    wireframeEntity->transform.rotation.x = glm::radians(35.264f);
-    wireframeEntity->transform.rotation.z = glm::radians(45.0f);
-    wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), assetRegistry.GetWireframeMaterialInstance());
+    wireframeEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
+    wireframeEntity->transform.scale = glm::vec3(2.5f);
+    wireframeEntity->transform.rotation = solidEntity->transform.rotation;
+    Material wireframeMaterial = assetRegistry.GetWireframeMaterialInstance();
+    wireframeMaterial.textureHandle = solidMaterial.textureHandle;
+    wireframeEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), wireframeMaterial);
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
     planeEntity->transform.scale = glm::vec3(5.0f, 0.1f, 5.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
-    planeMaterial.color = {0.35f, 0.35f, 0.4f, 1.0f};
+    planeMaterial.color = {0.3f, 0.3f, 0.3f, 1.0f};
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
@@ -80,8 +81,9 @@ int main()
             const float deltaTime = dvl::Time::GetDeltaTime();
             playerController.Update(deltaTime);
 
+            solidEntity->transform.rotation.z = rotationAngle;
+            wireframeEntity->transform.rotation.z = rotationAngle;
             rotationAngle += 0.025f;
-            wireframeEntity->transform.rotation.y = -rotationAngle;
 
             // TODO: Check if camera need to be updated by the renderer or in the gameplay logic
             mainCamera.UpdateViewMatrix();
