@@ -275,6 +275,17 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionNormalColor, color)}
     };
 
+    const ShaderParameterDesc parameters[] =
+    {
+        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4},
+        {"modelMatrix", dvl::ShaderParameterType::Mat4},
+        {"materialColor", dvl::ShaderParameterType::Float4},
+        {"lightCount", dvl::ShaderParameterType::Int},
+        {"lightDirections", dvl::ShaderParameterType::Float4},
+        {"lightColors", dvl::ShaderParameterType::Float4},
+        {"cameraPosition", dvl::ShaderParameterType::Float3}
+    };
+
     Material solidMaterial = {};
     Material wireframeMaterial = {};
 
@@ -284,6 +295,8 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
     pipelineDesc.vertexStride = sizeof(VertexPositionNormalColor);
+    pipelineDesc.parameters = parameters;
+    pipelineDesc.parameterCount = sizeof(parameters) / sizeof(parameters[0]);
     pipelineDesc.depthStencilState.depthTestEnabled = true;
     pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
