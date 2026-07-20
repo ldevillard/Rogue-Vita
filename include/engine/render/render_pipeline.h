@@ -2,6 +2,11 @@
 
 #include <dvl/dvl.h>
 
+#include <string_view>
+#include <vector>
+
+#include "shader_parameter.h"
+
 struct RenderPipelineHandle
 {
     static constexpr unsigned int Invalid = std::numeric_limits<unsigned int>::max();
@@ -36,6 +41,9 @@ struct RenderPipelineDesc
     std::size_t attributeCount = 0;
     std::size_t vertexStride = 0;
 
+    const ShaderParameterDesc* parameters = nullptr;
+    std::size_t parameterCount = 0;
+
     dvl::PrimitiveTopology topology = dvl::PrimitiveTopology::TriangleList;
     dvl::DepthStencilState depthStencilState;
     dvl::RasterizerState rasterizerState;
@@ -43,28 +51,12 @@ struct RenderPipelineDesc
 
 struct RenderPipeline
 {
-    // TODO: Make params open to extension and close to modification (map or vector of params)
     dvl::ShaderHandle shader;
     dvl::PipelineHandle pipeline;
 
-    dvl::ShaderParameterHandle viewProjectionParameter;
-    dvl::ShaderParameterHandle modelParameter;
+    std::vector<ShaderParameterBinding> parameters;
 
-    dvl::ShaderParameterHandle materialColorParameter;
+    dvl::ShaderParameterHandle GetParameter(std::string_view name) const;
 
-    dvl::ShaderParameterHandle lightCountParameter;
-    dvl::ShaderParameterHandle lightDirectionsParameter;
-    dvl::ShaderParameterHandle lightColorsParameter;
-    dvl::ShaderParameterHandle cameraPositionParameter;
-
-    bool IsValid() const
-    {
-        return shader.IsValid() && pipeline.IsValid() &&
-               viewProjectionParameter.IsValid() && modelParameter.IsValid() &&
-               materialColorParameter.IsValid() &&
-               lightCountParameter.IsValid() &&
-               lightDirectionsParameter.IsValid() &&
-               lightColorsParameter.IsValid() &&
-               cameraPositionParameter.IsValid();
-    }
+    bool IsValid() const;
 };

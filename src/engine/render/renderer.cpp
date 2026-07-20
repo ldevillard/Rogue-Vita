@@ -29,7 +29,7 @@ Renderer::Renderer(int screenWidth, int screenHeight, const AssetRegistry& asset
 	_activeCamera = nullptr;
 	dvl::Log(dvl::LogLevel::Info, "Graphics device initialized");
 }
-    
+
 Renderer::~Renderer()
 {
     _activeCamera = nullptr;
@@ -134,66 +134,40 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
         return {};
     }
 
-    dvl::ShaderParameter parameterDesc;
-    parameterDesc.shader = shader;
-    parameterDesc.name = "viewProjectionMatrix";
-    parameterDesc.type = dvl::ShaderParameterType::Mat4;
-
-    const dvl::ShaderParameterHandle viewProjectionParameter = _device.GetShaderParameter(parameterDesc);
-    if (!viewProjectionParameter.IsValid())
-    {
-        _device.DestroyPipeline(pipeline);
-        _device.DestroyShader(shader);
-        return {};
-    }
-
-    parameterDesc.name = "modelMatrix";
-    parameterDesc.type = dvl::ShaderParameterType::Mat4;
-    const dvl::ShaderParameterHandle modelParameter = _device.GetShaderParameter(parameterDesc);
-
-    parameterDesc.name = "materialColor";
-    parameterDesc.type = dvl::ShaderParameterType::Float4;
-    const dvl::ShaderParameterHandle materialColorParameter = _device.GetShaderParameter(parameterDesc);
-
-    parameterDesc.name = "lightCount";
-    parameterDesc.type = dvl::ShaderParameterType::Int;
-    const dvl::ShaderParameterHandle lightCountParameter = _device.GetShaderParameter(parameterDesc);
-
-    parameterDesc.name = "lightDirections";
-    parameterDesc.type = dvl::ShaderParameterType::Float4;
-    const dvl::ShaderParameterHandle lightDirectionsParameter = _device.GetShaderParameter(parameterDesc);
-
-    parameterDesc.name = "lightColors";
-    parameterDesc.type = dvl::ShaderParameterType::Float4;
-    const dvl::ShaderParameterHandle lightColorsParameter = _device.GetShaderParameter(parameterDesc);
-
-    parameterDesc.name = "cameraPosition";
-    parameterDesc.type = dvl::ShaderParameterType::Float3;
-    const dvl::ShaderParameterHandle cameraPositionParameter = _device.GetShaderParameter(parameterDesc);
-
     RenderPipeline renderPipeline = {};
     renderPipeline.shader = shader;
     renderPipeline.pipeline = pipeline;
-    renderPipeline.viewProjectionParameter = viewProjectionParameter;
-    renderPipeline.modelParameter = modelParameter;
-    renderPipeline.materialColorParameter = materialColorParameter;
-    renderPipeline.lightCountParameter = lightCountParameter;
-    renderPipeline.lightDirectionsParameter = lightDirectionsParameter;
-    renderPipeline.lightColorsParameter = lightColorsParameter;
-    renderPipeline.cameraPositionParameter = cameraPositionParameter;
+
+    for (size_t i = 0; i < desc.parameterCount; ++i)
+    {
+        ShaderParameterDesc parameterDesc = desc.parameters[i];
+        dvl::ShaderParameter shaderParameter;
+
+        shaderParameter.name = parameterDesc.name;
+        shaderParameter.type = parameterDesc.type;
+        shaderParameter.shader = shader;
+
+        const dvl::ShaderParameterHandle parameterHandle = _device.GetShaderParameter(shaderParameter);
+
+        if (!parameterHandle.IsValid())
+        {
+            dvl::Log(dvl::LogLevel::Error, "Couldn't create shader parameter!");
+            return {};
+        }
+
+        renderPipeline.parameters.push_back({ parameterDesc.name, parameterHandle });
+    }
 
     return renderPipeline;
 }
 
 void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
 {
-    _device.DestroyShaderParameter(renderPipeline.cameraPositionParameter);
-    _device.DestroyShaderParameter(renderPipeline.materialColorParameter);
-    _device.DestroyShaderParameter(renderPipeline.lightCountParameter);
-    _device.DestroyShaderParameter(renderPipeline.lightColorsParameter);
-    _device.DestroyShaderParameter(renderPipeline.lightDirectionsParameter);
-    _device.DestroyShaderParameter(renderPipeline.modelParameter);
-    _device.DestroyShaderParameter(renderPipeline.viewProjectionParameter);
+    for (ShaderParameterBinding& parameter : renderPipeline.parameters)
+    {
+        _device.DestroyShaderParameter(parameter.handle);
+    }
+
     _device.DestroyPipeline(renderPipeline.pipeline);
     _device.DestroyShader(renderPipeline.shader);
     renderPipeline = {};
@@ -256,25 +230,34 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     _device.SetPipeline(renderPipeline->pipeline);
 
     const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
-    _device.SetShaderParameter(renderPipeline->viewProjectionParameter, &viewProjectionMatrix[0][0], 1);
+    setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
 
     const glm::vec3 cameraPosition = cameraEntity->transform.position;
-    _device.SetShaderParameter(renderPipeline->cameraPositionParameter, &cameraPosition[0], 1);
+    setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
 
-    _device.SetShaderParameter(renderPipeline->materialColorParameter, &material.color.r, 1);
+    setParameter(*renderPipeline, "materialColor", &material.color.r);
 
-    _device.SetShaderParameter(renderPipeline->lightCountParameter, &_lightCount, 1);
+    setParameter(*renderPipeline, "lightCount", &_lightCount);
     
     if (_lightCount > 0)
     {
-        _device.SetShaderParameter(renderPipeline->lightDirectionsParameter, &_lightDirections[0][0], _lightCount);
-        _device.SetShaderParameter(renderPipeline->lightColorsParameter, &_lightColors[0][0], _lightCount);
+        setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
+        setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
     }
 
-    _device.SetShaderParameter(renderPipeline->modelParameter, &modelMatrix[0][0], 1);
+    setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
     _device.SetIndexBuffer(mesh.indexBuffer);
 
     _device.DrawIndexed(mesh.indexCount);
+}
+
+void Renderer::setParameter(const RenderPipeline& renderPipeline, std::string_view name, const void* data, unsigned int count)
+{
+    const dvl::ShaderParameterHandle parameter = renderPipeline.GetParameter(name);
+    if (parameter.IsValid())
+    {
+        _device.SetShaderParameter(parameter, data, count);
+    }
 }

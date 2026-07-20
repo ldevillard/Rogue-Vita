@@ -37,6 +37,9 @@ public:
     void Draw(const Mesh& mesh, const Material& material, const Transform& transform);
 
 private:
+    void setParameter(const RenderPipeline& renderPipeline, std::string_view name,
+                      const void* data, unsigned int count = 1);
+
     static constexpr int MaxLights = 4;
 
     dvl::Device _device;
