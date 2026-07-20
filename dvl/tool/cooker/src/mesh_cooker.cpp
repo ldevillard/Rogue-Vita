@@ -4,6 +4,7 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+#include <algorithm>
 #include <fstream>
 #include <limits>
 #include <vector>
@@ -33,6 +34,43 @@ namespace dvl
         std::vector<MeshVertexFormat> vertices;
         std::vector<std::uint16_t> indices;
 
+        aiVector3D minBounds
+        {
+            std::numeric_limits<float>::max(),
+            std::numeric_limits<float>::max(),
+            std::numeric_limits<float>::max()
+        };
+        
+        aiVector3D maxBounds
+        {
+            std::numeric_limits<float>::lowest(),
+            std::numeric_limits<float>::lowest(),
+            std::numeric_limits<float>::lowest()
+        };
+
+        for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
+        {
+            const aiMesh* mesh = scene->mMeshes[meshIndex];
+            if (!mesh->HasPositions())
+                continue;
+
+            for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
+            {
+                const aiVector3D& position = mesh->mVertices[vertexIndex];
+                minBounds.x = std::min(minBounds.x, position.x);
+                minBounds.y = std::min(minBounds.y, position.y);
+                minBounds.z = std::min(minBounds.z, position.z);
+                maxBounds.x = std::max(maxBounds.x, position.x);
+                maxBounds.y = std::max(maxBounds.y, position.y);
+                maxBounds.z = std::max(maxBounds.z, position.z);
+            }
+        }
+
+        const aiVector3D center = (minBounds + maxBounds) * 0.5f;
+        const aiVector3D size = maxBounds - minBounds;
+        const float largestDimension = std::max({size.x, size.y, size.z});
+        const float normalizationScale = largestDimension > 0.0f ? 1.0f / largestDimension : 1.0f;
+
         for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
         {
             const aiMesh* mesh = scene->mMeshes[meshIndex];
@@ -52,7 +90,7 @@ namespace dvl
             vertices.reserve(resultingVertexCount);
             for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
             {
-                const aiVector3D& position = mesh->mVertices[vertexIndex];
+                const aiVector3D position = (mesh->mVertices[vertexIndex] - center) * normalizationScale;
                 const aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[vertexIndex] : aiVector3D{};
                 const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vertexIndex] : aiVector3D{};
 
