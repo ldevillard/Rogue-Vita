@@ -30,11 +30,11 @@ void PlayerController::Update(float deltaTime)
 
     // Projection on XZ plane
     glm::vec3 forward = _camera.GetEntity()->transform.GetForward();
-    forward = glm::normalize(glm::vec3{forward.x, 0.0f, forward.z});
+    forward = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
 
     // Projection on XZ plane
     glm::vec3 right = _camera.GetEntity()->transform.GetRight();
-    right = glm::normalize(glm::vec3{right.x, 0.0f, right.z});
+    right = glm::normalize(glm::vec3(right.x, 0.0f, right.z));
 
     const glm::vec3 movement = right * input.x + forward * input.y;
 
