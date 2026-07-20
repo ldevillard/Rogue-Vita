@@ -255,7 +255,7 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     _device.DrawIndexed(mesh.indexCount);
 }
 
-void Renderer::setParameter(const RenderPipeline& renderPipeline, std::string_view name, const void* data, unsigned int count)
+void Renderer::setParameter(const RenderPipeline& renderPipeline, const char* name, const void* data, unsigned int count)
 {
     const dvl::ShaderParameterHandle parameter = renderPipeline.GetParameter(name);
     if (parameter.IsValid())

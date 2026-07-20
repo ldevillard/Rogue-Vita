@@ -42,7 +42,7 @@ int main()
     Entity* solidEntity = world.CreateEntity();
     solidEntity->transform.scale = glm::vec3(3);
     Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
-    redSolidMaterial.color = { 1.0f, 0.0f, 0.0f, 1.0f };
+    redSolidMaterial.color = { 1.0f, 1.0f, 1.0f, 1.0f };
     solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), redSolidMaterial);
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
