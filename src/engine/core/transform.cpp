@@ -24,7 +24,7 @@ void Transform::LookAt(const glm::vec3& target)
     if (glm::dot(delta, delta) < 0.000001f)
         return;
 
-    const glm::mat4 worldMatrix = glm::inverse(glm::lookAt(position,target, glm::vec3{0.0f, 1.0f, 0.0f}));
+    const glm::mat4 worldMatrix = glm::inverse(glm::lookAt(position,target, glm::vec3(0.0f, 1.0f, 0.0f)));
 
     rotation.y = std::asin(glm::clamp(worldMatrix[2][0], -1.0f, 1.0f));
     rotation.x = std::atan2(-worldMatrix[2][1], worldMatrix[2][2]);
@@ -37,9 +37,9 @@ glm::mat4 Transform::GetMatrix() const
 
     matrix = glm::translate(matrix, position);
 
-    matrix = glm::rotate(matrix, rotation.x, glm::vec3{1.0f, 0.0f, 0.0f});
-    matrix = glm::rotate(matrix, rotation.y, glm::vec3{0.0f, 1.0f, 0.0f});
-    matrix = glm::rotate(matrix, rotation.z, glm::vec3{0.0f, 0.0f, 1.0f});
+    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
     matrix = glm::scale(matrix, scale);
 

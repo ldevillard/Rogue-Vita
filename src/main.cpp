@@ -36,8 +36,8 @@ int main()
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
-    cameraEntity->transform.position = {-5.0f, 5.0f, -5.0f};
-    cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
+    cameraEntity->transform.position = glm::vec3(-5.0f, 5.0f, -5.0f);
+    cameraEntity->transform.LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 
     Entity* solidEntity = world.CreateEntity();
     solidEntity->transform.scale = glm::vec3(3);
@@ -47,21 +47,21 @@ int main()
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
     Entity* wireframeEntity = world.CreateEntity();
-    wireframeEntity->transform.position = {-1.0f, 0.0f, 0.0f};
+    wireframeEntity->transform.position = glm::vec3(-1.0f, 0.0f, 0.0f);
     wireframeEntity->transform.rotation.x = glm::radians(35.264f);
     wireframeEntity->transform.rotation.z = glm::radians(45.0f);
     wireframeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), assetRegistry.GetWireframeMaterialInstance());
 
     Entity* planeEntity = world.CreateEntity();
-    planeEntity->transform.position = {0.0f, -1.0f, 0.0f};
-    planeEntity->transform.scale = {5.0f, 0.1f, 5.0f};
+    planeEntity->transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
+    planeEntity->transform.scale = glm::vec3(5.0f, 0.1f, 5.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = {0.35f, 0.35f, 0.4f, 1.0f};
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
-    light.direction = { 0.0f, -1.0f, 0.0f };
+    light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
     light.intensity = 1.5f;
 
     float rotationAngle = 0.0f;
