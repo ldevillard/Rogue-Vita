@@ -37,7 +37,7 @@ public:
     void Draw(const Mesh& mesh, const Material& material, const Transform& transform);
 
 private:
-    void setParameter(const RenderPipeline& renderPipeline, std::string_view name,
+    void setParameter(const RenderPipeline& renderPipeline, const char* name,
                       const void* data, unsigned int count = 1);
 
     static constexpr int MaxLights = 4;
