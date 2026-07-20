@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "shader.h"
 #include "pipeline.h"
+#include "texture.h"
 #include "types.h"
 
 #include <memory>
@@ -42,9 +43,13 @@ namespace dvl
         PipelineHandle CreatePipeline(const PipelineDesc& desc);
         void DestroyPipeline(PipelineHandle handle);
 
+        TextureHandle CreateTexture(const TextureDesc& desc);
+        void DestroyTexture(TextureHandle handle);
+
         void SetPipeline(PipelineHandle handle);
         void SetVertexBuffer(BufferHandle handle);
         void SetIndexBuffer(BufferHandle handle);
+        void SetTexture(TextureHandle handle);
         
         void Draw(unsigned int vertexCount);
         void DrawIndexed(unsigned int indexCount);

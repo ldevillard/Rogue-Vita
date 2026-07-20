@@ -177,6 +177,33 @@ namespace dvl
         _backend->DestroyPipeline(handle);
     }
 
+    TextureHandle Device::CreateTexture(const TextureDesc& desc)
+    {
+        if (!_backend)
+        {
+            Log(LogLevel::Error, "Cannot create texture before device initialization!");
+            return {};
+        }
+
+        if (desc.width == 0 || desc.height == 0 || desc.data == nullptr)
+        {
+            Log(LogLevel::Error, "Can't create texture with invalid data!");
+            return {};
+        }
+
+        return _backend->CreateTexture(desc);
+    }
+
+    void Device::DestroyTexture(TextureHandle handle)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->DestroyTexture(handle);
+    }
+
     void Device::SetPipeline(PipelineHandle handle)
     {
         if (!_backend || !handle.IsValid())
@@ -205,6 +232,16 @@ namespace dvl
         }
 
         _backend->SetIndexBuffer(handle);
+    }
+
+    void Device::SetTexture(TextureHandle handle)
+    {
+         if (!_backend || !handle.IsValid())
+        {
+            return;
+        }
+
+        _backend->SetTexture(handle);
     }
 
     void Device::Draw(unsigned int vertexCount)
