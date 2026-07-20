@@ -17,6 +17,8 @@ public:
     MeshHandle LoadMesh(const std::filesystem::path& path, Renderer& renderer);
     void UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer);
 
+    // TODO: Load and unload materials
+
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
     const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;

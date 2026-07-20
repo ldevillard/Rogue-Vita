@@ -229,23 +229,25 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
 
     _device.SetPipeline(renderPipeline->pipeline);
 
-    const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
-    setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
-
-    const glm::vec3 cameraPosition = cameraEntity->transform.position;
-    setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
-
-    setParameter(*renderPipeline, "materialColor", &material.color.r);
-
-    setParameter(*renderPipeline, "lightCount", &_lightCount);
-    
-    if (_lightCount > 0)
+    // Parameters binding
     {
-        setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
-        setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
+        const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
+        setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
+        
+        const glm::vec3 cameraPosition = cameraEntity->transform.position; 
+        
+        setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
+        setParameter(*renderPipeline, "materialColor", &material.color.r);
+        setParameter(*renderPipeline, "lightCount", &_lightCount);
+        
+        if (_lightCount > 0)
+        {
+            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
+            setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
+        }
+        
+        setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
     }
-
-    setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
     _device.SetIndexBuffer(mesh.indexBuffer);
