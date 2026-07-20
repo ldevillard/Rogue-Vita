@@ -1,5 +1,6 @@
 #pragma once
 
+#include <filesystem>
 #include <unordered_map>
 
 #include "engine/render/material.h"
@@ -13,8 +14,8 @@ public:
     void Initialize(Renderer& renderer);
     void Shutdown(Renderer& renderer);
 
-    // TODO: Load
-    // TODO: Unload
+    MeshHandle LoadMesh(const std::filesystem::path& path, Renderer& renderer);
+    void UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer);
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;

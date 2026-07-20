@@ -32,17 +32,18 @@ int main()
 
     World world = {};
 
+    MeshHandle meshHandle = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/practice_dummy.dvlmesh", renderer);
+
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
     cameraEntity->transform.position = {-5.0f, 5.0f, -5.0f};
     cameraEntity->transform.LookAt({0.0f, 0.0f, 0.0f});
 
     Entity* solidEntity = world.CreateEntity();
-    solidEntity->transform.position = {0.0f, -0.5f, 0.0f};
-    solidEntity->transform.scale = { 0.5f, 0.5f, 0.5f };
+    solidEntity->transform.scale = glm::vec3(3);
     Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
     redSolidMaterial.color = { 1.0f, 0.0f, 0.0f, 1.0f };
-    solidEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), redSolidMaterial);
+    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), redSolidMaterial);
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
     Entity* wireframeEntity = world.CreateEntity();
