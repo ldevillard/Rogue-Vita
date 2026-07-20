@@ -28,6 +28,10 @@ public:
     RenderPipeline CreateRenderPipeline(const RenderPipelineDesc& desc);
     void DestroyRenderPipeline(RenderPipeline& renderPipeline);
 
+    // TODO: Create an engine side texture desc and handle
+    dvl::TextureHandle CreateTexture(const dvl::TextureDesc& desc);
+    void DestroyTexture(dvl::TextureHandle texture);
+
     void BeginFrame(const dvl::Color& clearColor);
     void EndFrame();
 

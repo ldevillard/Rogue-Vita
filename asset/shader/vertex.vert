@@ -1,8 +1,8 @@
 attribute vec3 aPosition;
 attribute vec3 aNormal;
-attribute vec4 aColor;
+attribute vec2 aUV;
 
-varying vec4 vColor;
+varying vec2 vUV;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 
@@ -27,7 +27,7 @@ void main()
 
     gl_Position = viewProjectionMatrix * worldPosition;
 
-    vColor = aColor;
+    vUV = aUV;
     vNormal = normalize(normalMatrix * aNormal * orientation);
     vWorldPosition = worldPosition.xyz;
 }
