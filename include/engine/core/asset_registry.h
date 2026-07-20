@@ -17,11 +17,15 @@ public:
     MeshHandle LoadMesh(const std::filesystem::path& path, Renderer& renderer);
     void UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer);
 
+    // TODO: Use engine side handle instead of dvl one
+    dvl::TextureHandle LoadTexture(const std::filesystem::path& path, Renderer& renderer);
+
     // TODO: Load and unload materials
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
     const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;
+    dvl::TextureHandle GetDefaultTexture() const;
 
     // Primitives
     const Mesh& GetCubeMesh() const;
@@ -32,6 +36,7 @@ public:
 
 private:
     void loadCubePrimitive(Renderer& renderer);
+    void loadDefaultTexture(Renderer& renderer);
     void loadMaterials(Renderer& renderer);
 
     // Primitives
@@ -49,4 +54,8 @@ private:
 
     std::unordered_map<MaterialHandle, Material, MaterialHandle::Hasher> _materials;
     int _nextMaterialId = 1;
+
+    // TODO: Engine side texture type, use a map here
+    std::vector<dvl::TextureHandle> _textures;
+    dvl::TextureHandle _defaultTexture;
 };

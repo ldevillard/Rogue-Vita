@@ -173,6 +173,16 @@ void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
     renderPipeline = {};
 }
 
+dvl::TextureHandle Renderer::CreateTexture(const dvl::TextureDesc& desc)
+{
+    return _device.CreateTexture(desc);
+}
+
+void Renderer::DestroyTexture(dvl::TextureHandle texture)
+{
+    _device.DestroyTexture(texture);
+}
+
 void Renderer::BeginFrame(const dvl::Color& clearColor)
 {
     _device.BeginFrame(clearColor);
@@ -247,6 +257,14 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
         }
         
         setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
+
+        const dvl::TextureHandle texture = material.textureHandle.IsValid() 
+                                           ? material.textureHandle 
+                                           : _assetRegistry.GetDefaultTexture();
+
+        _device.SetTexture(texture);
+        const int textureSlot = 0;
+        setParameter(*renderPipeline, "albedoTexture", &textureSlot);
     }
 
     _device.SetVertexBuffer(mesh.vertexBuffer);

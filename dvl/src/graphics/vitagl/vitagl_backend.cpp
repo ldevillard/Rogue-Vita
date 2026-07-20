@@ -290,6 +290,10 @@ namespace dvl::internal
 
             switch (attribute.format)
             {
+                case VertexFormat::Float2:
+                    nativeAttribute.componentCount = 2;
+                    break;
+
                 case VertexFormat::Float3:
                     nativeAttribute.componentCount = 3;
                     break;

@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include <dvl/asset/mesh_format.h>
+#include <dvl/asset/texture_format.h>
 
 #include "engine/render/vertex.h"
 #include "engine/render/renderer.h"
@@ -12,11 +13,17 @@
 void AssetRegistry::Initialize(Renderer& renderer)
 {
     loadCubePrimitive(renderer);
+    loadDefaultTexture(renderer);
     loadMaterials(renderer);
 }
 
 void AssetRegistry::Shutdown(Renderer& renderer)
 {
+    for (dvl::TextureHandle texture : _textures)
+    {
+        renderer.DestroyTexture(texture);
+    }
+
     for (std::pair<const MeshHandle, Mesh>& meshPair : _meshes)
     {
         renderer.DestroyMesh(meshPair.second);
@@ -75,23 +82,9 @@ MeshHandle AssetRegistry::LoadMesh(const std::filesystem::path& path, Renderer& 
     }
 
     // Load vertices
-    std::vector<dvl::MeshVertexFormat> cookedVertices(header.vertexCount);
+    std::vector<VertexPositionNormalUV> vertices(header.vertexCount);
     const std::uint8_t* vertexPtr = data.data() + sizeof(dvl::MeshFileHeader);
-    std::memcpy(cookedVertices.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
-
-    std::vector<VertexPositionNormalColor> vertices;
-    vertices.reserve(cookedVertices.size());
-
-    // TODO: Avoid conversion when UVs will be available
-    for (const dvl::MeshVertexFormat& vertex : cookedVertices)
-    {
-        vertices.push_back
-        ({
-            vertex.x, vertex.y, vertex.z,
-            vertex.nx, vertex.ny, vertex.nz,
-            {1.0f, 1.0f, 1.0f, 1.0f}
-        });
-    }
+    std::memcpy(vertices.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
 
     // Load indices
     std::vector<std::uint16_t> indices(header.indexCount);
@@ -100,7 +93,7 @@ MeshHandle AssetRegistry::LoadMesh(const std::filesystem::path& path, Renderer& 
 
     MeshDesc desc = {};
     desc.vertexData = vertices.data();
-    desc.vertexDataSize = vertices.size() * sizeof(VertexPositionNormalColor);
+    desc.vertexDataSize = vertices.size() * sizeof(VertexPositionNormalUV);
     desc.indices = indices.data();
     desc.indexCount = indices.size();
 
@@ -130,6 +123,55 @@ void AssetRegistry::UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer)
 
     renderer.DestroyMesh(it->second);
     _meshes.erase(it);
+}
+
+dvl::TextureHandle AssetRegistry::LoadTexture(const std::filesystem::path& path, Renderer& renderer)
+{
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file)
+    {
+        const std::string message = "Couldn't find texture to load with path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Error, message.c_str());
+        return {};
+    }
+
+    file.seekg(0, std::ios::end);
+    const std::streamsize fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<std::uint8_t> data(static_cast<std::size_t>(fileSize));
+    if (!file.read(reinterpret_cast<char*>(data.data()), fileSize))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to read file data during texture loading!");
+        return {};
+    }
+
+    dvl::TextureFileHeader header{};
+    std::memcpy(&header, data.data(), sizeof(header));
+
+    if (header.magic != dvl::TextureMagic || header.version != dvl::TextureVersion)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid texture header!");
+        return {};
+    }
+
+    dvl::TextureDesc desc{};
+    desc.width = header.width;
+    desc.height = header.height;
+    desc.data = data.data() + sizeof(dvl::TextureFileHeader);
+
+    const dvl::TextureHandle texture = renderer.CreateTexture(desc);
+
+    if (texture.IsValid())
+    {
+        _textures.push_back(texture);
+
+        const std::string message = "Loaded texture successfully at path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Info, message.c_str());
+    }
+
+    return texture;
 }
 
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
@@ -168,6 +210,11 @@ const RenderPipeline* AssetRegistry::GetRenderPipeline(const RenderPipelineHandl
     return nullptr;
 }
 
+dvl::TextureHandle AssetRegistry::GetDefaultTexture() const
+{
+    return _defaultTexture;
+}
+
 const Mesh& AssetRegistry::GetCubeMesh() const
 {
     return _meshes.at(_cubeMeshHandle);
@@ -185,43 +232,43 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
 
 void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
-    const VertexPositionNormalColor CubeVertices[] =
+    const VertexPositionNormalUV CubeVertices[] =
     {
         // Front
-        {-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f},
+        { 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f},
+        {-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f},
+        { 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f},
 
         // Back
-        { 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f},
+        {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f},
+        { 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f},
+        {-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f},
 
         // Left
-        {-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f},
+        {-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f},
+        {-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f},
+        {-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f},
 
         // Right
-        { 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        { 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f},
+        { 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f},
+        { 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f},
+        { 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f},
 
         // Top
-        {-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
+        {-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f},
+        { 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f},
+        {-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f},
+        { 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f},
 
         // Bottom
-        {-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        {-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}},
-        { 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, {1.0f, 1.0f, 1.0f, 1.0f}}
+        {-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f},
+        { 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f},
+        {-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f},
+        { 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f}
     };
 
     const std::uint16_t CubeIndices[] =
@@ -266,13 +313,29 @@ void AssetRegistry::loadCubePrimitive(Renderer& renderer)
     }
 }
 
+void AssetRegistry::loadDefaultTexture(Renderer& renderer)
+{
+    const std::uint8_t whitePixel[] = {255, 255, 255, 255};
+
+    dvl::TextureDesc desc{};
+    desc.width = 1;
+    desc.height = 1;
+    desc.data = whitePixel;
+
+    _defaultTexture = renderer.CreateTexture(desc);
+    if (_defaultTexture.IsValid())
+    {
+        _textures.push_back(_defaultTexture);
+    }
+}
+
 void AssetRegistry::loadMaterials(Renderer& renderer)
 {
     const dvl::VertexAttribute attributes[] =
     {
-        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalColor, x)},
-        {"aNormal", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalColor, nx)},
-        {"aColor", dvl::VertexFormat::Float4, offsetof(VertexPositionNormalColor, color)}
+        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalUV, x)},
+        {"aNormal", dvl::VertexFormat::Float3, offsetof(VertexPositionNormalUV, nx)},
+        {"aUV", dvl::VertexFormat::Float2, offsetof(VertexPositionNormalUV, u)}
     };
 
     const ShaderParameterDesc parameters[] =
@@ -283,18 +346,22 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"lightCount", dvl::ShaderParameterType::Int},
         {"lightDirections", dvl::ShaderParameterType::Float4},
         {"lightColors", dvl::ShaderParameterType::Float4},
-        {"cameraPosition", dvl::ShaderParameterType::Float3}
+        {"cameraPosition", dvl::ShaderParameterType::Float3},
+        {"albedoTexture", dvl::ShaderParameterType::Int}
     };
 
     Material solidMaterial = {};
     Material wireframeMaterial = {};
+
+    solidMaterial.textureHandle = _defaultTexture;
+    wireframeMaterial.textureHandle = _defaultTexture;
 
     RenderPipelineDesc pipelineDesc = {};
     pipelineDesc.vertexShaderPath = "app0:/asset/shaders/vertex.vert";
     pipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
-    pipelineDesc.vertexStride = sizeof(VertexPositionNormalColor);
+    pipelineDesc.vertexStride = sizeof(VertexPositionNormalUV);
     pipelineDesc.parameters = parameters;
     pipelineDesc.parameterCount = sizeof(parameters) / sizeof(parameters[0]);
     pipelineDesc.depthStencilState.depthTestEnabled = true;

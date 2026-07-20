@@ -1,7 +1,8 @@
-varying vec4 vColor;
+varying vec2 vUV;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
 
+uniform sampler2D albedoTexture;
 uniform vec4 materialColor;
 
 uniform int lightCount;
@@ -13,7 +14,8 @@ const int MAX_LIGHTS = 4;
 
 void main()
 {
-    vec3 objectColor = vColor.rgb * materialColor.rgb;
+    vec4 albedo = texture2D(albedoTexture, vUV);
+    vec3 objectColor = albedo.rgb * materialColor.rgb;
     vec3 normal = normalize(vNormal);
     vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
     vec3 result = vec3(0.0);
@@ -43,5 +45,5 @@ void main()
         result += (ambient + diffuse + specular) * objectColor;
     }
 
-    gl_FragColor = vec4(result, vColor.a * materialColor.a);
+    gl_FragColor = vec4(result, albedo.a * materialColor.a);
 }

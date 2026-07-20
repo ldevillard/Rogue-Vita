@@ -18,6 +18,7 @@ namespace dvl
 
     enum class VertexFormat
     {
+        Float2,
         Float3,
         Float4,
     };

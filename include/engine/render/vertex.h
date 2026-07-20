@@ -14,3 +14,10 @@ struct VertexPositionNormalColor
     float nx, ny, nz;
     dvl::Color color;
 };
+
+struct VertexPositionNormalUV
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+};

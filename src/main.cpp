@@ -41,8 +41,12 @@ int main()
 
     Entity* solidEntity = world.CreateEntity();
     solidEntity->transform.scale = glm::vec3(3);
+    solidEntity->transform.rotation = { glm::radians(-90.0f), glm::radians(0.0f), glm::radians(-130.0f) };
     Material redSolidMaterial = assetRegistry.GetSolidMaterialInstance();
     redSolidMaterial.color = { 1.0f, 1.0f, 1.0f, 1.0f };
+    const dvl::TextureHandle texture = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
+    redSolidMaterial.textureHandle = texture;
+
     solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), redSolidMaterial);
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
