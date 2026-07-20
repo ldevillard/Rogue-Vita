@@ -1,5 +1,10 @@
 #include "engine/core/asset_registry.h"
 
+#include <cstring>
+#include <fstream>
+
+#include <dvl/asset/mesh_format.h>
+
 #include "engine/render/vertex.h"
 #include "engine/render/renderer.h"
 #include "engine/render/render_pipeline.h"
@@ -21,6 +26,110 @@ void AssetRegistry::Shutdown(Renderer& renderer)
     {
         renderer.DestroyRenderPipeline(pipelinePair.second);
     }
+}
+
+MeshHandle AssetRegistry::LoadMesh(const std::filesystem::path& path, Renderer& renderer)
+{
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file)
+    {
+        const std::string message = "Couldn't find mesh to load with path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Error, message.c_str());
+        return {};
+    }
+
+    file.seekg(0, std::ios::end);
+
+    const std::streamsize fileSize = file.tellg();
+    if (fileSize < 0)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to get file size during mesh loading!");
+        return {};
+    }
+
+    std::vector<std::uint8_t> data(static_cast<size_t>(fileSize));
+
+    file.seekg(0, std::ios::beg);
+
+    if (!file.read(reinterpret_cast<char*>(data.data()), fileSize))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to read file data during mesh loading!");
+        return {};
+    }
+
+    // Load header
+    if (data.size() < sizeof(dvl::MeshFileHeader))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid mesh header!");
+        return {};
+    }
+
+    dvl::MeshFileHeader header{};
+    std::memcpy(&header, data.data(), sizeof(header));
+
+    if (header.magic != dvl::MeshMagic || header.version != dvl::MeshVersion)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to deserialize mesh!");
+        return {};
+    }
+
+    // Load vertices
+    std::vector<dvl::MeshVertexFormat> cookedVertices(header.vertexCount);
+    const std::uint8_t* vertexPtr = data.data() + sizeof(dvl::MeshFileHeader);
+    std::memcpy(cookedVertices.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
+
+    std::vector<VertexPositionNormalColor> vertices;
+    vertices.reserve(cookedVertices.size());
+
+    // TODO: Avoid conversion when UVs will be available
+    for (const dvl::MeshVertexFormat& vertex : cookedVertices)
+    {
+        vertices.push_back
+        ({
+            vertex.x, vertex.y, vertex.z,
+            vertex.nx, vertex.ny, vertex.nz,
+            {1.0f, 1.0f, 1.0f, 1.0f}
+        });
+    }
+
+    // Load indices
+    std::vector<std::uint16_t> indices(header.indexCount);
+    const std::uint8_t* indexPtr = data.data() + sizeof(dvl::MeshFileHeader) + header.vertexCount * sizeof(dvl::MeshVertexFormat);
+    std::memcpy(indices.data(), indexPtr, sizeof(std::uint16_t) * header.indexCount);
+
+    MeshDesc desc = {};
+    desc.vertexData = vertices.data();
+    desc.vertexDataSize = vertices.size() * sizeof(VertexPositionNormalColor);
+    desc.indices = indices.data();
+    desc.indexCount = indices.size();
+
+    Mesh mesh = {};
+    MeshHandle meshHandle = {};
+    if (renderer.CreateMesh(desc, mesh))
+    {
+        meshHandle.id = _nextMeshId++;
+        _meshes.emplace(meshHandle, mesh);
+
+        const std::string message = "Loaded mesh successfully at path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Info, message.c_str());
+    }
+
+    return meshHandle;
+}
+
+void AssetRegistry::UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer)
+{
+    const auto it = _meshes.find(meshHandle);
+
+    if (it == _meshes.end())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Couldn't find mesh to unload!");
+        return;
+    }
+
+    renderer.DestroyMesh(it->second);
+    _meshes.erase(it);
 }
 
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
@@ -170,8 +279,8 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     Material wireframeMaterial = {};
 
     RenderPipelineDesc pipelineDesc = {};
-    pipelineDesc.vertexShaderPath = "app0:/assets/shaders/vertex.vert";
-    pipelineDesc.fragmentShaderPath = "app0:/assets/shaders/fragment.frag";
+    pipelineDesc.vertexShaderPath = "app0:/asset/shaders/vertex.vert";
+    pipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
     pipelineDesc.vertexStride = sizeof(VertexPositionNormalColor);
