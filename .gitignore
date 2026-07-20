@@ -9,3 +9,4 @@ eboot.bin
 param.sfo
 .DS_Store
 *.dvlmesh
+*.dvltex

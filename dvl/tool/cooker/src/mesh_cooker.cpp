@@ -22,7 +22,8 @@ namespace dvl
                                 aiProcess_Triangulate |
                                 aiProcess_JoinIdenticalVertices |
                                 aiProcess_GenSmoothNormals |
-                                aiProcess_ImproveCacheLocality);
+                                aiProcess_ImproveCacheLocality |
+                                aiProcess_FlipUVs);
 
         if (scene == nullptr || !scene->HasMeshes())
         {

@@ -4,7 +4,7 @@ TARGET := build/dvl-cooker
 SOURCES := $(wildcard src/*.cpp) ../../src/log/desktop/desktop_log.cpp
 
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror
-CPPFLAGS := -Iinclude -I../../include
+CPPFLAGS := -Iinclude -I../../include -Ithird_party
 LDLIBS := -lassimp
 
 ifeq ($(shell uname -s),Darwin)
