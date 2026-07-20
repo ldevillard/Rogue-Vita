@@ -11,7 +11,7 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    dvl::CookerOrchestrator cookerOrchestrator{std::filesystem::path(argv[1]),
+    dvl::CookerOrchestrator cookerOrchestrator {std::filesystem::path(argv[1]),
                                                 std::filesystem::path(argv[2])};
 
     return cookerOrchestrator.Cook() ? 0 : 1;
