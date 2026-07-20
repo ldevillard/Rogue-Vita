@@ -3,6 +3,7 @@
 #include "dvl/graphics/buffer.h"
 #include "dvl/graphics/shader.h"
 #include "dvl/graphics/pipeline.h"
+#include "dvl/graphics/texture.h"
 #include "dvl/graphics/types.h"
 
 namespace dvl::internal
@@ -29,9 +30,13 @@ namespace dvl::internal
         virtual PipelineHandle CreatePipeline(const PipelineDesc& desc) = 0;
         virtual void DestroyPipeline(PipelineHandle handle) = 0;
 
+        virtual TextureHandle CreateTexture(const TextureDesc& desc) = 0;
+        virtual void DestroyTexture(TextureHandle handle) = 0;
+
         virtual void SetPipeline(PipelineHandle handle) = 0;
         virtual void SetVertexBuffer(BufferHandle handle) = 0;
         virtual void SetIndexBuffer(BufferHandle handle) = 0;
+        virtual void SetTexture(TextureHandle handle) = 0;
 
         virtual void Draw(unsigned int vertexCount) = 0;
         virtual void DrawIndexed(unsigned int indexCount) = 0;

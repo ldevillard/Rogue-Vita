@@ -27,9 +27,13 @@ namespace dvl::internal
         PipelineHandle CreatePipeline(const PipelineDesc& desc) override;
         void DestroyPipeline(PipelineHandle handle) override;
 
+        TextureHandle CreateTexture(const TextureDesc& desc) override;
+        void DestroyTexture(TextureHandle handle) override;
+
         void SetPipeline(PipelineHandle handle) override;
         void SetVertexBuffer(BufferHandle handle) override;
         void SetIndexBuffer(BufferHandle handle) override;
+        void SetTexture(TextureHandle handle) override;
 
         // If VBO CPU overhead becomes an issue, think about VAO and caching the vertex attribute state
         void Draw(unsigned int vertexCount) override;
@@ -89,7 +93,7 @@ namespace dvl::internal
         PipelineHandle _currentPipeline;
         unsigned int _nextPipelineHandle = 0;
 
-        // -- SHADER PARAMETERS --
+        // -- SHADER PARAMETER --
 
         struct NativeShaderParameter
         {
@@ -99,5 +103,14 @@ namespace dvl::internal
 
         std::unordered_map<unsigned int, NativeShaderParameter> _shaderParameters;
         unsigned int _nextShaderParameterHandle = 0;
+
+        // -- TEXTURES --
+        struct NativeTexture
+        {
+            unsigned int id;
+        };
+
+        std::unordered_map<unsigned int, NativeTexture> _textures;
+        unsigned int _nextTextureHandle = 0;
     };
 }

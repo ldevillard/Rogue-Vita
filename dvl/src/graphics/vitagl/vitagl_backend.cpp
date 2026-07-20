@@ -32,6 +32,13 @@ namespace dvl::internal
 
         _pipelines.clear();
 
+        for (const std::pair<const unsigned int, NativeTexture>& texture : _textures)
+        {
+            glDeleteTextures(1, &texture.second.id);
+        }
+
+        _textures.clear();
+
         for (const std::pair<const unsigned int, NativeBuffer>& buffer : _buffers)
         {
             glDeleteBuffers(1, &buffer.second.id);
@@ -327,6 +334,39 @@ namespace dvl::internal
         _pipelines.erase(it);
     }
 
+    TextureHandle VitaGLBackend::CreateTexture(const TextureDesc& desc)
+    {
+        GLuint texture = 0;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                        desc.width, desc.height, 0,
+                        GL_RGBA, GL_UNSIGNED_BYTE, desc.data);
+
+        NativeTexture nativeTexture { static_cast<unsigned int>(texture) };
+
+        TextureHandle handle{};
+        handle.id = _nextTextureHandle++;
+
+        _textures.emplace(handle.id, nativeTexture);
+        return handle;
+    }
+
+    void VitaGLBackend::DestroyTexture(TextureHandle handle)
+    {
+        const auto it = _textures.find(handle.id);
+
+        if (it == _textures.end())
+            return;
+
+        glDeleteTextures(1, &it->second.id);
+        _textures.erase(it);
+    }
+
     void VitaGLBackend::SetPipeline(PipelineHandle handle)
     {
         const auto it = _pipelines.find(handle.id);
@@ -415,6 +455,16 @@ namespace dvl::internal
         }
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, it->second.id);
+    }
+
+    void VitaGLBackend::SetTexture(TextureHandle handle)
+    {
+         const auto it = _textures.find(handle.id);
+
+        if (it == _textures.end())
+            return;
+
+        glBindTexture(GL_TEXTURE_2D, it->second.id);
     }
 
     void VitaGLBackend::Draw(unsigned int vertexCount)
