@@ -14,6 +14,7 @@
 #include "engine/render/vertex.h"
 
 #include "game/component/player_controller.h"
+#include "game/component/spring_arm.h"
 
 int main()
 {
@@ -49,6 +50,8 @@ int main()
     solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), solidMaterial);
     PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
 
+    SpringArm& springArm = cameraEntity->AddComponent<SpringArm>(solidEntity->transform);
+
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
     wireframeEntity->transform.scale = glm::vec3(2.5f);
@@ -80,6 +83,7 @@ int main()
 
             const float deltaTime = dvl::Time::GetDeltaTime();
             playerController.Update(deltaTime);
+            springArm.Update(deltaTime);
 
             solidEntity->transform.rotation.z = rotationAngle;
             wireframeEntity->transform.rotation.z = rotationAngle;
