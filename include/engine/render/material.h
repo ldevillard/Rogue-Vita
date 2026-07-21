@@ -3,6 +3,7 @@
 #include <dvl/dvl.h>
 
 #include "render_pipeline.h"
+#include "texture.h"
 
 struct MaterialHandle
 {
@@ -33,7 +34,7 @@ struct Material
 {
     RenderPipelineHandle renderPipelineHandle;
 
-    dvl::TextureHandle textureHandle;
+    TextureHandle textureHandle;
     
     dvl::Color color {1.0f, 1.0f, 1.0f, 1.0f};
 };

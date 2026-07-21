@@ -44,13 +44,6 @@ bool Renderer::CreateMesh(const MeshDesc& desc, Mesh& mesh)
         return false;
     }
 
-    if (desc.vertexData == nullptr || desc.vertexDataSize == 0 ||
-        desc.indices == nullptr || desc.indexCount == 0)
-    {
-        dvl::Log(dvl::LogLevel::Error, "Invalid mesh description");
-        return false;
-    }
-
     dvl::BufferDesc vertexBufferDesc;
     vertexBufferDesc.type = dvl::BufferType::Vertex;
     vertexBufferDesc.usage = dvl::BufferUsage::Static;
@@ -89,21 +82,26 @@ void Renderer::DestroyMesh(Mesh& mesh)
     mesh = {};
 }
 
-RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
+bool Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc, RenderPipeline& renderPipeline)
 {
+    if (renderPipeline.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Cannot overwrite an existing render pipeline");
+        return false;
+    }
 
     if (desc.vertexShaderPath == nullptr || desc.fragmentShaderPath == nullptr ||
         desc.attributes == nullptr || desc.attributeCount == 0 || desc.vertexStride == 0)
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid render pipeline description");
-        return {};
+        return false;
     }
 
     ShaderSource shaderSource;
     if (!LoadShaderSource(desc.vertexShaderPath, desc.fragmentShaderPath, shaderSource))
     {
         dvl::Log(dvl::LogLevel::Error, "Failed to load render pipeline shader source");
-        return {};
+        return false;
     }
 
     dvl::ShaderDesc shaderDesc;
@@ -115,7 +113,7 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
     const dvl::ShaderHandle shader = _device.CreateShader(shaderDesc);
     if (!shader.IsValid())
     {
-        return {};
+        return false;
     }
 
     dvl::PipelineDesc pipelineDesc;
@@ -131,10 +129,9 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
     if (!pipeline.IsValid())
     {
         _device.DestroyShader(shader);
-        return {};
+        return false;
     }
 
-    RenderPipeline renderPipeline = {};
     renderPipeline.shader = shader;
     renderPipeline.pipeline = pipeline;
 
@@ -152,13 +149,14 @@ RenderPipeline Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc)
         if (!parameterHandle.IsValid())
         {
             dvl::Log(dvl::LogLevel::Error, "Couldn't create shader parameter!");
-            return {};
+            DestroyRenderPipeline(renderPipeline);
+            return false;
         }
 
         renderPipeline.parameters.push_back({ parameterDesc.name, parameterHandle });
     }
 
-    return renderPipeline;
+    return true;
 }
 
 void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
@@ -173,14 +171,36 @@ void Renderer::DestroyRenderPipeline(RenderPipeline& renderPipeline)
     renderPipeline = {};
 }
 
-dvl::TextureHandle Renderer::CreateTexture(const dvl::TextureDesc& desc)
+bool Renderer::CreateTexture(const TextureDesc& desc, Texture& texture)
 {
-    return _device.CreateTexture(desc);
+    if (texture.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Cannot overwrite an existing texture");
+        return false;
+    }
+
+    dvl::TextureDesc textureDesc = {};
+    textureDesc.width = desc.width;
+    textureDesc.height = desc.height;
+    textureDesc.data = desc.data;
+
+    const dvl::TextureHandle textureHandle = _device.CreateTexture(textureDesc);
+
+    if (!textureHandle.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to create texture!");
+        return false;
+    }
+
+    texture.id = textureHandle.id;
+    return true;
 }
 
-void Renderer::DestroyTexture(dvl::TextureHandle texture)
+void Renderer::DestroyTexture(Texture& texture)
 {
-    _device.DestroyTexture(texture);
+    dvl::TextureHandle textureHandle = { texture.id };
+    _device.DestroyTexture(textureHandle);
+    texture = {};
 }
 
 void Renderer::BeginFrame(const dvl::Color& clearColor)
@@ -221,8 +241,10 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
     }
 
     const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.renderPipelineHandle);
+    const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
 
-    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid())
+    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
+        texture == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
         return;
@@ -258,11 +280,7 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
         
         setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
 
-        const dvl::TextureHandle texture = material.textureHandle.IsValid() 
-                                           ? material.textureHandle 
-                                           : _assetRegistry.GetDefaultTexture();
-
-        _device.SetTexture(texture);
+        _device.SetTexture({ texture->id });
         const int textureSlot = 0;
         setParameter(*renderPipeline, "albedoTexture", &textureSlot);
     }
@@ -276,8 +294,5 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
 void Renderer::setParameter(const RenderPipeline& renderPipeline, const char* name, const void* data, unsigned int count)
 {
     const dvl::ShaderParameterHandle parameter = renderPipeline.GetParameter(name);
-    if (parameter.IsValid())
-    {
-        _device.SetShaderParameter(parameter, data, count);
-    }
+    _device.SetShaderParameter(parameter, data, count);
 }
