@@ -8,7 +8,7 @@
 #include "engine/core/entity.h"
 
 PlayerController::PlayerController(Entity& entity, const Camera& camera)
-    : Component(entity), _camera(camera)
+    : Behavior(entity), _camera(camera)
 {
 }
 
