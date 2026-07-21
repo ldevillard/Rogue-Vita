@@ -39,7 +39,7 @@ public:
     void BeginScene(const Camera& camera);
     void SubmitLight(const DirectionalLight& light);
 
-    void Draw(const Mesh& mesh, const Material& material, const Transform& transform);
+    void Draw(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix);
 
 private:
     void setParameter(const RenderPipeline& renderPipeline, const char* name,

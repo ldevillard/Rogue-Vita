@@ -33,44 +33,43 @@ int main()
 
     World world = {};
 
-    MeshHandle meshHandle = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/practice_dummy.dvlmesh", renderer);
+    MeshHandle practiceDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/practice_dummy.dvlmesh", renderer);
+    MeshHandle targetDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/target_dummy.dvlmesh", renderer);
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
     cameraEntity->transform.position = glm::vec3(-5.0f, 5.0f, -5.0f);
     cameraEntity->transform.LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    Entity* solidEntity = world.CreateEntity();
-    solidEntity->transform.position = glm::vec3(0.75f, 0.0f, -0.75f);
-    solidEntity->transform.scale = glm::vec3(2.5f);
-    solidEntity->transform.rotation = glm::vec3(glm::radians(-90.0f), 0.0f, 0.0f);
+    Entity* playerEntity = world.CreateEntity();
+    playerEntity->transform.position = glm::vec3(0.75f, 0.0f, -0.75f);
+    playerEntity->transform.scale = glm::vec3(2.5f);
     Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
-    solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);;
+    solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/target_dummy.dvltex", renderer);
 
-    solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), solidMaterial);
-    solidEntity->AddComponent<PlayerController>(mainCamera);
+    playerEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), solidMaterial);
+    playerEntity->AddComponent<PlayerController>(mainCamera);
 
-    cameraEntity->AddComponent<SpringArm>(solidEntity->transform);
+    cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
 
-    Entity* wireframeEntity = world.CreateEntity();
-    wireframeEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
-    wireframeEntity->transform.scale = glm::vec3(2.5f);
-    wireframeEntity->transform.rotation = solidEntity->transform.rotation;
-    Material wireframeMaterial = assetRegistry.GetWireframeMaterialInstance();
-    wireframeMaterial.textureHandle = solidMaterial.textureHandle;
-    wireframeEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), wireframeMaterial);
+    Entity* targetEntity = world.CreateEntity();
+    targetEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
+    targetEntity->transform.scale = glm::vec3(2.5f);
+    Material targetMaterial = assetRegistry.GetSolidMaterialInstance();
+    targetMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
+    targetEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), targetMaterial);
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
-    planeEntity->transform.scale = glm::vec3(5.0f, 0.1f, 5.0f);
+    planeEntity->transform.scale = glm::vec3(8.0f, 0.1f, 8.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
-    planeMaterial.color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
+    planeMaterial.color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
-    light.direction = glm::vec3(0.0f, -1.0f, 0.0f);
-    light.intensity = 1.5f;
+    light.direction = glm::vec3(0.35f, -1.0f, 0.45f);
+    light.intensity = 1.3f;
 
     float rotationAngle = 0.0f;
 
@@ -96,8 +95,7 @@ int main()
                 }
             }
 
-            solidEntity->transform.rotation.z = rotationAngle;
-            wireframeEntity->transform.rotation.z = rotationAngle;
+            targetEntity->transform.rotation.y = rotationAngle;
             rotationAngle += 0.025f;
 
             // TODO: Create a dirty flag system in getters
@@ -124,7 +122,8 @@ int main()
             if (meshRenderer == nullptr)
                 continue;
 
-            renderer.Draw(*meshRenderer->mesh, meshRenderer->material, entity->transform);
+            const glm::mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
+            renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
         }
 
         renderer.EndFrame();
