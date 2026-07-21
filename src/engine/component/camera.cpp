@@ -6,7 +6,8 @@
 
 #include "engine/core/entity.h"
 
-Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType)
+Camera::Camera(Entity& entity, float screenWidth, float screenHeight, ProjectionType projectionType)
+    : Component(entity)
 {
     constexpr float NearPlane = 0.1f;
     constexpr float FarPlane = 100.0f;
@@ -37,20 +38,9 @@ Camera::Camera(const float screenWidth, const float screenHeight, ProjectionType
     _view = glm::mat4{1.0f};
 }
 
-bool Camera::IsValid() const
-{
-    return entity != nullptr;
-}
-
 void Camera::UpdateViewMatrix()
 {
-    if (entity == nullptr)
-    {
-        dvl::Log(dvl::LogLevel::Error, "Couldn't update camera's view matrix since its associated entity is null!");
-        return;
-    }
-
-    _view = glm::inverse(entity->transform.GetMatrix());
+    _view = glm::inverse(entity.transform.GetMatrix());
 }
 
 const glm::mat4& Camera::GetViewMatrix() const

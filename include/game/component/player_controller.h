@@ -7,9 +7,8 @@ class Camera;
 class PlayerController : public Component
 {
 public:
-    PlayerController(const Camera& camera);
+    PlayerController(Entity& entity, const Camera& camera);
 
-    bool IsValid() const override;
     void Update(float deltaTime);
 
     float moveSpeed = 3.0f;

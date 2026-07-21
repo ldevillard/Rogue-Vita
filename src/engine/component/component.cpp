@@ -1,11 +1,11 @@
 #include "engine/component/component.h"
 
-const Entity* Component::GetEntity() const
+Component::Component(Entity& entity)
+    : entity(entity)
 {
-    return entity;
 }
 
-void Component::SetEntity(Entity* entity)
+const Entity* Component::GetEntity() const
 {
-    this->entity = entity;
+    return &entity;
 }

@@ -1,11 +1,6 @@
 #include "engine/component/mesh_renderer.h"
 
-MeshRenderer::MeshRenderer(const Mesh* mesh, const Material& material)
-    : mesh(mesh), material(material)
+MeshRenderer::MeshRenderer(Entity& entity, const Mesh* mesh, const Material& material)
+    : Component(entity), mesh(mesh), material(material)
 {
-}
-
-bool MeshRenderer::IsValid() const
-{
-    return mesh != nullptr && mesh->IsValid() && material.renderPipelineHandle.IsValid();
 }
