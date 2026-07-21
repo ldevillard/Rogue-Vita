@@ -2,17 +2,16 @@
 
 #include <glm/glm.hpp>
 
-#include "engine/component/component.h"
+#include "engine/component/behavior.h"
 
 class Transform;
 
-// TODO: Maybe make an interface IUpdateable or something similar ? (IGameObject ?)
-class SpringArm : public Component
+class SpringArm : public Behavior
 {
 public:
     SpringArm(Entity& entity, const Transform& target);
 
-    void Update(float deltaTime);
+    void Update(float deltaTime) override;
 
     float movementSpeed = 3;
 

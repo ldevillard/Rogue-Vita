@@ -4,7 +4,7 @@
 #include "engine/core/transform.h"
 
 SpringArm::SpringArm(Entity& entity, const Transform& target)
-    : Component(entity), _target(target)
+    : Behavior(entity), _target(target)
 {
     const glm::vec3 forward = entity.transform.GetForward();
     const glm::vec3 toTarget = target.position - entity.transform.position;
