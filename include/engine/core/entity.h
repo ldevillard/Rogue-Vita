@@ -52,6 +52,8 @@ public:
         return nullptr;
     }
 
+    const std::vector<std::unique_ptr<Component>>& GetComponents() const;
+
     Transform transform;
     unsigned int id = 0;
 

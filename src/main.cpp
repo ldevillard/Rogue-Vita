@@ -48,9 +48,9 @@ int main()
     solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);;
 
     solidEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(meshHandle), solidMaterial);
-    PlayerController& playerController = solidEntity->AddComponent<PlayerController>(mainCamera);
+    solidEntity->AddComponent<PlayerController>(mainCamera);
 
-    SpringArm& springArm = cameraEntity->AddComponent<SpringArm>(solidEntity->transform);
+    cameraEntity->AddComponent<SpringArm>(solidEntity->transform);
 
     Entity* wireframeEntity = world.CreateEntity();
     wireframeEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
@@ -76,35 +76,50 @@ int main()
 
     while (true)
     {
+        dvl::Time::Update();
+        dvl::Input::Update();
+
         // Gameplay logic
         {
-            dvl::Time::Update();
-            dvl::Input::Update();
-
             const float deltaTime = dvl::Time::GetDeltaTime();
-            playerController.Update(deltaTime);
-            springArm.Update(deltaTime);
+
+            // TODO: Rework entity traversal with RegisterComponent system in world to avoid
+            // multiple traversal and casts
+            for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+            {
+                for (const std::unique_ptr<Component>& component : entity->GetComponents())
+                {
+                    if (Behavior* behavior = dynamic_cast<Behavior*>(component.get()))
+                    {
+                        behavior->Update(deltaTime);
+                    }
+                }
+            }
 
             solidEntity->transform.rotation.z = rotationAngle;
             wireframeEntity->transform.rotation.z = rotationAngle;
             rotationAngle += 0.025f;
 
-            // TODO: Check if camera need to be updated by the renderer or in the gameplay logic
+            // TODO: Create a dirty flag system in getters
             mainCamera.UpdateViewMatrix();
         }
 
         renderer.BeginFrame(glm::vec4(0.118f, 0.122f, 0.278f, 1.0f));
         renderer.BeginScene(mainCamera);
 
+        // TODO: Use future World::GetLights
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
+            // With the future new register component system, it will support multiple lights per entity
             const DirectionalLight* directionalLight = entity->GetComponent<DirectionalLight>();
             if (directionalLight != nullptr)
                 renderer.SubmitLight(*directionalLight);
         }
 
+        // TODO: Use future World::GetMeshRenders
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
+            // With the future new register component system, it will support multiple mesh renderers per entity
             const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
             if (meshRenderer == nullptr)
                 continue;
