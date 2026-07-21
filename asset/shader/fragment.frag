@@ -37,9 +37,9 @@ void main()
         vec3 diffuse = diffuseFactor * lightColor;
 
         // Specular (Phong)
-        float specularStrength = 0.5;
+        float specularStrength = 0.04;
         vec3 reflectDirection = reflect(-lightDirection, normal);
-        float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 32.0);
+        float specularFactor = pow(max(dot(viewDirection, reflectDirection), 0.0), 12.0);
         vec3 specular = specularStrength * specularFactor * lightColor;
 
         result += (ambient + diffuse + specular) * objectColor;
