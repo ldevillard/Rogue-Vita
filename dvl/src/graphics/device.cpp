@@ -57,12 +57,12 @@ namespace dvl
         _backend.reset();
     }
 
-    void Device::BeginFrame(const Color& clearColor)
+    void Device::BeginFrame(float r, float g, float b, float a)
     {
         if (!_backend)
             return;
 
-        _backend->BeginFrame(clearColor);
+        _backend->BeginFrame(r, g, b, a);
     }
 
     void Device::EndFrame()

@@ -27,7 +27,7 @@ namespace dvl
         bool Initialize(const DeviceDesc& desc);
         void Shutdown();
 
-        void BeginFrame(const Color& clearColor);
+        void BeginFrame(float r, float g, float b, float a);
         void EndFrame();
 
         bool IsInitialized() const;

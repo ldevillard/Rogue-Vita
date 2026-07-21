@@ -13,7 +13,7 @@ namespace dvl::internal
         bool Initialize(const DeviceDesc& desc) override;
         void Shutdown() override;
 
-        void BeginFrame(const Color& clearColor) override;
+        void BeginFrame(float r, float g, float b, float a) override;
         void EndFrame() override;
 
         void SetViewport(const Viewport& viewport) override;

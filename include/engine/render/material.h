@@ -1,6 +1,6 @@
 #pragma once
 
-#include <dvl/dvl.h>
+#include <glm/glm.hpp>
 
 #include "render_pipeline.h"
 #include "texture.h"
@@ -36,6 +36,5 @@ struct Material
 
     TextureHandle textureHandle;
     
-    // TODO: Remove dvl color
-    dvl::Color color {1.0f, 1.0f, 1.0f, 1.0f};
+    glm::vec4 color = glm::vec4(1.0f);
 };

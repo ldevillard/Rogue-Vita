@@ -203,9 +203,9 @@ void Renderer::DestroyTexture(Texture& texture)
     texture = {};
 }
 
-void Renderer::BeginFrame(const dvl::Color& clearColor)
+void Renderer::BeginFrame(const glm::vec4& clearColor)
 {
-    _device.BeginFrame(clearColor);
+    _device.BeginFrame(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 }
 
 void Renderer::EndFrame()

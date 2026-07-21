@@ -54,9 +54,9 @@ namespace dvl::internal
         _shaders.clear();
     }
 
-    void VitaGLBackend::BeginFrame(const Color& clearColor)
+    void VitaGLBackend::BeginFrame(float r, float g, float b, float a)
     {
-        glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+        glClearColor(r, g, b, a);
 
         glClearDepthf(1.0f);
 

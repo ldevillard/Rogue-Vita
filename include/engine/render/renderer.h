@@ -33,7 +33,7 @@ public:
     bool CreateTexture(const TextureDesc& desc, Texture& texture);
     void DestroyTexture(Texture& texture);
 
-    void BeginFrame(const dvl::Color& clearColor);
+    void BeginFrame(const glm::vec4& clearColor);
     void EndFrame();
 
     void BeginScene(const Camera& camera);
