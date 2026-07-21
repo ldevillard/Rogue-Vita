@@ -7,9 +7,7 @@
 class MeshRenderer : public Component
 {
 public:
-    MeshRenderer(const Mesh* mesh, const Material& material);
-
-    bool IsValid() const override;
+    MeshRenderer(Entity& entity, const Mesh* mesh, const Material& material);
 
     // TODO: Use handle instead
     const Mesh* mesh = nullptr;

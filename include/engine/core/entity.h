@@ -16,10 +16,8 @@ public:
     {
         static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
-        std::unique_ptr<T> component = std::make_unique<T>(std::forward<Args>(args)...);
+        std::unique_ptr<T> component = std::make_unique<T>(*this, std::forward<Args>(args)...);
         T& componentReference = *component;
-
-        component->SetEntity(this);
 
         _components.push_back(std::move(component));
 

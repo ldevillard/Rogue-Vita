@@ -102,7 +102,7 @@ int main()
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
             const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
-            if (meshRenderer == nullptr || !meshRenderer->IsValid())
+            if (meshRenderer == nullptr)
                 continue;
 
             renderer.Draw(*meshRenderer->mesh, meshRenderer->material, entity->transform);

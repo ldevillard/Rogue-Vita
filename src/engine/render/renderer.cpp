@@ -221,7 +221,7 @@ void Renderer::BeginScene(const Camera& camera)
 
 void Renderer::SubmitLight(const DirectionalLight& light)
 {
-    if (!light.IsValid() || _lightCount >= MaxLights)
+    if (_lightCount >= MaxLights)
     {
         return;
     }

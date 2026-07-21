@@ -5,17 +5,11 @@ class Entity;
 class Component
 {
 public:
+    Component(Entity& entity);
     virtual ~Component() = default;
-
-    virtual bool IsValid() const = 0;
 
     const Entity* GetEntity() const;
 
 protected:
-    Entity* entity = nullptr;
-
-private:
-    friend class Entity;
-
-    void SetEntity(Entity* entity);
+    Entity& entity;
 };

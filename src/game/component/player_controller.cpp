@@ -7,21 +7,13 @@
 #include "engine/component/camera.h"
 #include "engine/core/entity.h"
 
-PlayerController::PlayerController(const Camera& camera)
-    : _camera(camera)
+PlayerController::PlayerController(Entity& entity, const Camera& camera)
+    : Component(entity), _camera(camera)
 {
-}
-
-bool PlayerController::IsValid() const
-{
-    return entity != nullptr && _camera.GetEntity() != nullptr;
 }
 
 void PlayerController::Update(float deltaTime)
 {
-    if (!IsValid())
-        return;
-
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 
     glm::vec2 input{stick.x, stick.y};
@@ -38,6 +30,6 @@ void PlayerController::Update(float deltaTime)
 
     const glm::vec3 movement = right * input.x + forward * input.y;
 
-    entity->transform.position += movement * moveSpeed * deltaTime;
+    entity.transform.position += movement * moveSpeed * deltaTime;
 
 }

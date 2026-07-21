@@ -13,9 +13,7 @@ public:
         Orthographic
     };
 
-    Camera(const float screenWidth, const float screenHeight, ProjectionType projectionType = Perspective);
-
-    bool IsValid() const override;
+    Camera(Entity& entity, float screenWidth, float screenHeight, ProjectionType projectionType = Perspective);
 
     void UpdateViewMatrix();
 
