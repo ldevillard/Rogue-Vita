@@ -35,6 +35,7 @@ int main()
 
     MeshHandle practiceDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/practice_dummy.dvlmesh", renderer);
     MeshHandle targetDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/target_dummy.dvlmesh", renderer);
+    MeshHandle trainingDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/training_dummy.dvlmesh", renderer);
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
@@ -42,7 +43,7 @@ int main()
     cameraEntity->transform.LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
 
     Entity* playerEntity = world.CreateEntity();
-    playerEntity->transform.position = glm::vec3(0.75f, 0.0f, -0.75f);
+    playerEntity->transform.position = glm::vec3(0.75f, 1.0f, -0.75f);
     playerEntity->transform.scale = glm::vec3(2.5f);
     Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
     solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/target_dummy.dvltex", renderer);
@@ -53,14 +54,22 @@ int main()
     cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
 
     Entity* targetEntity = world.CreateEntity();
-    targetEntity->transform.position = glm::vec3(-0.75f, 0.0f, 0.75f);
+    targetEntity->transform.position = glm::vec3(-0.75f, 1.3f, 0.75f);
     targetEntity->transform.scale = glm::vec3(2.5f);
     Material targetMaterial = assetRegistry.GetSolidMaterialInstance();
     targetMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
     targetEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), targetMaterial);
 
+    Entity* trainingEntity = world.CreateEntity();
+    trainingEntity->transform.position = glm::vec3(3.0f, 1.3f, 3.0f);
+    trainingEntity->transform.rotation.y = glm::radians(-135.0f);
+    trainingEntity->transform.scale = glm::vec3(2.5f);
+    Material trainingMaterial = assetRegistry.GetSolidMaterialInstance();
+    trainingMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/training_dummy.dvltex", renderer);
+    trainingEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(trainingDummyMesh), trainingMaterial);
+
     Entity* planeEntity = world.CreateEntity();
-    planeEntity->transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
+    planeEntity->transform.position = glm::vec3(0.0f);
     planeEntity->transform.scale = glm::vec3(8.0f, 0.1f, 8.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);

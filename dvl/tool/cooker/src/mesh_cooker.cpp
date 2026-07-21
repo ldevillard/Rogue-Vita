@@ -14,7 +14,7 @@
 
 namespace dvl
 {
-    aiVector3D ConvertToEngineAxes(const aiVector3D& value)
+    aiVector3D ConvertZUpToYUp(const aiVector3D& value)
     {
         return {value.x, value.z, -value.y};
     }
@@ -37,6 +37,19 @@ namespace dvl
             Log(LogLevel::Error, message.c_str());
             return false;
         }
+
+        int upAxis = 1;
+        if (scene->mMetaData != nullptr)
+            scene->mMetaData->Get("UpAxis", upAxis);
+
+        if (upAxis != 1 && upAxis != 2)
+        {
+            const std::string message = "Unsupported up axis in mesh '" + source.string() + "'";
+            Log(LogLevel::Error, message.c_str());
+            return false;
+        }
+
+        const bool requiresYUpConversion = upAxis == 2;
 
         std::vector<MeshVertexFormat> vertices;
         std::vector<std::uint16_t> indices;
@@ -101,8 +114,8 @@ namespace dvl
                 const aiVector3D sourceNormal = mesh->HasNormals() ? mesh->mNormals[vertexIndex] : aiVector3D{};
                 const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vertexIndex] : aiVector3D{};
 
-                const aiVector3D position = ConvertToEngineAxes(sourcePosition);
-                const aiVector3D normal = ConvertToEngineAxes(sourceNormal);
+                const aiVector3D position = requiresYUpConversion ? ConvertZUpToYUp(sourcePosition) : sourcePosition;
+                const aiVector3D normal = requiresYUpConversion ? ConvertZUpToYUp(sourceNormal) : sourceNormal;
 
                 vertices.push_back
                 ({
