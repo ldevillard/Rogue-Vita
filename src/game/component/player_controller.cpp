@@ -30,6 +30,11 @@ void PlayerController::Update(float deltaTime)
 
     const glm::vec3 movement = right * input.x + forward * input.y;
 
-    entity.transform.position += movement * moveSpeed * deltaTime;
+    // TODO: Make a transform look direction method
+    if (glm::dot(movement, movement) > 0.000001f)
+    {
+        entity.transform.rotation.y = std::atan2(movement.x, movement.z);
+    }
 
+    entity.transform.position += movement * moveSpeed * deltaTime;
 }

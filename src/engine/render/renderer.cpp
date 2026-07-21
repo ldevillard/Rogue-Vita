@@ -232,7 +232,7 @@ void Renderer::SubmitLight(const DirectionalLight& light)
     _lightCount++;
 }
 
-void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform& transform)
+void Renderer::Draw(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix)
 {
     if (_activeCamera == nullptr)
     {
@@ -256,8 +256,6 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const Transform&
         dvl::Log(dvl::LogLevel::Error, "Invalid active camera entity!");
         return;
     }
-
-    const glm::mat4 modelMatrix = transform.GetMatrix();
 
     _device.SetPipeline(renderPipeline->pipeline);
 
