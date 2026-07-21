@@ -7,6 +7,7 @@ namespace dvl
     constexpr std::uint32_t MeshMagic = MakeMagic('D', 'V', 'L', 'M');
     constexpr std::uint32_t MeshVersion = 1;
 
+    // TODO: Added bounds min and bounds max
     struct MeshFileHeader
     {
         std::uint32_t magic;
