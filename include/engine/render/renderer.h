@@ -9,6 +9,8 @@ struct MeshDesc;
 struct Material;
 struct RenderPipeline;
 struct RenderPipelineDesc;
+struct Texture;
+struct TextureDesc;
 
 class AssetRegistry;
 class Camera;
@@ -25,12 +27,11 @@ public:
     bool CreateMesh(const MeshDesc& desc, Mesh& mesh);
     void DestroyMesh(Mesh& mesh);
 
-    RenderPipeline CreateRenderPipeline(const RenderPipelineDesc& desc);
+    bool CreateRenderPipeline(const RenderPipelineDesc& desc, RenderPipeline& renderPipeline);
     void DestroyRenderPipeline(RenderPipeline& renderPipeline);
 
-    // TODO: Create an engine side texture desc and handle
-    dvl::TextureHandle CreateTexture(const dvl::TextureDesc& desc);
-    void DestroyTexture(dvl::TextureHandle texture);
+    bool CreateTexture(const TextureDesc& desc, Texture& texture);
+    void DestroyTexture(Texture& texture);
 
     void BeginFrame(const dvl::Color& clearColor);
     void EndFrame();

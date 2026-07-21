@@ -19,9 +19,9 @@ void AssetRegistry::Initialize(Renderer& renderer)
 
 void AssetRegistry::Shutdown(Renderer& renderer)
 {
-    for (dvl::TextureHandle texture : _textures)
+    for (std::pair<const TextureHandle, Texture>& texturePair : _textures)
     {
-        renderer.DestroyTexture(texture);
+        renderer.DestroyTexture(texturePair.second);
     }
 
     for (std::pair<const MeshHandle, Mesh>& meshPair : _meshes)
@@ -125,7 +125,7 @@ void AssetRegistry::UnloadMesh(const MeshHandle& meshHandle, Renderer& renderer)
     _meshes.erase(it);
 }
 
-dvl::TextureHandle AssetRegistry::LoadTexture(const std::filesystem::path& path, Renderer& renderer)
+TextureHandle AssetRegistry::LoadTexture(const std::filesystem::path& path, Renderer& renderer)
 {
     std::ifstream file(path, std::ios::binary);
 
@@ -156,22 +156,37 @@ dvl::TextureHandle AssetRegistry::LoadTexture(const std::filesystem::path& path,
         return {};
     }
 
-    dvl::TextureDesc desc{};
+    TextureDesc desc = {};
     desc.width = header.width;
     desc.height = header.height;
     desc.data = data.data() + sizeof(dvl::TextureFileHeader);
 
-    const dvl::TextureHandle texture = renderer.CreateTexture(desc);
-
-    if (texture.IsValid())
+    Texture texture = {};
+    TextureHandle textureHandle = {};
+    if (renderer.CreateTexture(desc, texture))
     {
-        _textures.push_back(texture);
+        textureHandle.id = _nextTextureId++;
+        _textures.emplace(textureHandle, texture);
 
         const std::string message = "Loaded texture successfully at path: " + std::string(path);
         dvl::Log(dvl::LogLevel::Info, message.c_str());
     }
 
-    return texture;
+    return textureHandle;
+}
+
+void AssetRegistry::UnloadTexture(const TextureHandle& textureHandle, Renderer& renderer)
+{
+    const auto it = _textures.find(textureHandle);
+
+    if (it == _textures.end())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Couldn't find texture to unload!");
+        return;
+    }
+
+    renderer.DestroyTexture(it->second);
+    _textures.erase(it);
 }
 
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
@@ -200,7 +215,7 @@ const Material* AssetRegistry::GetMaterial(const MaterialHandle& materialHandle)
 
 const RenderPipeline* AssetRegistry::GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const
 {
-     const auto it = _pipelines.find(renderPipelineHandle);
+    const auto it = _pipelines.find(renderPipelineHandle);
 
     if (it != _pipelines.end())
     {
@@ -210,9 +225,21 @@ const RenderPipeline* AssetRegistry::GetRenderPipeline(const RenderPipelineHandl
     return nullptr;
 }
 
-dvl::TextureHandle AssetRegistry::GetDefaultTexture() const
+const Texture* AssetRegistry::GetTexture(const TextureHandle& textureHandle) const
 {
-    return _defaultTexture;
+    const auto it = _textures.find(textureHandle);
+
+    if (it != _textures.end())
+    {
+        return &it->second;
+    }
+
+    return nullptr;
+}
+
+const Texture& AssetRegistry::GetDefaultTexture() const
+{
+    return _textures.at(_defaultTextureHandle);
 }
 
 const Mesh& AssetRegistry::GetCubeMesh() const
@@ -317,15 +344,16 @@ void AssetRegistry::loadDefaultTexture(Renderer& renderer)
 {
     const std::uint8_t whitePixel[] = {255, 255, 255, 255};
 
-    dvl::TextureDesc desc{};
+    TextureDesc desc = {};
     desc.width = 1;
     desc.height = 1;
     desc.data = whitePixel;
 
-    _defaultTexture = renderer.CreateTexture(desc);
-    if (_defaultTexture.IsValid())
+    Texture defaultTexture = {};
+    if (renderer.CreateTexture(desc, defaultTexture))
     {
-        _textures.push_back(_defaultTexture);
+        _defaultTextureHandle.id = _nextTextureId++;
+        _textures.emplace(_defaultTextureHandle, defaultTexture);
     }
 }
 
@@ -353,8 +381,8 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     Material solidMaterial = {};
     Material wireframeMaterial = {};
 
-    solidMaterial.textureHandle = _defaultTexture;
-    wireframeMaterial.textureHandle = _defaultTexture;
+    solidMaterial.textureHandle = _defaultTextureHandle;
+    wireframeMaterial.textureHandle = _defaultTextureHandle;
 
     RenderPipelineDesc pipelineDesc = {};
     pipelineDesc.vertexShaderPath = "app0:/asset/shaders/vertex.vert";
@@ -367,9 +395,11 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     pipelineDesc.depthStencilState.depthTestEnabled = true;
     pipelineDesc.depthStencilState.depthWriteEnabled = true;
 
-    RenderPipeline solidRenderPipeline = renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline solidRenderPipeline = {};
+    renderer.CreateRenderPipeline(pipelineDesc, solidRenderPipeline);
     pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
-    RenderPipeline wireframeRenderPipeline= renderer.CreateRenderPipeline(pipelineDesc);
+    RenderPipeline wireframeRenderPipeline = {};
+    renderer.CreateRenderPipeline(pipelineDesc, wireframeRenderPipeline);
     
     RenderPipelineHandle solidPipelineHandle = {};
     solidPipelineHandle.id = _nextPipelineId++;
