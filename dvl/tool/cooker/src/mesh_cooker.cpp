@@ -14,6 +14,11 @@
 
 namespace dvl
 {
+    aiVector3D ConvertToEngineAxes(const aiVector3D& value)
+    {
+        return {value.x, value.z, -value.y};
+    }
+
     bool MeshCooker::Cook(const std::filesystem::path& source, const std::filesystem::path& destination) const
     {
         Assimp::Importer importer;
@@ -23,6 +28,7 @@ namespace dvl
                                 aiProcess_JoinIdenticalVertices |
                                 aiProcess_GenSmoothNormals |
                                 aiProcess_ImproveCacheLocality |
+                                aiProcess_PreTransformVertices |
                                 aiProcess_FlipUVs);
 
         if (scene == nullptr || !scene->HasMeshes())
@@ -91,9 +97,12 @@ namespace dvl
             vertices.reserve(resultingVertexCount);
             for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
             {
-                const aiVector3D position = (mesh->mVertices[vertexIndex] - center) * normalizationScale;
-                const aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[vertexIndex] : aiVector3D{};
+                const aiVector3D sourcePosition = (mesh->mVertices[vertexIndex] - center) * normalizationScale;
+                const aiVector3D sourceNormal = mesh->HasNormals() ? mesh->mNormals[vertexIndex] : aiVector3D{};
                 const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vertexIndex] : aiVector3D{};
+
+                const aiVector3D position = ConvertToEngineAxes(sourcePosition);
+                const aiVector3D normal = ConvertToEngineAxes(sourceNormal);
 
                 vertices.push_back
                 ({
