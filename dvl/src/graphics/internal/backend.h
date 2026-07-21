@@ -16,7 +16,7 @@ namespace dvl::internal
         virtual bool Initialize(const DeviceDesc& desc) = 0;
         virtual void Shutdown() = 0;
 
-        virtual void BeginFrame(const Color& clearColor) = 0;
+        virtual void BeginFrame(float r, float g, float b, float a) = 0;
         virtual void EndFrame() = 0;
 
         virtual void SetViewport(const Viewport& viewport) = 0;

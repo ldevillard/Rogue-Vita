@@ -64,7 +64,7 @@ int main()
     planeEntity->transform.position = glm::vec3(0.0f, -1.0f, 0.0f);
     planeEntity->transform.scale = glm::vec3(5.0f, 0.1f, 5.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
-    planeMaterial.color = {0.3f, 0.3f, 0.3f, 1.0f};
+    planeMaterial.color = glm::vec4(0.3f, 0.3f, 0.3f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
@@ -93,7 +93,7 @@ int main()
             mainCamera.UpdateViewMatrix();
         }
 
-        renderer.BeginFrame({0.118f, 0.122f, 0.278f});
+        renderer.BeginFrame(glm::vec4(0.118f, 0.122f, 0.278f, 1.0f));
         renderer.BeginScene(mainCamera);
 
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
