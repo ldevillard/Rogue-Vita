@@ -14,8 +14,9 @@ public:
     glm::vec3 GetForward() const;
     glm::vec3 GetRight() const;
     glm::vec3 GetUp() const;
+    glm::mat4 GetMatrix() const;
 
     // TODO: Update with quat when it will be available
     void LookAt(const glm::vec3& target);
-    glm::mat4 GetMatrix() const;
+    void LookDirection(const glm::vec3& direction);
 };
