@@ -16,7 +16,7 @@ namespace dvl
 {
     aiVector3D ConvertZUpToYUp(const aiVector3D& value)
     {
-        return {value.x, value.z, -value.y};
+        return {-value.x, value.z, value.y};
     }
 
     bool MeshCooker::Cook(const std::filesystem::path& source, const std::filesystem::path& destination) const
