@@ -87,10 +87,12 @@ int main()
         dvl::Time::Update();
         dvl::Input::Update();
 
+        const float deltaTime = dvl::Time::GetDeltaTime();
+        
+        dvl::Tweener::Update(deltaTime);
+
         // Gameplay logic
         {
-            const float deltaTime = dvl::Time::GetDeltaTime();
-
             // TODO: Rework entity traversal with RegisterComponent system in world to avoid
             // multiple traversal and casts
             for (const std::unique_ptr<Entity>& entity : world.GetEntities())
@@ -111,7 +113,7 @@ int main()
             mainCamera.UpdateViewMatrix();
         }
 
-        renderer.BeginFrame(glm::vec4(0.118f, 0.122f, 0.278f, 1.0f));
+        renderer.BeginFrame(glm::vec4(0.32f, 0.45f, 0.65f, 1.0f));
         renderer.BeginScene(mainCamera);
 
         // TODO: Use future World::GetLights
