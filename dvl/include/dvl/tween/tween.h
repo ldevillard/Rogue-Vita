@@ -26,8 +26,8 @@ namespace dvl
         using Callback = std::function<void()>;
         using UpdateCallback = std::function<void(const T&)>;
 
-        Tween(const T& from, const T& to, float duration, Easing easing)
-            : _from(from), _to(to), _duration(std::max(duration, 0.0f)), _easing(easing)
+        Tween(const T& from, const T& to, float duration, Easing easing, int loopCount = 1)
+            : _from(from), _to(to), _duration(std::max(duration, 0.0f)), _easing(easing), _loopCount(loopCount)
         {
         }
 
@@ -88,8 +88,21 @@ namespace dvl
 
             if (time >= 1.0f)
             {
-                _finished = true;
+                if (_loopCount == -1)
+                {
+                    _elapsedTime = 0.0f;
+                    return;
+                }
 
+                _completedLoops++;
+
+                if (_completedLoops < _loopCount)
+                {
+                    _elapsedTime = 0.0f;
+                    return;
+                }
+
+                _finished = true;
                 if (_onComplete)
                     _onComplete();
             }
@@ -107,6 +120,9 @@ namespace dvl
         float _elapsedTime = 0.0f;
 
         Easing _easing;
+
+        int _loopCount;
+        int _completedLoops = 0;
 
         bool _started = false;
         bool _finished = false;
