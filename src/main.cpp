@@ -1,6 +1,9 @@
 #include <dvl/dvl.h>
 
+#include <cmath>
+
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
@@ -67,6 +70,16 @@ int main()
     Material trainingMaterial = assetRegistry.GetSolidMaterialInstance();
     trainingMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/training_dummy.dvltex", renderer);
     trainingEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(trainingDummyMesh), trainingMaterial);
+
+    constexpr float JumpHeight = 1.0f;
+    constexpr float JumpDuration = 1.0f;
+    const float trainingStartHeight = trainingEntity->transform.position.y;
+
+    dvl::Tweener::Create(0.0f, glm::pi<float>(), JumpDuration, dvl::Easing::Linear, -1)
+        .OnUpdate([trainingEntity, trainingStartHeight](const float& jumpTime)
+        {
+            trainingEntity->transform.position.y = trainingStartHeight + std::sin(jumpTime) * JumpHeight;
+        });
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = glm::vec3(0.0f);
