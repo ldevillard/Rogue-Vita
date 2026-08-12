@@ -6,6 +6,10 @@ namespace dvl
     {
         Linear,
 
+        InSine,
+        OutSine,
+        InOutSine,
+
         InBack,
         OutBack,
         InOutBack,
