@@ -75,6 +75,7 @@ int main()
     constexpr float JumpDuration = 1.0f;
     const float trainingStartHeight = trainingEntity->transform.position.y;
 
+    // TODO: Replace this sine-based loop with a yoyo option in the tween system
     dvl::Tweener::Create(0.0f, glm::pi<float>(), JumpDuration, dvl::Easing::Linear, -1)
         .OnUpdate([trainingEntity, trainingStartHeight](const float& jumpTime)
         {
