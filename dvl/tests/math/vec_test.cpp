@@ -240,3 +240,96 @@ DVL_TEST(Vec4FreeFunctionsReturnExpectedValues)
 
     return true;
 }
+
+DVL_TEST(Vec3CrossProductSatisfiesGeometricIdentities)
+{
+    const dvl::Vec3 a(2.0f, -1.0f, 3.0f);
+    const dvl::Vec3 b(-4.0f, 5.0f, 2.0f);
+    const dvl::Vec3 cross = dvl::Cross(a, b);
+
+    DVL_EXPECT_NEAR(dvl::Dot(cross, a), 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(cross, b), 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(
+        cross.LengthSquared(),
+        a.LengthSquared() * b.LengthSquared() - dvl::Dot(a, b) * dvl::Dot(a, b),
+        Epsilon);
+
+    const dvl::Vec3 reverseCross = dvl::Cross(b, a);
+    DVL_EXPECT_NEAR(reverseCross.x, -cross.x, Epsilon);
+    DVL_EXPECT_NEAR(reverseCross.y, -cross.y, Epsilon);
+    DVL_EXPECT_NEAR(reverseCross.z, -cross.z, Epsilon);
+
+    const dvl::Vec3 parallelCross = dvl::Cross(a, a * 3.0f);
+    DVL_EXPECT_NEAR(parallelCross.LengthSquared(), 0.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Vec3LerpSupportsSymmetryAndExtrapolation)
+{
+    const dvl::Vec3 a(-2.0f, 4.0f, 1.0f);
+    const dvl::Vec3 b(6.0f, -2.0f, 5.0f);
+
+    const dvl::Vec3 forward = dvl::Lerp(a, b, 0.35f);
+    const dvl::Vec3 reverse = dvl::Lerp(b, a, 0.65f);
+    DVL_EXPECT_NEAR(forward.x, reverse.x, Epsilon);
+    DVL_EXPECT_NEAR(forward.y, reverse.y, Epsilon);
+    DVL_EXPECT_NEAR(forward.z, reverse.z, Epsilon);
+
+    const dvl::Vec3 extrapolated = dvl::Lerp(a, b, 1.5f);
+    DVL_EXPECT_NEAR(extrapolated.x, 10.0f, Epsilon);
+    DVL_EXPECT_NEAR(extrapolated.y, -5.0f, Epsilon);
+    DVL_EXPECT_NEAR(extrapolated.z, 7.0f, Epsilon);
+
+    const dvl::Vec3 atStart = dvl::Lerp(a, b, 0.0f);
+    const dvl::Vec3 atEnd = dvl::Lerp(a, b, 1.0f);
+    DVL_EXPECT_EQ(atStart.x, a.x);
+    DVL_EXPECT_EQ(atStart.y, a.y);
+    DVL_EXPECT_EQ(atStart.z, a.z);
+    DVL_EXPECT_EQ(atEnd.x, b.x);
+    DVL_EXPECT_EQ(atEnd.y, b.y);
+    DVL_EXPECT_EQ(atEnd.z, b.z);
+
+    return true;
+}
+
+DVL_TEST(VecNormalizationPreservesDirectionAndDotIdentities)
+{
+    const dvl::Vec3 vector3(2.0f, -3.0f, 6.0f);
+    const dvl::Vec3 normalized3 = vector3.Normalized();
+    const dvl::Vec3 scaledNormalized3 = (vector3 * 7.0f).Normalized();
+    DVL_EXPECT_NEAR(dvl::Cross(vector3, normalized3).LengthSquared(), 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(vector3, normalized3), vector3.Length(), Epsilon);
+    DVL_EXPECT_NEAR(normalized3.x, scaledNormalized3.x, Epsilon);
+    DVL_EXPECT_NEAR(normalized3.y, scaledNormalized3.y, Epsilon);
+    DVL_EXPECT_NEAR(normalized3.z, scaledNormalized3.z, Epsilon);
+
+    const dvl::Vec4 vector4(1.0f, -2.0f, 3.0f, -4.0f);
+    const dvl::Vec4 normalized4 = vector4.Normalized();
+    DVL_EXPECT_NEAR(dvl::Dot(vector4, vector4), vector4.LengthSquared(), Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(vector4, normalized4), vector4.Length(), Epsilon);
+    DVL_EXPECT_NEAR(normalized4.Length(), 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Vec4LerpSupportsSymmetryAndExtrapolation)
+{
+    const dvl::Vec4 a(-1.0f, 2.0f, -3.0f, 4.0f);
+    const dvl::Vec4 b(3.0f, -2.0f, 5.0f, 0.0f);
+
+    const dvl::Vec4 forward = dvl::Lerp(a, b, 0.2f);
+    const dvl::Vec4 reverse = dvl::Lerp(b, a, 0.8f);
+    DVL_EXPECT_NEAR(forward.x, reverse.x, Epsilon);
+    DVL_EXPECT_NEAR(forward.y, reverse.y, Epsilon);
+    DVL_EXPECT_NEAR(forward.z, reverse.z, Epsilon);
+    DVL_EXPECT_NEAR(forward.w, reverse.w, Epsilon);
+
+    const dvl::Vec4 extrapolated = dvl::Lerp(a, b, -0.5f);
+    DVL_EXPECT_NEAR(extrapolated.x, -3.0f, Epsilon);
+    DVL_EXPECT_NEAR(extrapolated.y, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(extrapolated.z, -7.0f, Epsilon);
+    DVL_EXPECT_NEAR(extrapolated.w, 6.0f, Epsilon);
+
+    return true;
+}
