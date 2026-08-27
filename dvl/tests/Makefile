@@ -3,7 +3,7 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror
 
 TARGET := dvl-tests
 TEST_SOURCES := main.cpp $(wildcard math/*.cpp)
-DVL_SOURCES := ../src/math/vec.cpp
+DVL_SOURCES := ../src/math/quat.cpp ../src/math/vec.cpp
 
 .PHONY: all run clean
 
