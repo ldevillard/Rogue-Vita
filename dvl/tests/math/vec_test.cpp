@@ -139,6 +139,23 @@ DVL_TEST(Vec4ConstructorsInitializeComponents)
     return true;
 }
 
+DVL_TEST(Vec4XYZReturnsFirstThreeComponentsAndIgnoresW)
+{
+    const dvl::Vec4 first(1.0f, -2.0f, 3.0f, 42.0f);
+    const dvl::Vec4 second(1.0f, -2.0f, 3.0f, -99.0f);
+    const dvl::Vec3 firstXYZ = first.XYZ();
+    const dvl::Vec3 secondXYZ = second.XYZ();
+
+    DVL_EXPECT_EQ(firstXYZ.x, 1.0f);
+    DVL_EXPECT_EQ(firstXYZ.y, -2.0f);
+    DVL_EXPECT_EQ(firstXYZ.z, 3.0f);
+    DVL_EXPECT_EQ(secondXYZ.x, firstXYZ.x);
+    DVL_EXPECT_EQ(secondXYZ.y, firstXYZ.y);
+    DVL_EXPECT_EQ(secondXYZ.z, firstXYZ.z);
+
+    return true;
+}
+
 DVL_TEST(Vec4ArithmeticOperatorsReturnExpectedValues)
 {
     const dvl::Vec4 a(2.0f, 4.0f, 6.0f, 8.0f);

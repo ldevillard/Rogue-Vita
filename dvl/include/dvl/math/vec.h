@@ -33,6 +33,8 @@ namespace dvl
         Vec4();
         Vec4(float x, float y, float z, float w);
 
+        Vec3 XYZ() const;
+
         Vec4 operator+(const Vec4& rhs) const;
         Vec4 operator-(const Vec4& rhs) const;
         Vec4 operator*(float scalar) const;

@@ -5,6 +5,8 @@
 
 namespace dvl
 {
+    struct Transform;
+
     class Mat4
     {
     public:
@@ -15,6 +17,7 @@ namespace dvl
         static Mat4 Translation(const Vec3& translation);
         static Mat4 Scale(const Vec3& scale);
         static Mat4 Rotation(const Quat& rotation);
+        static Mat4 FromTransform(const Transform& transform);
 
         Mat4 operator*(const Mat4& rhs) const;
         Vec4 operator*(const Vec4& rhs) const;
