@@ -5,6 +5,7 @@
 
 namespace dvl
 {
+    // align on 16-byte for future SIMD optimizations
     struct alignas(16) Transform
     {
         Quat rotation = Quat::Identity();
