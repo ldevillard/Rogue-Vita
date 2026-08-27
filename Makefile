@@ -20,7 +20,7 @@ RED          := \033[1;31m
 YELLOW       := \033[1;33m
 RESET        := \033[0m
 
-.PHONY: all package clean re emul remul run rrun
+.PHONY: all package clean re emul remul run rrun test
 
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
@@ -146,3 +146,9 @@ run: eboot.bin
 rrun:
 	@$(MAKE) clean
 	@$(MAKE) run VITA3K=0
+
+test:
+	@$(MAKE) -C dvl/tests run; \
+		test_status=$$?; \
+		$(MAKE) -C dvl/tests clean; \
+		exit $$test_status
