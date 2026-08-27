@@ -1,0 +1,242 @@
+#include "../unit_test.h"
+
+#include "dvl/math/vec.h"
+
+namespace
+{
+    constexpr float Epsilon = 0.0001f;
+}
+
+DVL_TEST(Vec3ConstructorsInitializeComponents)
+{
+    const dvl::Vec3 zero;
+    DVL_EXPECT_EQ(zero.x, 0.0f);
+    DVL_EXPECT_EQ(zero.y, 0.0f);
+    DVL_EXPECT_EQ(zero.z, 0.0f);
+
+    const dvl::Vec3 value(1.0f, -2.0f, 3.0f);
+    DVL_EXPECT_EQ(value.x, 1.0f);
+    DVL_EXPECT_EQ(value.y, -2.0f);
+    DVL_EXPECT_EQ(value.z, 3.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3ArithmeticOperatorsReturnExpectedValues)
+{
+    const dvl::Vec3 a(2.0f, 4.0f, 6.0f);
+    const dvl::Vec3 b(1.0f, 2.0f, 3.0f);
+
+    const dvl::Vec3 sum = a + b;
+    DVL_EXPECT_EQ(sum.x, 3.0f);
+    DVL_EXPECT_EQ(sum.y, 6.0f);
+    DVL_EXPECT_EQ(sum.z, 9.0f);
+
+    const dvl::Vec3 difference = a - b;
+    DVL_EXPECT_EQ(difference.x, 1.0f);
+    DVL_EXPECT_EQ(difference.y, 2.0f);
+    DVL_EXPECT_EQ(difference.z, 3.0f);
+
+    const dvl::Vec3 product = b * 2.0f;
+    DVL_EXPECT_EQ(product.x, 2.0f);
+    DVL_EXPECT_EQ(product.y, 4.0f);
+    DVL_EXPECT_EQ(product.z, 6.0f);
+
+    const dvl::Vec3 quotient = a / 2.0f;
+    DVL_EXPECT_EQ(quotient.x, 1.0f);
+    DVL_EXPECT_EQ(quotient.y, 2.0f);
+    DVL_EXPECT_EQ(quotient.z, 3.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3CompoundOperatorsModifyTheVector)
+{
+    dvl::Vec3 value(1.0f, 2.0f, 3.0f);
+
+    value += dvl::Vec3(2.0f, 3.0f, 4.0f);
+    DVL_EXPECT_EQ(value.x, 3.0f);
+    DVL_EXPECT_EQ(value.y, 5.0f);
+    DVL_EXPECT_EQ(value.z, 7.0f);
+
+    value -= dvl::Vec3(1.0f, 2.0f, 3.0f);
+    DVL_EXPECT_EQ(value.x, 2.0f);
+    DVL_EXPECT_EQ(value.y, 3.0f);
+    DVL_EXPECT_EQ(value.z, 4.0f);
+
+    value *= 2.0f;
+    DVL_EXPECT_EQ(value.x, 4.0f);
+    DVL_EXPECT_EQ(value.y, 6.0f);
+    DVL_EXPECT_EQ(value.z, 8.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3LengthAndNormalizationAreCorrect)
+{
+    const dvl::Vec3 value(3.0f, 4.0f, 0.0f);
+    DVL_EXPECT_EQ(value.LengthSquared(), 25.0f);
+    DVL_EXPECT_NEAR(value.Length(), 5.0f, Epsilon);
+
+    const dvl::Vec3 normalized = value.Normalized();
+    DVL_EXPECT_NEAR(normalized.x, 0.6f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.y, 0.8f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.Length(), 1.0f, Epsilon);
+
+    dvl::Vec3 mutableValue(0.0f, 0.0f, 2.0f);
+    mutableValue.Normalize();
+    DVL_EXPECT_NEAR(mutableValue.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(mutableValue.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(mutableValue.z, 1.0f, Epsilon);
+
+    const dvl::Vec3 normalizedZero = dvl::Vec3().Normalized();
+    DVL_EXPECT_EQ(normalizedZero.x, 0.0f);
+    DVL_EXPECT_EQ(normalizedZero.y, 0.0f);
+    DVL_EXPECT_EQ(normalizedZero.z, 0.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3FreeFunctionsReturnExpectedValues)
+{
+    const dvl::Vec3 xAxis(1.0f, 0.0f, 0.0f);
+    const dvl::Vec3 yAxis(0.0f, 1.0f, 0.0f);
+
+    DVL_EXPECT_EQ(dvl::Dot(xAxis, yAxis), 0.0f);
+    DVL_EXPECT_EQ(dvl::Dot(dvl::Vec3(1.0f, 2.0f, 3.0f), dvl::Vec3(4.0f, 5.0f, 6.0f)), 32.0f);
+
+    const dvl::Vec3 cross = dvl::Cross(xAxis, yAxis);
+    DVL_EXPECT_EQ(cross.x, 0.0f);
+    DVL_EXPECT_EQ(cross.y, 0.0f);
+    DVL_EXPECT_EQ(cross.z, 1.0f);
+
+    const dvl::Vec3 midpoint = dvl::Lerp(
+        dvl::Vec3(0.0f, 2.0f, 4.0f),
+        dvl::Vec3(2.0f, 4.0f, 6.0f),
+        0.5f);
+    DVL_EXPECT_EQ(midpoint.x, 1.0f);
+    DVL_EXPECT_EQ(midpoint.y, 3.0f);
+    DVL_EXPECT_EQ(midpoint.z, 5.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4ConstructorsInitializeComponents)
+{
+    const dvl::Vec4 zero;
+    DVL_EXPECT_EQ(zero.x, 0.0f);
+    DVL_EXPECT_EQ(zero.y, 0.0f);
+    DVL_EXPECT_EQ(zero.z, 0.0f);
+    DVL_EXPECT_EQ(zero.w, 0.0f);
+
+    const dvl::Vec4 value(1.0f, -2.0f, 3.0f, -4.0f);
+    DVL_EXPECT_EQ(value.x, 1.0f);
+    DVL_EXPECT_EQ(value.y, -2.0f);
+    DVL_EXPECT_EQ(value.z, 3.0f);
+    DVL_EXPECT_EQ(value.w, -4.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4ArithmeticOperatorsReturnExpectedValues)
+{
+    const dvl::Vec4 a(2.0f, 4.0f, 6.0f, 8.0f);
+    const dvl::Vec4 b(1.0f, 2.0f, 3.0f, 4.0f);
+
+    const dvl::Vec4 sum = a + b;
+    DVL_EXPECT_EQ(sum.x, 3.0f);
+    DVL_EXPECT_EQ(sum.y, 6.0f);
+    DVL_EXPECT_EQ(sum.z, 9.0f);
+    DVL_EXPECT_EQ(sum.w, 12.0f);
+
+    const dvl::Vec4 difference = a - b;
+    DVL_EXPECT_EQ(difference.x, 1.0f);
+    DVL_EXPECT_EQ(difference.y, 2.0f);
+    DVL_EXPECT_EQ(difference.z, 3.0f);
+    DVL_EXPECT_EQ(difference.w, 4.0f);
+
+    const dvl::Vec4 product = b * 2.0f;
+    DVL_EXPECT_EQ(product.x, 2.0f);
+    DVL_EXPECT_EQ(product.y, 4.0f);
+    DVL_EXPECT_EQ(product.z, 6.0f);
+    DVL_EXPECT_EQ(product.w, 8.0f);
+
+    const dvl::Vec4 quotient = a / 2.0f;
+    DVL_EXPECT_EQ(quotient.x, 1.0f);
+    DVL_EXPECT_EQ(quotient.y, 2.0f);
+    DVL_EXPECT_EQ(quotient.z, 3.0f);
+    DVL_EXPECT_EQ(quotient.w, 4.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4CompoundOperatorsModifyTheVector)
+{
+    dvl::Vec4 value(1.0f, 2.0f, 3.0f, 4.0f);
+
+    value += dvl::Vec4(2.0f, 3.0f, 4.0f, 5.0f);
+    DVL_EXPECT_EQ(value.x, 3.0f);
+    DVL_EXPECT_EQ(value.y, 5.0f);
+    DVL_EXPECT_EQ(value.z, 7.0f);
+    DVL_EXPECT_EQ(value.w, 9.0f);
+
+    value -= dvl::Vec4(1.0f, 2.0f, 3.0f, 4.0f);
+    DVL_EXPECT_EQ(value.x, 2.0f);
+    DVL_EXPECT_EQ(value.y, 3.0f);
+    DVL_EXPECT_EQ(value.z, 4.0f);
+    DVL_EXPECT_EQ(value.w, 5.0f);
+
+    value *= 2.0f;
+    DVL_EXPECT_EQ(value.x, 4.0f);
+    DVL_EXPECT_EQ(value.y, 6.0f);
+    DVL_EXPECT_EQ(value.z, 8.0f);
+    DVL_EXPECT_EQ(value.w, 10.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4LengthAndNormalizationAreCorrect)
+{
+    const dvl::Vec4 value(1.0f, 2.0f, 2.0f, 0.0f);
+    DVL_EXPECT_EQ(value.LengthSquared(), 9.0f);
+    DVL_EXPECT_NEAR(value.Length(), 3.0f, Epsilon);
+
+    const dvl::Vec4 normalized = value.Normalized();
+    DVL_EXPECT_NEAR(normalized.x, 1.0f / 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.y, 2.0f / 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.z, 2.0f / 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.w, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(normalized.Length(), 1.0f, Epsilon);
+
+    dvl::Vec4 mutableValue(0.0f, 0.0f, 0.0f, 2.0f);
+    mutableValue.Normalize();
+    DVL_EXPECT_NEAR(mutableValue.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(mutableValue.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(mutableValue.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(mutableValue.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 normalizedZero = dvl::Vec4().Normalized();
+    DVL_EXPECT_EQ(normalizedZero.x, 0.0f);
+    DVL_EXPECT_EQ(normalizedZero.y, 0.0f);
+    DVL_EXPECT_EQ(normalizedZero.z, 0.0f);
+    DVL_EXPECT_EQ(normalizedZero.w, 0.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4FreeFunctionsReturnExpectedValues)
+{
+    const dvl::Vec4 a(1.0f, 2.0f, 3.0f, 4.0f);
+    const dvl::Vec4 b(5.0f, 6.0f, 7.0f, 8.0f);
+
+    DVL_EXPECT_EQ(dvl::Dot(a, b), 70.0f);
+
+    const dvl::Vec4 midpoint = dvl::Lerp(a, b, 0.5f);
+    DVL_EXPECT_EQ(midpoint.x, 3.0f);
+    DVL_EXPECT_EQ(midpoint.y, 4.0f);
+    DVL_EXPECT_EQ(midpoint.z, 5.0f);
+    DVL_EXPECT_EQ(midpoint.w, 6.0f);
+
+    return true;
+}
