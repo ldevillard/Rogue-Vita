@@ -5,7 +5,7 @@
 Rogue Vita is an experimental 3D isometric rogue-lite game built for the PlayStation Vita using C++ and VitaGL.
 
 ![Rogue Vita](showcases/rogue-vita.gif)
-*Rogue Vita - Current state of the project!*
+*Current state of the project!*
 
 ## dvl 🛠️
 
