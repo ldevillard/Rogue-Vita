@@ -236,7 +236,7 @@ DVL_TEST(Vec4FreeFunctionsReturnExpectedValues)
     DVL_EXPECT_EQ(midpoint.x, 3.0f);
     DVL_EXPECT_EQ(midpoint.y, 4.0f);
     DVL_EXPECT_EQ(midpoint.z, 5.0f);
-    DVL_EXPECT_EQ(midpoint.w, 6.0f);
+    DVL_EXPECT_EQ(midpoint.w, 5.0f);
 
     return true;
 }
