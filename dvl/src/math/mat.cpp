@@ -1,5 +1,7 @@
 #include "dvl/math/mat.h"
 
+#include "dvl/math/transform.h"
+
 namespace dvl
 {
     Mat4::Mat4()
@@ -60,6 +62,13 @@ namespace dvl
         result.m[2][1] = 2.0f * (yz - xw);
         result.m[2][2] = 1.0f - 2.0f * (xx + yy);
         return result;
+    }
+
+    Mat4 Mat4::FromTransform(const Transform& transform)
+    {
+        return Translation(transform.translation.XYZ())
+            * Rotation(transform.rotation)
+            * Scale(transform.scale.XYZ());
     }
 
     Mat4 Mat4::operator*(const Mat4& rhs) const

@@ -1,6 +1,7 @@
 #include "../unit_test.h"
 
 #include "dvl/math/mat.h"
+#include "dvl/math/transform.h"
 
 namespace
 {
@@ -169,6 +170,50 @@ DVL_TEST(Mat4MultiplicationIsAssociativeAndHasIdentity)
             DVL_EXPECT_NEAR(rightIdentity.m[column][row], leftAssociated.m[column][row], Epsilon);
         }
     }
+
+    return true;
+}
+
+DVL_TEST(Mat4FromDefaultTransformCreatesIdentity)
+{
+    const dvl::Mat4 matrix = dvl::Mat4::FromTransform(dvl::Transform());
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(matrix.m[column][row], expected, Epsilon);
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(Mat4FromTransformAppliesScaleRotationThenTranslation)
+{
+    dvl::Transform transform;
+    transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f);
+    transform.translation = dvl::Vec4(10.0f, 20.0f, 30.0f, 42.0f);
+    transform.scale = dvl::Vec4(2.0f, 3.0f, 4.0f, -12.0f);
+
+    const dvl::Mat4 matrix = dvl::Mat4::FromTransform(transform);
+    const dvl::Mat4 expected =
+        dvl::Mat4::Translation(dvl::Vec3(10.0f, 20.0f, 30.0f)) *
+        dvl::Mat4::Rotation(transform.rotation) *
+        dvl::Mat4::Scale(dvl::Vec3(2.0f, 3.0f, 4.0f));
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+            DVL_EXPECT_NEAR(matrix.m[column][row], expected.m[column][row], Epsilon);
+    }
+
+    const dvl::Vec4 transformedPoint = matrix * dvl::Vec4(1.0f, 2.0f, 3.0f, 1.0f);
+    DVL_EXPECT_NEAR(transformedPoint.x, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(transformedPoint.y, 22.0f, Epsilon);
+    DVL_EXPECT_NEAR(transformedPoint.z, 42.0f, Epsilon);
+    DVL_EXPECT_NEAR(transformedPoint.w, 1.0f, Epsilon);
 
     return true;
 }
