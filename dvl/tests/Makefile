@@ -2,8 +2,8 @@ CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror
 
 TARGET := dvl-tests
-TEST_SOURCES := main.cpp $(wildcard math/*.cpp)
-DVL_SOURCES := ../src/math/mat.cpp ../src/math/quat.cpp ../src/math/vec.cpp
+TEST_SOURCES := main.cpp $(wildcard math/*.cpp) $(wildcard anim/*.cpp)
+DVL_SOURCES := ../src/math/mat.cpp ../src/math/quat.cpp ../src/math/vec.cpp ../src/anim/anim.cpp
 
 .PHONY: all run clean
 
