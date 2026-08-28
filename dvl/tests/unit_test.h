@@ -31,6 +31,10 @@ namespace dvl
     inline int RunUnitTests()
     {
         const std::vector<UnitTest>& tests = GetUnitTests();
+        constexpr const char* cyan = "\033[1;36m";
+        constexpr const char* green = "\033[1;32m";
+        constexpr const char* red = "\033[1;31m";
+        constexpr const char* reset = "\033[0m";
 
         std::size_t passed = 0;
 
@@ -38,16 +42,19 @@ namespace dvl
 
         for (const UnitTest& test : tests)
         {
-            std::cout << "[RUN] " << test.name << '\n';
+            std::cout << '[' << cyan << "RUN" << reset << "] "
+                      << test.name << '\n';
 
             if (test.method())
             {
                 passed++;
-                std::cout << "[PASS] " << test.name << "\n\n";
+                std::cout << '[' << green << "PASS" << reset << "] "
+                          << test.name << "\n\n";
             }
             else
             {
-                std::cout << "[FAIL] " << test.name << "\n\n";
+                std::cout << '[' << red << "FAIL" << reset << "] "
+                          << test.name << "\n\n";
             }
         }
 
