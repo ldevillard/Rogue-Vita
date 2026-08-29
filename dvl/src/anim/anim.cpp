@@ -19,4 +19,12 @@ namespace dvl
             }
         }
     }
+
+    void ComputeSkinningMatrices(const Skeleton& skeleton, const Mat4* worldPose, Mat4* outSkinningMatrices)
+    {
+        for (int i = 0; i < skeleton.boneCount; i++)
+        {
+            outSkinningMatrices[i] = worldPose[i] * skeleton.inverseBindMatrices[i];
+        }
+    }
 }
