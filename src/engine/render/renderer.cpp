@@ -46,7 +46,7 @@ bool Renderer::CreateMesh(const MeshDesc& desc, Mesh& mesh)
 
     dvl::BufferDesc vertexBufferDesc;
     vertexBufferDesc.type = dvl::BufferType::Vertex;
-    vertexBufferDesc.usage = dvl::BufferUsage::Static;
+    vertexBufferDesc.usage = desc.vertexBufferUsage;
     vertexBufferDesc.size = desc.vertexDataSize;
     vertexBufferDesc.data = desc.vertexData;
 
@@ -73,6 +73,17 @@ bool Renderer::CreateMesh(const MeshDesc& desc, Mesh& mesh)
     mesh.indexBuffer = indexBuffer;
     mesh.indexCount = desc.indexCount;
     return true;
+}
+
+bool Renderer::UpdateMeshVertices(const Mesh& mesh, const void* vertexData, std::size_t vertexDataSize)
+{
+    if (!mesh.IsValid())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Cannot update an invalid mesh");
+        return false;
+    }
+
+    return _device.UpdateBuffer(mesh.vertexBuffer, vertexData, vertexDataSize);
 }
 
 void Renderer::DestroyMesh(Mesh& mesh)

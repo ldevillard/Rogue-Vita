@@ -35,6 +35,7 @@ namespace dvl
         void SetViewport(const Viewport& viewport);
 
         BufferHandle CreateBuffer(const BufferDesc& desc);
+        bool UpdateBuffer(BufferHandle handle, const void* data, std::size_t size);
         void DestroyBuffer(BufferHandle handle);
 
         ShaderHandle CreateShader(const ShaderDesc& desc);

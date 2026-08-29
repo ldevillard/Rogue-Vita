@@ -118,6 +118,33 @@ namespace dvl::internal
         return handle;
     }
 
+    bool VitaGLBackend::UpdateBuffer(BufferHandle handle, const void* data, std::size_t size)
+    {
+        const auto it = _buffers.find(handle.id);
+
+        if (it == _buffers.end())
+        {
+            Log(LogLevel::Error, "Invalid buffer handle");
+            return false;
+        }
+
+        NativeBuffer& buffer = it->second;
+
+        if (size > buffer.size)
+        {
+            Log(LogLevel::Error, "Data size exceeds buffer size");
+            return false;
+        }
+
+        const GLenum target = buffer.type == BufferType::Index ? GL_ELEMENT_ARRAY_BUFFER : GL_ARRAY_BUFFER;
+
+        glBindBuffer(target, buffer.id);
+        glBufferSubData(target, 0, size, data);
+        glBindBuffer(target, 0);
+
+        return true;
+    }
+
     void VitaGLBackend::DestroyBuffer(BufferHandle handle)
     {
         const auto it = _buffers.find(handle.id);
