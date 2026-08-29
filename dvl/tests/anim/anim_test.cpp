@@ -118,3 +118,109 @@ DVL_TEST(LocalToWorldAppliesRootTransformToEverySkeletonRoot)
 
     return true;
 }
+
+DVL_TEST(ComputeSkinningMatricesDoesNothingForAnEmptySkeleton)
+{
+    const dvl::Skeleton skeleton;
+    dvl::Mat4 output = dvl::Mat4::Translation(dvl::Vec3(1.0f, 2.0f, 3.0f));
+
+    dvl::ComputeSkinningMatrices(skeleton, nullptr, &output);
+
+    const dvl::Vec4 position = output * dvl::Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    DVL_EXPECT_EQ(position.x, 1.0f);
+    DVL_EXPECT_EQ(position.y, 2.0f);
+    DVL_EXPECT_EQ(position.z, 3.0f);
+    DVL_EXPECT_EQ(position.w, 1.0f);
+
+    return true;
+}
+
+DVL_TEST(ComputeSkinningMatricesCancelsTheBindPose)
+{
+    const dvl::Mat4 translation = dvl::Mat4::Translation(dvl::Vec3(3.0f, -2.0f, 5.0f));
+    const dvl::Mat4 inverseTranslation = dvl::Mat4::Translation(dvl::Vec3(-3.0f, 2.0f, -5.0f));
+
+    const dvl::Mat4 rotation = dvl::Mat4::Rotation(
+        dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f));
+    const dvl::Mat4 inverseRotation = dvl::Mat4::Rotation(
+        dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), -Pi / 2.0f));
+
+    const dvl::Mat4 scale = dvl::Mat4::Scale(dvl::Vec3(2.0f, 4.0f, 0.5f));
+    const dvl::Mat4 inverseScale = dvl::Mat4::Scale(dvl::Vec3(0.5f, 0.25f, 2.0f));
+
+    const dvl::Mat4 worldPose[] =
+    {
+        translation,
+        translation * rotation * scale
+    };
+
+    const dvl::Mat4 inverseBindMatrices[] =
+    {
+        inverseTranslation,
+        inverseScale * inverseRotation * inverseTranslation
+    };
+
+    const dvl::Skeleton skeleton { 2, nullptr, inverseBindMatrices };
+    dvl::Mat4 skinningMatrices[2];
+
+    dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
+
+    for (int boneIndex = 0; boneIndex < skeleton.boneCount; boneIndex++)
+    {
+        for (int column = 0; column < 4; column++)
+        {
+            for (int row = 0; row < 4; row++)
+            {
+                const float expected = column == row ? 1.0f : 0.0f;
+                DVL_EXPECT_NEAR(skinningMatrices[boneIndex].m[column][row], expected, Epsilon);
+            }
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(ComputeSkinningMatricesTransformsEachBoneFromBindPoseToWorldPose)
+{
+    const dvl::Mat4 worldPose[] =
+    {
+        dvl::Mat4::Translation(dvl::Vec3(2.0f, 3.0f, 4.0f)),
+        dvl::Mat4::Translation(dvl::Vec3(0.0f, 1.0f, 0.0f)) *
+            dvl::Mat4::Rotation(
+                dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f))
+    };
+
+    const dvl::Mat4 inverseBindMatrices[] =
+    {
+        dvl::Mat4::Identity(),
+        dvl::Mat4::Translation(dvl::Vec3(0.0f, -1.0f, 0.0f))
+    };
+
+    const dvl::Skeleton skeleton { 2, nullptr, inverseBindMatrices };
+    dvl::Mat4 skinningMatrices[2];
+
+    dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
+
+    const dvl::Vec4 rootResult =
+        skinningMatrices[0] * dvl::Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    DVL_EXPECT_NEAR(rootResult.x, 2.0f, Epsilon);
+    DVL_EXPECT_NEAR(rootResult.y, 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(rootResult.z, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(rootResult.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 jointResult =
+        skinningMatrices[1] * dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    DVL_EXPECT_NEAR(jointResult.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(jointResult.y, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(jointResult.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(jointResult.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 tipResult =
+        skinningMatrices[1] * dvl::Vec4(0.0f, 2.0f, 0.0f, 1.0f);
+    DVL_EXPECT_NEAR(tipResult.x, -1.0f, Epsilon);
+    DVL_EXPECT_NEAR(tipResult.y, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(tipResult.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(tipResult.w, 1.0f, Epsilon);
+
+    return true;
+}

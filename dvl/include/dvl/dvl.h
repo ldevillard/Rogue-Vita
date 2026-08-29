@@ -1,5 +1,6 @@
 #pragma once
 
+#include "anim/anim.h"
 #include "graphics/device.h"
 #include "graphics/types.h"
 #include "input/input.h"
