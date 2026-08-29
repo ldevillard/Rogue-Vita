@@ -19,6 +19,7 @@ namespace dvl::internal
         void SetViewport(const Viewport& viewport) override;
 
         BufferHandle CreateBuffer(const BufferDesc& desc) override;
+        bool UpdateBuffer(BufferHandle handle, const void* data, std::size_t size) override;
         void DestroyBuffer(BufferHandle handle) override;
 
         ShaderHandle CreateShader(const ShaderDesc& desc) override;

@@ -25,6 +25,7 @@ public:
     ~Renderer();
 
     bool CreateMesh(const MeshDesc& desc, Mesh& mesh);
+    bool UpdateMeshVertices(const Mesh& mesh, const void* vertexData, std::size_t vertexDataSize);
     void DestroyMesh(Mesh& mesh);
 
     bool CreateRenderPipeline(const RenderPipelineDesc& desc, RenderPipeline& renderPipeline);

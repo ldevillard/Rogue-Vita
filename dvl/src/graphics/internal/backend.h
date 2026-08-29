@@ -22,6 +22,7 @@ namespace dvl::internal
         virtual void SetViewport(const Viewport& viewport) = 0;
 
         virtual BufferHandle CreateBuffer(const BufferDesc& desc) = 0;
+        virtual bool UpdateBuffer(BufferHandle handle, const void* data, std::size_t size) = 0;
         virtual void DestroyBuffer(BufferHandle handle) = 0;
 
         virtual ShaderHandle CreateShader(const ShaderDesc& desc) = 0;

@@ -118,10 +118,22 @@ namespace dvl
         return _backend->CreateBuffer(desc);
     }
 
+    bool Device::UpdateBuffer(BufferHandle handle, const void* data, std::size_t size)
+    {
+        if (!_backend || !handle.IsValid())
+        {
+            Log(LogLevel::Error, "Invalid buffer handle or uninitialized device");
+            return false;
+        }
+
+        return _backend->UpdateBuffer(handle, data, size);
+    }
+
     void Device::DestroyBuffer(BufferHandle handle)
     {
         if (!_backend || !handle.IsValid())
         {
+            Log(LogLevel::Error, "Invalid buffer handle or uninitialized device");
             return;
         }
     

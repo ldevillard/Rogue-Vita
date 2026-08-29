@@ -37,6 +37,8 @@ struct MeshDesc
 
     const std::uint16_t* indices = nullptr;
     unsigned int indexCount = 0;
+
+    dvl::BufferUsage vertexBufferUsage = dvl::BufferUsage::Static;
 };
 
 struct Mesh 
