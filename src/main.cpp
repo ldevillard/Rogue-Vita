@@ -102,7 +102,7 @@ int main()
     light.direction = glm::vec3(0.35f, -1.0f, 0.45f);
     light.intensity = 1.3f;
 
-    // CPU skinning test
+    // Skinned mesh test
     const std::int16_t parents[] = {-1, 0};
 
     constexpr int BoneCount = 2;
@@ -153,10 +153,10 @@ int main()
     animatedMeshDesc.indexCount = static_cast<unsigned int>(sizeof(animatedIndices) / sizeof(animatedIndices[0]));
     animatedMeshDesc.vertexBufferUsage = dvl::BufferUsage::Static;
 
-    Mesh cpuSkinMesh = {};
-    if (!renderer.CreateMesh(animatedMeshDesc, cpuSkinMesh))
+    Mesh skinnedTestMesh = {};
+    if (!renderer.CreateMesh(animatedMeshDesc, skinnedTestMesh))
     {
-        dvl::Log(dvl::LogLevel::Error, "Failed to create CPU-skinned mesh");
+        dvl::Log(dvl::LogLevel::Error, "Failed to create skinned mesh");
         assetRegistry.Shutdown(renderer);
         return 1;
     }
@@ -164,13 +164,13 @@ int main()
     Entity* wireframeAnimatedEntity = world.CreateEntity();
     Material wireframeAnimatedMaterial = assetRegistry.GetSkinnedWireframeMaterialInstance();
     wireframeAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
-    MeshRenderer& wireframeAnimatedMeshRenderer = wireframeAnimatedEntity->AddComponent<MeshRenderer>(&cpuSkinMesh, wireframeAnimatedMaterial);
+    MeshRenderer& wireframeAnimatedMeshRenderer = wireframeAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, wireframeAnimatedMaterial);
     wireframeAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
     Entity* solidAnimatedEntity = world.CreateEntity();
     Material solidAnimatedMaterial = assetRegistry.GetSkinnedSolidMaterialInstance();
     solidAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
-    MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&cpuSkinMesh, solidAnimatedMaterial);
+    MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, solidAnimatedMaterial);
     solidAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
     const glm::vec3 planeTopCenter = planeEntity->transform.position + glm::vec3(0.0f, planeEntity->transform.scale.y * 0.5f, 0.0f);
@@ -250,8 +250,8 @@ int main()
             const glm::mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedMeshRenderer.localTransform.GetMatrix();
             const glm::mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedMeshRenderer.localTransform.GetMatrix();
 
-            renderer.DrawSkinned(cpuSkinMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
-            renderer.DrawSkinned(cpuSkinMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
+            renderer.DrawSkinned(skinnedTestMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
+            renderer.DrawSkinned(skinnedTestMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
         }
 
         // TODO: Use future World::GetMeshRenders
@@ -269,7 +269,7 @@ int main()
         renderer.EndFrame();
     }
 
-    renderer.DestroyMesh(cpuSkinMesh);
+    renderer.DestroyMesh(skinnedTestMesh);
     assetRegistry.Shutdown(renderer);
 
     return 0;
