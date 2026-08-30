@@ -77,6 +77,10 @@ namespace dvl::internal
             {
                 int location = -1;
                 int componentCount = 0;
+
+                unsigned int type = 0;
+                bool normalized = false;
+
                 std::size_t offset = 0;
             };
 

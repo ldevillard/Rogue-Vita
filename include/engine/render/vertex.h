@@ -21,3 +21,13 @@ struct VertexPositionNormalUV
     float nx, ny, nz;
     float u, v;
 };
+
+struct SkinnedVertexPositionNormalUV
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+
+    std::uint8_t boneIndices[4];
+    std::uint8_t boneWeights[4];
+};
