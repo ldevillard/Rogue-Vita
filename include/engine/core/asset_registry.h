@@ -34,6 +34,8 @@ public:
     // Materials
     const Material GetSolidMaterialInstance() const;
     const Material GetWireframeMaterialInstance() const;
+    const Material GetSkinnedSolidMaterialInstance() const;
+    const Material GetSkinnedWireframeMaterialInstance() const;
 
     // Textures
     const Texture& GetDefaultTexture() const;
@@ -41,6 +43,8 @@ public:
 private:
     void loadCubePrimitive(Renderer& renderer);
     void loadDefaultTexture(Renderer& renderer);
+
+    // TODO: Split in loadMaterials and loadSkinnedMaterials
     void loadMaterials(Renderer& renderer);
 
     // Primitives
@@ -49,6 +53,8 @@ private:
     // Materials
     MaterialHandle _solidMaterialHandle;
     MaterialHandle _wireframeMaterialHandle;
+    MaterialHandle _skinnedSolidMaterialHandle;
+    MaterialHandle _skinnedWireframeMaterialHandle;
 
     // Textures
     TextureHandle _defaultTextureHandle;

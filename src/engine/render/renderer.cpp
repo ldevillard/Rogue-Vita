@@ -274,24 +274,104 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const glm::mat4&
     {
         const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
         setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
-        
-        const glm::vec3 cameraPosition = cameraEntity->transform.position; 
-        
+
+        const glm::vec3 cameraPosition = cameraEntity->transform.position;
+
         setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
         setParameter(*renderPipeline, "materialColor", &material.color.r);
         setParameter(*renderPipeline, "lightCount", &_lightCount);
-        
+
         if (_lightCount > 0)
         {
             setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
             setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
         }
-        
+
         setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
 
         _device.SetTexture({ texture->id });
         const int textureSlot = 0;
         setParameter(*renderPipeline, "albedoTexture", &textureSlot);
+    }
+
+    _device.SetVertexBuffer(mesh.vertexBuffer);
+    _device.SetIndexBuffer(mesh.indexBuffer);
+
+    _device.DrawIndexed(mesh.indexCount);
+}
+
+void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount)
+{
+    if (_activeCamera == nullptr)
+    {
+        dvl::Log(dvl::LogLevel::Error, "There is no active camera, draw call canceled!");
+        return;
+    }
+
+    if (skinningMatrices == nullptr || boneCount == 0 || boneCount > MaxBones)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid skinning matrices");
+        return;
+    }
+
+    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.renderPipelineHandle);
+    const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
+
+    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
+        texture == nullptr)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
+        return;
+    }
+
+    const Entity* cameraEntity = _activeCamera->GetEntity();
+    if (cameraEntity == nullptr)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid active camera entity!");
+        return;
+    }
+
+    _device.SetPipeline(renderPipeline->pipeline);
+
+    // Parameters binding
+    {
+        const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
+        setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
+
+        const glm::vec3 cameraPosition = cameraEntity->transform.position;
+
+        setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
+        setParameter(*renderPipeline, "materialColor", &material.color.r);
+        setParameter(*renderPipeline, "lightCount", &_lightCount);
+
+        if (_lightCount > 0)
+        {
+            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
+            setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
+        }
+
+        setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
+
+        _device.SetTexture({ texture->id });
+        const int textureSlot = 0;
+        setParameter(*renderPipeline, "albedoTexture", &textureSlot);
+
+        dvl::Vec4 packedSkinningMatrices[MaxBones * 3];
+
+        // Pack the 4x4 skinning matrices into an array of Vec4 (3 Vec4 per matrix)
+        for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
+        {
+            for (int row = 0; row < 3; row++)
+            {
+                packedSkinningMatrices[boneIndex * 3 + row] = dvl::Vec4(
+                    skinningMatrices[boneIndex].m[0][row],
+                    skinningMatrices[boneIndex].m[1][row],
+                    skinningMatrices[boneIndex].m[2][row],
+                    skinningMatrices[boneIndex].m[3][row]);
+            }
+        }
+
+        setParameter(*renderPipeline, "skinningMatrices", packedSkinningMatrices, boneCount * 3);
     }
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
