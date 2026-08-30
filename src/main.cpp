@@ -47,12 +47,12 @@ int main()
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
-    cameraEntity->transform.position = glm::vec3(-5.0f, 5.0f, -5.0f);
-    cameraEntity->transform.LookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+    cameraEntity->transform.position = dvl::Vec3(-5.0f, 5.0f, -5.0f);
+    cameraEntity->transform.LookAt(dvl::Vec3(0.0f, 0.0f, 0.0f));
 
     Entity* playerEntity = world.CreateEntity();
-    playerEntity->transform.position = glm::vec3(0.75f, 1.0f, -0.75f);
-    playerEntity->transform.scale = glm::vec3(2.5f);
+    playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
+    playerEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
     solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/target_dummy.dvltex", renderer);
 
@@ -63,16 +63,16 @@ int main()
 
     /*
     Entity* targetEntity = world.CreateEntity();
-    targetEntity->transform.position = glm::vec3(-0.75f, 1.3f, 0.75f);
-    targetEntity->transform.scale = glm::vec3(2.5f);
+    targetEntity->transform.position = dvl::Vec3(-0.75f, 1.3f, 0.75f);
+    targetEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material targetMaterial = assetRegistry.GetSolidMaterialInstance();
     targetMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
     targetEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), targetMaterial);
 
     Entity* trainingEntity = world.CreateEntity();
-    trainingEntity->transform.position = glm::vec3(3.0f, 1.3f, 3.0f);
-    trainingEntity->transform.rotation.y = glm::radians(-135.0f);
-    trainingEntity->transform.scale = glm::vec3(2.5f);
+    trainingEntity->transform.position = dvl::Vec3(3.0f, 1.3f, 3.0f);
+    trainingEntity->transform.rotation.y = dvl::Radians(-135.0f);
+    trainingEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material trainingMaterial = assetRegistry.GetSolidMaterialInstance();
     trainingMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/training_dummy.dvltex", renderer);
     trainingEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(trainingDummyMesh), trainingMaterial);
@@ -90,8 +90,8 @@ int main()
     */
 
     Entity* planeEntity = world.CreateEntity();
-    planeEntity->transform.position = glm::vec3(0.0f);
-    planeEntity->transform.scale = glm::vec3(8.0f, 0.1f, 8.0f);
+    planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
+    planeEntity->transform.scale = dvl::Vec3(8.0f, 0.1f, 8.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
@@ -173,10 +173,10 @@ int main()
     MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, solidAnimatedMaterial);
     solidAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
-    const glm::vec3 planeTopCenter = planeEntity->transform.position + glm::vec3(0.0f, planeEntity->transform.scale.y * 0.5f, 0.0f);
-    glm::vec3 cameraFacingDirection = cameraEntity->transform.position - planeTopCenter;
+    const dvl::Vec3 planeTopCenter = planeEntity->transform.position + dvl::Vec3(0.0f, planeEntity->transform.scale.y * 0.5f, 0.0f);
+    dvl::Vec3 cameraFacingDirection = cameraEntity->transform.position - planeTopCenter;
     cameraFacingDirection.y = 0.0f;
-    const glm::vec3 cameraRight = glm::normalize(glm::cross(cameraFacingDirection, glm::vec3(0.0f, 1.0f, 0.0f)));
+    const dvl::Vec3 cameraRight = dvl::Cross(cameraFacingDirection, dvl::Vec3(0.0f, 1.0f, 0.0f)).Normalized();
     constexpr float AnimatedEntitySpacing = 1.5f;
 
     wireframeAnimatedEntity->transform.position = planeTopCenter - cameraRight * (AnimatedEntitySpacing * 0.5f);
@@ -247,8 +247,8 @@ int main()
             dvl::LocalToWorld(skeleton, animatedPose, dvl::Mat4::Identity(), worldPose);
             dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
 
-            const glm::mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedMeshRenderer.localTransform.GetMatrix();
-            const glm::mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedMeshRenderer.localTransform.GetMatrix();
+            const dvl::Mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedMeshRenderer.localTransform.GetMatrix();
+            const dvl::Mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedMeshRenderer.localTransform.GetMatrix();
 
             renderer.DrawSkinned(skinnedTestMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
             renderer.DrawSkinned(skinnedTestMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
@@ -262,7 +262,7 @@ int main()
             if (meshRenderer == nullptr)
                 continue;
 
-            const glm::mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
+            const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
             renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
         }
 

@@ -40,8 +40,8 @@ public:
     void BeginScene(const Camera& camera);
     void SubmitLight(const DirectionalLight& light);
 
-    void Draw(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix);
-    void DrawSkinned(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount);
+    void Draw(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix);
+    void DrawSkinned(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount);
 
 private:
     void setParameter(const RenderPipeline& renderPipeline, const char* name,

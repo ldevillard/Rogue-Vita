@@ -243,7 +243,7 @@ void Renderer::SubmitLight(const DirectionalLight& light)
     _lightCount++;
 }
 
-void Renderer::Draw(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix)
+void Renderer::Draw(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix)
 {
     if (_activeCamera == nullptr)
     {
@@ -272,12 +272,12 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const glm::mat4&
 
     // Parameters binding
     {
-        const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
+        const dvl::Mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
         setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
 
-        const glm::vec3 cameraPosition = cameraEntity->transform.position;
+        const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
 
-        setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
+        setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
         setParameter(*renderPipeline, "materialColor", &material.color.r);
         setParameter(*renderPipeline, "lightCount", &_lightCount);
 
@@ -300,7 +300,7 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const glm::mat4&
     _device.DrawIndexed(mesh.indexCount);
 }
 
-void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const glm::mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount)
+void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount)
 {
     if (_activeCamera == nullptr)
     {
@@ -335,12 +335,12 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const glm
 
     // Parameters binding
     {
-        const glm::mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
+        const dvl::Mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
         setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
 
-        const glm::vec3 cameraPosition = cameraEntity->transform.position;
+        const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
 
-        setParameter(*renderPipeline, "cameraPosition", &cameraPosition[0]);
+        setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
         setParameter(*renderPipeline, "materialColor", &material.color.r);
         setParameter(*renderPipeline, "lightCount", &_lightCount);
 
@@ -364,10 +364,10 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const glm
             for (int row = 0; row < 3; row++)
             {
                 packedSkinningMatrices[boneIndex * 3 + row] = dvl::Vec4(
-                    skinningMatrices[boneIndex].m[0][row],
-                    skinningMatrices[boneIndex].m[1][row],
-                    skinningMatrices[boneIndex].m[2][row],
-                    skinningMatrices[boneIndex].m[3][row]);
+                    skinningMatrices[boneIndex][0][row],
+                    skinningMatrices[boneIndex][1][row],
+                    skinningMatrices[boneIndex][2][row],
+                    skinningMatrices[boneIndex][3][row]);
             }
         }
 

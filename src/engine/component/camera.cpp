@@ -1,7 +1,5 @@
 #include "engine/component/camera.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-
 #include <dvl/log/log.h>
 
 #include "engine/core/entity.h"
@@ -17,7 +15,7 @@ Camera::Camera(Entity& entity, float screenWidth, float screenHeight, Projection
     switch (projectionType)
     {
     case Perspective:
-        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, NearPlane, FarPlane);
+        _projection = dvl::Mat4::Perspective(dvl::Radians(60.0f), aspectRatio, NearPlane, FarPlane);
         break;
         
     case Orthographic:
@@ -26,29 +24,29 @@ Camera::Camera(Entity& entity, float screenWidth, float screenHeight, Projection
         const float halfHeight = OrthographicSize * 0.5f;
         const float halfWidth = halfHeight * aspectRatio;
 
-        _projection = glm::ortho(-halfWidth, halfWidth, -halfHeight, halfHeight, NearPlane, FarPlane);
+        _projection = dvl::Mat4::Orthographic(-halfWidth, halfWidth, -halfHeight, halfHeight, NearPlane, FarPlane);
         break;
     }
 
     default:
-        _projection = glm::perspective(glm::radians(60.0f), aspectRatio, NearPlane, FarPlane);
+        _projection = dvl::Mat4::Perspective(dvl::Radians(60.0f), aspectRatio, NearPlane, FarPlane);
         break;
     }
 
-    _view = glm::mat4{1.0f};
+    _view = dvl::Mat4::Identity();
 }
 
 void Camera::UpdateViewMatrix()
 {
-    _view = glm::inverse(entity.transform.GetMatrix());
+    _view = dvl::Mat4::Inverse(entity.transform.GetMatrix());
 }
 
-const glm::mat4& Camera::GetViewMatrix() const
+const dvl::Mat4& Camera::GetViewMatrix() const
 {
     return _view;
 }
 
-const glm::mat4& Camera::GetProjectionMatrix() const
+const dvl::Mat4& Camera::GetProjectionMatrix() const
 {
     return _projection;
 }
