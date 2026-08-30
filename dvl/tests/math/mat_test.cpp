@@ -283,6 +283,56 @@ DVL_TEST(Mat4OrthographicMapsBoundsToNormalizedDeviceCoordinates)
     return true;
 }
 
+DVL_TEST(Mat4LookAtCreatesIdentityForTheCanonicalCamera)
+{
+    const dvl::Mat4 view = dvl::Mat4::LookAt(
+        dvl::Vec3(0.0f, 0.0f, 0.0f),
+        dvl::Vec3(0.0f, 0.0f, -1.0f),
+        dvl::Vec3(0.0f, 1.0f, 0.0f));
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(view.m[column][row], expected, Epsilon);
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(Mat4LookAtTransformsEyeAndTargetIntoViewSpace)
+{
+    const dvl::Vec3 eye(2.0f, 3.0f, 4.0f);
+    const dvl::Vec3 target(-1.0f, 1.0f, -2.0f);
+    const dvl::Mat4 view = dvl::Mat4::LookAt(eye, target, dvl::Vec3(0.0f, 1.0f, 0.0f));
+
+    const dvl::Vec4 viewEye = view * dvl::Vec4(eye.x, eye.y, eye.z, 1.0f);
+    DVL_EXPECT_NEAR(viewEye.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(viewEye.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(viewEye.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(viewEye.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 viewTarget = view * dvl::Vec4(target.x, target.y, target.z, 1.0f);
+    DVL_EXPECT_NEAR(viewTarget.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(viewTarget.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(viewTarget.z, -(target - eye).Length(), Epsilon);
+    DVL_EXPECT_NEAR(viewTarget.w, 1.0f, Epsilon);
+
+    const dvl::Mat4 world = dvl::Mat4::Inverse(view);
+    DVL_EXPECT_NEAR(world.m[3][0], eye.x, Epsilon);
+    DVL_EXPECT_NEAR(world.m[3][1], eye.y, Epsilon);
+    DVL_EXPECT_NEAR(world.m[3][2], eye.z, Epsilon);
+
+    const dvl::Vec3 expectedForward = (target - eye).Normalized();
+    DVL_EXPECT_NEAR(-world.m[2][0], expectedForward.x, Epsilon);
+    DVL_EXPECT_NEAR(-world.m[2][1], expectedForward.y, Epsilon);
+    DVL_EXPECT_NEAR(-world.m[2][2], expectedForward.z, Epsilon);
+
+    return true;
+}
+
 DVL_TEST(Mat4InverseOfIdentityIsIdentity)
 {
     const dvl::Mat4 inverse = dvl::Mat4::Inverse(dvl::Mat4::Identity());
