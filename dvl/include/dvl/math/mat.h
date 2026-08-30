@@ -28,6 +28,9 @@ namespace dvl
         Mat4 operator*(const Mat4& rhs) const;
         Vec4 operator*(const Vec4& rhs) const;
 
+        float* operator[](int column);
+        const float* operator[](int column) const;
+
         // Column-major storage: m[column][row].
         float m[4][4];
     };
