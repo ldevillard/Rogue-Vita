@@ -31,16 +31,16 @@ void PlayerController::Update(float deltaTime)
     input /= std::max(1.0f, glm::length(input));
 
     // Projection on XZ plane
-    glm::vec3 forward = _camera.GetEntity()->transform.GetForward();
-    forward = glm::normalize(glm::vec3(forward.x, 0.0f, forward.z));
+    dvl::Vec3 forward = _camera.GetEntity()->transform.GetForward();
+    forward = dvl::Vec3(forward.x, 0.0f, forward.z).Normalized();
 
     // Projection on XZ plane
-    glm::vec3 right = _camera.GetEntity()->transform.GetRight();
-    right = glm::normalize(glm::vec3(right.x, 0.0f, right.z));
+    dvl::Vec3 right = _camera.GetEntity()->transform.GetRight();
+    right = dvl::Vec3(right.x, 0.0f, right.z).Normalized();
 
-    const glm::vec3 movement = right * input.x + forward * input.y;
+    const dvl::Vec3 movement = right * input.x + forward * input.y;
 
-    if (glm::dot(movement, movement) == 0.0f)
+    if (movement.LengthSquared() == 0.0f)
         return;
 
     entity.transform.LookDirection(movement);
@@ -56,15 +56,15 @@ void PlayerController::Update(float deltaTime)
 
 void PlayerController::Dash()
 {
-    const glm::vec3 from = entity.transform.position;
+    const dvl::Vec3 from = entity.transform.position;
 
     // TODO: Raycast in the dash direction and reduce the distance when an obstacle is hit
-    const glm::vec3 to = from + entity.transform.GetForward() * dashDistance;
+    const dvl::Vec3 to = from + entity.transform.GetForward() * dashDistance;
 
-    dvl::Tween<glm::vec3>& tween = dvl::Tweener::Create(from, to, dashDuration, dvl::Easing::OutSine);
+    dvl::Tween<dvl::Vec3>& tween = dvl::Tweener::Create(from, to, dashDuration, dvl::Easing::OutSine);
     _dashTween = &tween;
 
-    tween.OnUpdate([this](const glm::vec3& position)
+    tween.OnUpdate([this](const dvl::Vec3& position)
     {
         entity.transform.position = position;
     });

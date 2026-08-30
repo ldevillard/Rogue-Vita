@@ -1,22 +1,22 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/math.h>
 
 // TODO: Compute matrices and vectors once per frame, maybe a dirty flag system may work
 class Transform
 {
 public:
-    glm::vec3 position {0.0f};
+    dvl::Vec3 position;
     // TODO: Support quat to avoid gimball lock
-    glm::vec3 rotation {0.0f};
-    glm::vec3 scale {1.0f};
+    dvl::Vec3 rotation;
+    dvl::Vec3 scale = dvl::Vec3(1.0f, 1.0f, 1.0f);
 
-    glm::vec3 GetForward() const;
-    glm::vec3 GetRight() const;
-    glm::vec3 GetUp() const;
-    glm::mat4 GetMatrix() const;
+    dvl::Vec3 GetForward() const;
+    dvl::Vec3 GetRight() const;
+    dvl::Vec3 GetUp() const;
+    dvl::Mat4 GetMatrix() const;
 
     // TODO: Update with quat when it will be available
-    void LookAt(const glm::vec3& target);
-    void LookDirection(const glm::vec3& direction);
+    void LookAt(const dvl::Vec3& target);
+    void LookDirection(const dvl::Vec3& direction);
 };

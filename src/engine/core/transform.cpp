@@ -1,59 +1,56 @@
 #include "engine/core/transform.h"
 
-#include <glm/gtc/matrix_transform.hpp>
+#include <cmath>
 
-glm::vec3 Transform::GetForward() const 
+dvl::Vec3 Transform::GetForward() const
 {
-    return -glm::normalize(glm::vec3(GetMatrix()[2]));
+    const dvl::Mat4 matrix = GetMatrix();
+    return dvl::Vec3(-matrix[2][0], -matrix[2][1], -matrix[2][2]).Normalized();
 }
 
-glm::vec3 Transform::GetRight() const 
+dvl::Vec3 Transform::GetRight() const
 {
-    return glm::normalize(glm::vec3(GetMatrix()[0]));
+    const dvl::Mat4 matrix = GetMatrix();
+    return dvl::Vec3(matrix[0][0], matrix[0][1], matrix[0][2]).Normalized();
 }
 
-glm::vec3 Transform::GetUp() const 
+dvl::Vec3 Transform::GetUp() const
 {
-    return glm::normalize(glm::vec3(GetMatrix()[1]));
+    const dvl::Mat4 matrix = GetMatrix();
+    return dvl::Vec3(matrix[1][0], matrix[1][1], matrix[1][2]).Normalized();
 }
 
-glm::mat4 Transform::GetMatrix() const
+dvl::Mat4 Transform::GetMatrix() const
 {
-    glm::mat4 matrix {1.0f};
-
-    matrix = glm::translate(matrix, position);
-
-    matrix = glm::rotate(matrix, rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    matrix = glm::rotate(matrix, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    matrix = glm::rotate(matrix, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-
-    matrix = glm::scale(matrix, scale);
-
-    return matrix;
+    return dvl::Mat4::Translation(position) *
+        dvl::Mat4::Rotation(dvl::Quat::FromAxisAngle(dvl::Vec3(1.0f, 0.0f, 0.0f), rotation.x)) *
+        dvl::Mat4::Rotation(dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), rotation.y)) *
+        dvl::Mat4::Rotation(dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), rotation.z)) *
+        dvl::Mat4::Scale(scale);
 }
 
-void Transform::LookAt(const glm::vec3& target)
+void Transform::LookAt(const dvl::Vec3& target)
 {
-    const glm::vec3 delta = target - position;
+    const dvl::Vec3 delta = target - position;
 
-    if (glm::dot(delta, delta) < 0.000001f)
+    if (delta.LengthSquared() < 0.000001f)
         return;
 
-    const glm::mat4 worldMatrix = glm::inverse(glm::lookAt(position, target, glm::vec3(0.0f, 1.0f, 0.0f)));
+    const dvl::Mat4 worldMatrix = dvl::Mat4::Inverse(dvl::Mat4::LookAt(position, target, dvl::Vec3(0.0f, 1.0f, 0.0f)));
 
-    rotation.y = std::asin(glm::clamp(worldMatrix[2][0], -1.0f, 1.0f));
+    rotation.y = std::asin(dvl::Clamp(worldMatrix[2][0], -1.0f, 1.0f));
     rotation.x = std::atan2(-worldMatrix[2][1], worldMatrix[2][2]);
     rotation.z = std::atan2(-worldMatrix[1][0], worldMatrix[0][0]);
 }
 
-void Transform::LookDirection(const glm::vec3& direction)
+void Transform::LookDirection(const dvl::Vec3& direction)
 {
-    const float lengthSquared = glm::dot(direction, direction);
+    const float lengthSquared = direction.LengthSquared();
 
     if (lengthSquared < 0.000001f)
         return;
 
-    const glm::vec3 forward = direction * glm::inversesqrt(lengthSquared);
+    const dvl::Vec3 forward = direction * dvl::InverseSqrt(lengthSquared);
 
     rotation.x = 0.0f;
     rotation.y = std::atan2(-forward.x, -forward.z);

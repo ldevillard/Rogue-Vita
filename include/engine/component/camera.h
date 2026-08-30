@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/mat.h>
 
 #include "engine/component/component.h"
 
@@ -17,10 +17,10 @@ public:
 
     void UpdateViewMatrix();
 
-    const glm::mat4& GetViewMatrix() const;
-    const glm::mat4& GetProjectionMatrix() const;
+    const dvl::Mat4& GetViewMatrix() const;
+    const dvl::Mat4& GetProjectionMatrix() const;
 
 private:
-    glm::mat4 _view;
-    glm::mat4 _projection;
+    dvl::Mat4 _view;
+    dvl::Mat4 _projection;
 };

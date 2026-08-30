@@ -1,18 +1,18 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/math.h>
 
 struct VertexPositionColor
 {
     float x, y, z;
-    glm::vec4 color;
+    dvl::Vec4 color;
 };
 
 struct VertexPositionNormalColor
 {
     float x, y, z;
     float nx, ny, nz;
-    glm::vec4 color;
+    dvl::Vec4 color;
 };
 
 struct VertexPositionNormalUV

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/vec.h>
 
 #include "engine/component/behavior.h"
 
@@ -18,5 +18,5 @@ public:
 private:
     const Transform& _target;
 
-    glm::vec3 _targetOffset;
+    dvl::Vec3 _targetOffset;
 };
