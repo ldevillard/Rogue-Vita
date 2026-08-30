@@ -4,6 +4,86 @@
 
 namespace dvl
 {
+    Vec2::Vec2()
+        : x(0.0f), y(0.0f)
+    {
+    }
+
+    Vec2::Vec2(float x, float y)
+        : x(x), y(y)
+    {
+    }
+
+    Vec2 Vec2::operator+(const Vec2& rhs) const
+    {
+        return Vec2(x + rhs.x, y + rhs.y);
+    }
+
+    Vec2 Vec2::operator-(const Vec2& rhs) const
+    {
+        return Vec2(x - rhs.x, y - rhs.y);
+    }
+
+    Vec2 Vec2::operator*(float scalar) const
+    {
+        return Vec2(x * scalar, y * scalar);
+    }
+
+    Vec2 Vec2::operator/(float scalar) const
+    {
+        return Vec2(x / scalar, y / scalar);
+    }
+
+    Vec2& Vec2::operator+=(const Vec2& rhs)
+    {
+        x += rhs.x;
+        y += rhs.y;
+        return *this;
+    }
+
+    Vec2& Vec2::operator-=(const Vec2& rhs)
+    {
+        x -= rhs.x;
+        y -= rhs.y;
+        return *this;
+    }
+
+    Vec2& Vec2::operator*=(float scalar)
+    {
+        x *= scalar;
+        y *= scalar;
+        return *this;
+    }
+
+    float Vec2::Length() const
+    {
+        return std::sqrt(LengthSquared());
+    }
+
+    float Vec2::LengthSquared() const
+    {
+        return x * x + y * y;
+    }
+
+    Vec2 Vec2::Normalized() const
+    {
+        const float length = Length();
+        if (length == 0.0f)
+            return Vec2();
+
+        return *this / length;
+    }
+
+    void Vec2::Normalize()
+    {
+        const float length = Length();
+        if (length == 0.0f)
+            return;
+
+        x /= length;
+        y /= length;
+    }
+
     Vec3::Vec3()
         : x(0.0f), y(0.0f), z(0.0f)
     {
@@ -181,6 +261,11 @@ namespace dvl
         w /= length;
     }
 
+    float Dot(const Vec2& a, const Vec2& b)
+    {
+        return a.x * b.x + a.y * b.y;
+    }
+
     float Dot(const Vec3& a, const Vec3& b)
     {
         return a.x * b.x + a.y * b.y + a.z * b.z;
@@ -197,6 +282,11 @@ namespace dvl
             a.y * b.z - a.z * b.y,
             a.z * b.x - a.x * b.z,
             a.x * b.y - a.y * b.x);
+    }
+
+    Vec2 Lerp(const Vec2& a, const Vec2& b, float t)
+    {
+        return a + (b - a) * t;
     }
 
     Vec3 Lerp(const Vec3& a, const Vec3& b, float t)
