@@ -44,8 +44,8 @@ private:
     void loadCubePrimitive(Renderer& renderer);
     void loadDefaultTexture(Renderer& renderer);
 
-    // TODO: Split in loadMaterials and loadSkinnedMaterials
     void loadMaterials(Renderer& renderer);
+    void loadSkinnedMaterials(Renderer& renderer);
 
     // Primitives
     MeshHandle _cubeMeshHandle;
