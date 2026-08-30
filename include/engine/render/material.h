@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/math.h>
 
 #include "render_pipeline.h"
 #include "texture.h"
@@ -36,5 +36,5 @@ struct Material
 
     TextureHandle textureHandle;
     
-    glm::vec4 color = glm::vec4(1.0f);
+    dvl::Vec4 color = dvl::Vec4(1.0f, 1.0f, 1.0f, 1.0f);
 };

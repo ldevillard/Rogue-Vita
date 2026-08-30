@@ -214,9 +214,9 @@ void Renderer::DestroyTexture(Texture& texture)
     texture = {};
 }
 
-void Renderer::BeginFrame(const glm::vec4& clearColor)
+void Renderer::BeginFrame(const dvl::Vec4& clearColor)
 {
-    _device.BeginFrame(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+    _device.BeginFrame(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
 }
 
 void Renderer::EndFrame()
@@ -237,9 +237,9 @@ void Renderer::SubmitLight(const DirectionalLight& light)
         return;
     }
 
-    const glm::vec3 direction = glm::normalize(light.direction);
-    _lightDirections[_lightCount] = glm::vec4(direction, 0.0f);
-    _lightColors[_lightCount] = glm::vec4(light.color, light.intensity);
+    const dvl::Vec3 direction = light.direction.Normalized();
+    _lightDirections[_lightCount] = dvl::Vec4(direction.x, direction.y, direction.z, 0.0f);
+    _lightColors[_lightCount] = dvl::Vec4(light.color.x, light.color.y, light.color.z, light.intensity);
     _lightCount++;
 }
 
@@ -278,13 +278,13 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const dvl::Mat4&
         const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
 
         setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
-        setParameter(*renderPipeline, "materialColor", &material.color.r);
+        setParameter(*renderPipeline, "materialColor", &material.color.x);
         setParameter(*renderPipeline, "lightCount", &_lightCount);
 
         if (_lightCount > 0)
         {
-            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
-            setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
+            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0].x, _lightCount);
+            setParameter(*renderPipeline, "lightColors", &_lightColors[0].x, _lightCount);
         }
 
         setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
@@ -341,13 +341,13 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const dvl
         const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
 
         setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
-        setParameter(*renderPipeline, "materialColor", &material.color.r);
+        setParameter(*renderPipeline, "materialColor", &material.color.x);
         setParameter(*renderPipeline, "lightCount", &_lightCount);
 
         if (_lightCount > 0)
         {
-            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0][0], _lightCount);
-            setParameter(*renderPipeline, "lightColors", &_lightColors[0][0], _lightCount);
+            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0].x, _lightCount);
+            setParameter(*renderPipeline, "lightColors", &_lightColors[0].x, _lightCount);
         }
 
         setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);

@@ -2,8 +2,6 @@
 
 #include <dvl/dvl.h>
 
-#include <glm/glm.hpp>
-
 struct Mesh;
 struct MeshDesc;
 struct Material;
@@ -34,7 +32,7 @@ public:
     bool CreateTexture(const TextureDesc& desc, Texture& texture);
     void DestroyTexture(Texture& texture);
 
-    void BeginFrame(const glm::vec4& clearColor);
+    void BeginFrame(const dvl::Vec4& clearColor);
     void EndFrame();
 
     void BeginScene(const Camera& camera);
@@ -54,8 +52,8 @@ private:
     const Camera* _activeCamera = nullptr;
     const AssetRegistry& _assetRegistry;
 
-    glm::vec4 _lightDirections[MaxLights]{};
-    glm::vec4 _lightColors[MaxLights]{};
+    dvl::Vec4 _lightDirections[MaxLights]{};
+    dvl::Vec4 _lightColors[MaxLights]{};
 
     int _lightCount = 0;
 };

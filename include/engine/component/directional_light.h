@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include <dvl/math/math.h>
 
 #include "engine/component/component.h"
 
@@ -9,7 +9,7 @@ class DirectionalLight : public Component
 public:
     DirectionalLight(Entity& entity);
 
-    glm::vec3 direction = glm::vec3(0.0f, -1.0f, 0.0f);
-    glm::vec3 color = glm::vec3(1.0f, 1.0f, 1.0f);
+    dvl::Vec3 direction = dvl::Vec3(0.0f, -1.0f, 0.0f);
+    dvl::Vec3 color = dvl::Vec3(1.0f, 1.0f, 1.0f);
     float intensity = 1.0f;
 };

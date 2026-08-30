@@ -4,9 +4,6 @@
 #include <cstdint>
 #include <cmath>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/constants.hpp>
-
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
 #include "engine/component/mesh_renderer.h"
@@ -82,7 +79,7 @@ int main()
     const float trainingStartHeight = trainingEntity->transform.position.y;
 
     // TODO: Replace this sine-based loop with a yoyo option in the tween system
-    dvl::Tweener::Create(0.0f, glm::pi<float>(), JumpDuration, dvl::Easing::Linear, -1)
+    dvl::Tweener::Create(0.0f, dvl::Pi, JumpDuration, dvl::Easing::Linear, -1)
         .OnUpdate([trainingEntity, trainingStartHeight](const float& jumpTime)
         {
             trainingEntity->transform.position.y = trainingStartHeight + std::sin(jumpTime) * JumpHeight;
@@ -93,13 +90,13 @@ int main()
     planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
     planeEntity->transform.scale = dvl::Vec3(8.0f, 0.1f, 8.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
-    planeMaterial.color = glm::vec4(0.4f, 0.4f, 0.4f, 1.0f);
+    planeMaterial.color = dvl::Vec4(0.4f, 0.4f, 0.4f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
 
     // Directional light
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
-    light.direction = glm::vec3(0.35f, -1.0f, 0.45f);
+    light.direction = dvl::Vec3(0.35f, -1.0f, 0.45f);
     light.intensity = 1.3f;
 
     // Skinned mesh test
@@ -163,13 +160,13 @@ int main()
 
     Entity* wireframeAnimatedEntity = world.CreateEntity();
     Material wireframeAnimatedMaterial = assetRegistry.GetSkinnedWireframeMaterialInstance();
-    wireframeAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
+    wireframeAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
     MeshRenderer& wireframeAnimatedMeshRenderer = wireframeAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, wireframeAnimatedMaterial);
     wireframeAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
     Entity* solidAnimatedEntity = world.CreateEntity();
     Material solidAnimatedMaterial = assetRegistry.GetSkinnedSolidMaterialInstance();
-    solidAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
+    solidAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
     MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, solidAnimatedMaterial);
     solidAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
@@ -223,7 +220,7 @@ int main()
             mainCamera.UpdateViewMatrix();
         }
 
-        renderer.BeginFrame(glm::vec4(0.32f, 0.45f, 0.65f, 1.0f));
+        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
         renderer.BeginScene(mainCamera);
 
         // TODO: Use future World::GetLights
