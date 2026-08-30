@@ -104,6 +104,28 @@ namespace dvl
         return result;
     }
 
+    Mat4 Mat4::LookAt(const Vec3& eye, const Vec3& target, const Vec3& up)
+    {
+        const Vec3 forward = (target - eye).Normalized();
+        const Vec3 right = Cross(forward, up).Normalized();
+        const Vec3 cameraUp = Cross(right, forward);
+
+        Mat4 result;
+        result.m[0][0] = right.x;
+        result.m[1][0] = right.y;
+        result.m[2][0] = right.z;
+        result.m[0][1] = cameraUp.x;
+        result.m[1][1] = cameraUp.y;
+        result.m[2][1] = cameraUp.z;
+        result.m[0][2] = -forward.x;
+        result.m[1][2] = -forward.y;
+        result.m[2][2] = -forward.z;
+        result.m[3][0] = -Dot(right, eye);
+        result.m[3][1] = -Dot(cameraUp, eye);
+        result.m[3][2] = Dot(forward, eye);
+        return result;
+    }
+
     Mat4 Mat4::Inverse(const Mat4& matrix)
     {
         Mat4 result{};
