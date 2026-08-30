@@ -192,4 +192,14 @@ namespace dvl
             m[0][2] * rhs.x + m[1][2] * rhs.y + m[2][2] * rhs.z + m[3][2] * rhs.w,
             m[0][3] * rhs.x + m[1][3] * rhs.y + m[2][3] * rhs.z + m[3][3] * rhs.w);
     }
+
+    float* Mat4::operator[](int column)
+    {
+        return m[column];
+    }
+
+    const float* Mat4::operator[](int column) const
+    {
+        return m[column];
+    }
 }

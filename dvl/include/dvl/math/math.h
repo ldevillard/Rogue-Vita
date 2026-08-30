@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cmath>
-
 #include "mat.h"
 #include "quat.h"
 #include "transform.h"
@@ -11,23 +9,8 @@ namespace dvl
 {
     constexpr float Pi = 3.14159265358979323846f;
 
-    constexpr float Radians(float degrees)
-    {
-        return degrees * (Pi / 180.0f);
-    }
-
-    constexpr float Degrees(float radians)
-    {
-        return radians * (180.0f / Pi);
-    }
-
-    constexpr float Clamp(float value, float minimum, float maximum)
-    {
-        return value < minimum ? minimum : (value > maximum ? maximum : value);
-    }
-
-    inline float InverseSqrt(float value)
-    {
-        return 1.0f / std::sqrt(value);
-    }
+    float Radians(float degrees);
+    float Degrees(float radians);
+    float Clamp(float value, float minimum, float maximum);
+    float InverseSqrt(float value);
 }

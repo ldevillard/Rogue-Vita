@@ -7,15 +7,17 @@ namespace
     constexpr float Epsilon = 0.0001f;
 }
 
-DVL_TEST(MathAngleConstantsAndConversionsAreConstexpr)
+DVL_TEST(PiIsConstexprAndAngleConversionsAreCorrect)
 {
-    constexpr float HalfTurnRadians = dvl::Radians(180.0f);
-    constexpr float HalfTurnDegrees = dvl::Degrees(dvl::Pi);
+    constexpr float ExpectedPi = dvl::Pi;
+    const float halfTurnRadians = dvl::Radians(180.0f);
+    const float halfTurnDegrees = dvl::Degrees(dvl::Pi);
 
-    static_assert(HalfTurnRadians > 3.14f && HalfTurnRadians < 3.15f);
-    static_assert(HalfTurnDegrees > 179.99f && HalfTurnDegrees < 180.01f);
+    static_assert(ExpectedPi > 3.14f && ExpectedPi < 3.15f);
 
     DVL_EXPECT_NEAR(dvl::Pi, 3.14159265f, Epsilon);
+    DVL_EXPECT_NEAR(halfTurnRadians, dvl::Pi, Epsilon);
+    DVL_EXPECT_NEAR(halfTurnDegrees, 180.0f, Epsilon);
 
     return true;
 }
@@ -56,17 +58,13 @@ DVL_TEST(DegreesAndRadiansRoundTrip)
 
 DVL_TEST(ClampRestrictsValuesToTheRequestedRange)
 {
-    constexpr float Below = dvl::Clamp(-2.0f, -1.0f, 1.0f);
-    constexpr float Inside = dvl::Clamp(0.25f, -1.0f, 1.0f);
-    constexpr float Above = dvl::Clamp(3.0f, -1.0f, 1.0f);
+    const float below = dvl::Clamp(-2.0f, -1.0f, 1.0f);
+    const float inside = dvl::Clamp(0.25f, -1.0f, 1.0f);
+    const float above = dvl::Clamp(3.0f, -1.0f, 1.0f);
 
-    static_assert(Below == -1.0f);
-    static_assert(Inside == 0.25f);
-    static_assert(Above == 1.0f);
-
-    DVL_EXPECT_EQ(Below, -1.0f);
-    DVL_EXPECT_EQ(Inside, 0.25f);
-    DVL_EXPECT_EQ(Above, 1.0f);
+    DVL_EXPECT_EQ(below, -1.0f);
+    DVL_EXPECT_EQ(inside, 0.25f);
+    DVL_EXPECT_EQ(above, 1.0f);
 
     return true;
 }

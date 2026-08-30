@@ -36,6 +36,19 @@ DVL_TEST(Mat4DefaultConstructorAndIdentityCreateIdentityMatrix)
     return true;
 }
 
+DVL_TEST(Mat4SubscriptOperatorAccessesColumnsThenRows)
+{
+    dvl::Mat4 matrix;
+    matrix[2][1] = 42.0f;
+
+    DVL_EXPECT_EQ(matrix.m[2][1], 42.0f);
+
+    const dvl::Mat4& constMatrix = matrix;
+    DVL_EXPECT_EQ(constMatrix[2][1], 42.0f);
+
+    return true;
+}
+
 DVL_TEST(Mat4TranslationUsesHomogeneousCoordinatesAndColumnMajorStorage)
 {
     const dvl::Mat4 translation = dvl::Mat4::Translation(dvl::Vec3(3.0f, -2.0f, 5.0f));
