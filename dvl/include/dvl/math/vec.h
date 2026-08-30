@@ -2,6 +2,31 @@
 
 namespace dvl
 {
+    class Vec2
+    {
+    public:
+        Vec2();
+        Vec2(float x, float y);
+
+        Vec2 operator+(const Vec2& rhs) const;
+        Vec2 operator-(const Vec2& rhs) const;
+        Vec2 operator*(float scalar) const;
+        Vec2 operator/(float scalar) const;
+
+        Vec2& operator+=(const Vec2& rhs);
+        Vec2& operator-=(const Vec2& rhs);
+        Vec2& operator*=(float scalar);
+
+        float Length() const;
+        float LengthSquared() const;
+
+        Vec2 Normalized() const;
+        void Normalize();
+
+        float x;
+        float y;
+    };
+
     class Vec3
     {
     public:
@@ -56,11 +81,13 @@ namespace dvl
         float w;
     };
 
+    float Dot(const Vec2& a, const Vec2& b);
     float Dot(const Vec3& a, const Vec3& b);
     float Dot(const Vec4& a, const Vec4& b);
 
     Vec3 Cross(const Vec3& a, const Vec3& b);
 
+    Vec2 Lerp(const Vec2& a, const Vec2& b, float t);
     Vec3 Lerp(const Vec3& a, const Vec3& b, float t);
     Vec4 Lerp(const Vec4& a, const Vec4& b, float t);
 }
