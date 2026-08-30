@@ -1,9 +1,8 @@
 #include "game/component/player_controller.h"
 
 #include <dvl/input/input.h>
+#include <dvl/math/math.h>
 #include <dvl/tween/tweener.h>
-
-#include <glm/glm.hpp>
 
 #include "engine/component/camera.h"
 #include "engine/core/entity.h"
@@ -26,9 +25,9 @@ void PlayerController::Update(float deltaTime)
 
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 
-    glm::vec2 input{stick.x, stick.y};
+    dvl::Vec2 input{stick.x, stick.y};
     // Avoid moving faster diagonally
-    input /= std::max(1.0f, glm::length(input));
+    input = input / std::max(1.0f, input.Length());
 
     // Projection on XZ plane
     dvl::Vec3 forward = _camera.GetEntity()->transform.GetForward();
