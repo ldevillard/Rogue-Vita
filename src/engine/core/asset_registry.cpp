@@ -257,6 +257,16 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
     return _materials.at(_wireframeMaterialHandle);
 }
 
+const Material AssetRegistry::GetSkinnedSolidMaterialInstance() const
+{
+    return _materials.at(_skinnedSolidMaterialHandle);
+}
+
+const Material AssetRegistry::GetSkinnedWireframeMaterialInstance() const
+{
+    return _materials.at(_skinnedWireframeMaterialHandle);
+}
+
 void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
     const VertexPositionNormalUV CubeVertices[] =
@@ -366,6 +376,15 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"aUV", dvl::VertexFormat::Float2, offsetof(VertexPositionNormalUV, u)}
     };
 
+    const dvl::VertexAttribute skinnedAttributes[] =
+    {
+        {"aPosition", dvl::VertexFormat::Float3, offsetof(SkinnedVertexPositionNormalUV, x)},
+        {"aNormal", dvl::VertexFormat::Float3, offsetof(SkinnedVertexPositionNormalUV, nx)},
+        {"aUV", dvl::VertexFormat::Float2, offsetof(SkinnedVertexPositionNormalUV, u)},
+        {"aBoneIndices", dvl::VertexFormat::UByte4, offsetof(SkinnedVertexPositionNormalUV, boneIndices)},
+        {"aBoneWeights", dvl::VertexFormat::UNormByte4, offsetof(SkinnedVertexPositionNormalUV, boneWeights)}
+    };
+
     const ShaderParameterDesc parameters[] =
     {
         {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4},
@@ -378,11 +397,29 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"albedoTexture", dvl::ShaderParameterType::Int}
     };
 
+    const ShaderParameterDesc skinnedParameters[] =
+    {
+        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4},
+        {"modelMatrix", dvl::ShaderParameterType::Mat4},
+        {"materialColor", dvl::ShaderParameterType::Float4},
+        {"lightCount", dvl::ShaderParameterType::Int},
+        {"lightDirections", dvl::ShaderParameterType::Float4},
+        {"lightColors", dvl::ShaderParameterType::Float4},
+        {"cameraPosition", dvl::ShaderParameterType::Float3},
+        {"albedoTexture", dvl::ShaderParameterType::Int},
+        {"skinningMatrices", dvl::ShaderParameterType::Float4}
+    };
+
     Material solidMaterial = {};
     Material wireframeMaterial = {};
 
+    Material skinnedSolidMaterial = {};
+    Material skinnedWireframeMaterial = {};
+
     solidMaterial.textureHandle = _defaultTextureHandle;
     wireframeMaterial.textureHandle = _defaultTextureHandle;
+    skinnedSolidMaterial.textureHandle = _defaultTextureHandle;
+    skinnedWireframeMaterial.textureHandle = _defaultTextureHandle;
 
     RenderPipelineDesc pipelineDesc = {};
     pipelineDesc.vertexShaderPath = "app0:/asset/shaders/vertex.vert";
@@ -397,10 +434,29 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
 
     RenderPipeline solidRenderPipeline = {};
     renderer.CreateRenderPipeline(pipelineDesc, solidRenderPipeline);
+
     pipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
     RenderPipeline wireframeRenderPipeline = {};
     renderer.CreateRenderPipeline(pipelineDesc, wireframeRenderPipeline);
     
+    RenderPipelineDesc skinnedPipelineDesc = {};
+    skinnedPipelineDesc.vertexShaderPath = "app0:/asset/shaders/skinned_vertex.vert";
+    skinnedPipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
+    skinnedPipelineDesc.attributes = skinnedAttributes;
+    skinnedPipelineDesc.attributeCount = sizeof(skinnedAttributes) / sizeof(skinnedAttributes[0]);
+    skinnedPipelineDesc.vertexStride = sizeof(SkinnedVertexPositionNormalUV);
+    skinnedPipelineDesc.parameters = skinnedParameters;
+    skinnedPipelineDesc.parameterCount = sizeof(skinnedParameters) / sizeof(skinnedParameters[0]);
+    skinnedPipelineDesc.depthStencilState.depthTestEnabled = true;
+    skinnedPipelineDesc.depthStencilState.depthWriteEnabled = true;
+
+    RenderPipeline skinnedSolidRenderPipeline = {};
+    renderer.CreateRenderPipeline(skinnedPipelineDesc, skinnedSolidRenderPipeline);
+
+    skinnedPipelineDesc.rasterizerState.fillMode = dvl::FillMode::Wireframe;
+    RenderPipeline skinnedWireframeRenderPipeline = {};
+    renderer.CreateRenderPipeline(skinnedPipelineDesc, skinnedWireframeRenderPipeline);
+
     RenderPipelineHandle solidPipelineHandle = {};
     solidPipelineHandle.id = _nextPipelineId++;
     
@@ -409,13 +465,29 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     
     _pipelines.emplace(solidPipelineHandle, solidRenderPipeline);
     _pipelines.emplace(wireframePipelineHandle, wireframeRenderPipeline);
+
+    RenderPipelineHandle skinnedSolidPipelineHandle = {};
+    skinnedSolidPipelineHandle.id = _nextPipelineId++;
+
+    RenderPipelineHandle skinnedWireframePipelineHandle = {};
+    skinnedWireframePipelineHandle.id = _nextPipelineId++;
+
+    _pipelines.emplace(skinnedSolidPipelineHandle, skinnedSolidRenderPipeline);
+    _pipelines.emplace(skinnedWireframePipelineHandle, skinnedWireframeRenderPipeline);
     
     solidMaterial.renderPipelineHandle = solidPipelineHandle;
     wireframeMaterial.renderPipelineHandle = wireframePipelineHandle;
 
+    skinnedSolidMaterial.renderPipelineHandle = skinnedSolidPipelineHandle;
+    skinnedWireframeMaterial.renderPipelineHandle = skinnedWireframePipelineHandle;
+
     _solidMaterialHandle.id = _nextMaterialId++;
     _wireframeMaterialHandle.id = _nextMaterialId++;
+    _skinnedSolidMaterialHandle.id = _nextMaterialId++;
+    _skinnedWireframeMaterialHandle.id = _nextMaterialId++;
 
     _materials.emplace(_solidMaterialHandle, solidMaterial);
     _materials.emplace(_wireframeMaterialHandle, wireframeMaterial);
+    _materials.emplace(_skinnedSolidMaterialHandle, skinnedSolidMaterial);
+    _materials.emplace(_skinnedWireframeMaterialHandle, skinnedWireframeMaterial);
 }

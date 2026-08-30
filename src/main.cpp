@@ -21,54 +21,6 @@
 #include "game/component/player_controller.h"
 #include "game/component/spring_arm.h"
 
-namespace
-{
-    constexpr int BoneCount = 2;
-    constexpr std::size_t MaxBoneInfluences = 4;
-    constexpr std::size_t AnimatedVertexCount = 6;
-
-    struct CpuSkinVertex
-    {
-        VertexPositionNormalUV bindVertex;
-        std::uint8_t boneIndices[MaxBoneInfluences];
-        float boneWeights[MaxBoneInfluences];
-    };
-
-    void SkinVerticesCpu(const CpuSkinVertex* bindVertices, std::size_t vertexCount, const dvl::Mat4* skinningMatrices, VertexPositionNormalUV* skinnedVertices)
-    {
-        for (std::size_t vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++)
-        {
-            const VertexPositionNormalUV& bindVertex = bindVertices[vertexIndex].bindVertex;
-            const dvl::Vec4 bindPosition(bindVertex.x, bindVertex.y, bindVertex.z, 1.0f);
-            const dvl::Vec4 bindNormal(bindVertex.nx, bindVertex.ny, bindVertex.nz, 0.0f);
-
-            dvl::Vec4 position(0.0f, 0.0f, 0.0f, 0.0f);
-            dvl::Vec4 normal(0.0f, 0.0f, 0.0f, 0.0f);
-
-            for (std::size_t influenceIndex = 0; influenceIndex < MaxBoneInfluences; influenceIndex++)
-            {
-                const float boneWeight = bindVertices[vertexIndex].boneWeights[influenceIndex];
-
-                if (boneWeight <= 0.0f)
-                    continue;
-
-                const std::uint8_t boneIndex = bindVertices[vertexIndex].boneIndices[influenceIndex];
-                position += skinningMatrices[boneIndex] * bindPosition * boneWeight;
-                normal += skinningMatrices[boneIndex] * bindNormal * boneWeight;
-            }
-
-            skinnedVertices[vertexIndex].x = position.x;
-            skinnedVertices[vertexIndex].y = position.y;
-            skinnedVertices[vertexIndex].z = position.z;
-
-            normal.Normalize();
-            skinnedVertices[vertexIndex].nx = normal.x;
-            skinnedVertices[vertexIndex].ny = normal.y;
-            skinnedVertices[vertexIndex].nz = normal.z;
-        }
-    }
-}
-
 int main()
 {
     dvl::Log(dvl::LogLevel::Info, "Application starting");
@@ -153,6 +105,9 @@ int main()
     // CPU skinning test
     const std::int16_t parents[] = {-1, 0};
 
+    constexpr int BoneCount = 2;
+    constexpr int AnimatedVertexCount = 6;
+
     dvl::Transform bindPose[BoneCount];
     bindPose[0].translation = dvl::Vec4(0.5f, 0.0f, 0.0f, 0.0f);
     bindPose[1].translation = dvl::Vec4(0.0f, 1.0f, 0.0f, 0.0f);
@@ -168,26 +123,20 @@ int main()
         inverseBindMatrices
     };
 
-    const CpuSkinVertex bindVertices[AnimatedVertexCount] =
+    const SkinnedVertexPositionNormalUV animatedVertices[AnimatedVertexCount] =
     {
-        {{0.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f}, {0, 0, 0, 0}, {1.0f, 0.0f, 0.0f, 0.0f}},
+        {0.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.0f, {0, 0, 0, 0}, {255, 0, 0, 0}},
 
-        {{1.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f}, {0, 0, 0, 0}, {1.0f, 0.0f, 0.0f, 0.0f}},
+        {1.0f, 0.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f, {0, 0, 0, 0}, {255, 0, 0, 0}},
 
-        {{0.0f, 1.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.5f}, {0, 1, 0, 0}, {0.5f, 0.5f, 0.0f, 0.0f}},
+        {0.0f, 1.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 0.5f, {0, 1, 0, 0}, {128, 127, 0, 0}},
 
-        {{1.0f, 1.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.5f}, {0, 1, 0, 0}, {0.5f, 0.5f, 0.0f, 0.0f}},
+        {1.0f, 1.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.5f, {0, 1, 0, 0}, {128, 127, 0, 0}},
 
-        {{0.0f, 2.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f}, {1, 0, 0, 0}, {1.0f, 0.0f, 0.0f, 0.0f}},
+        {0.0f, 2.0f, 0.0f,  0.0f, 0.0f, -1.0f,  0.0f, 1.0f, {1, 0, 0, 0}, {255, 0, 0, 0}},
 
-        {{1.0f, 2.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f}, {1, 0, 0, 0}, {1.0f, 0.0f, 0.0f, 0.0f}}
+        {1.0f, 2.0f, 0.0f,  0.0f, 0.0f, -1.0f,  1.0f, 1.0f, {1, 0, 0, 0}, {255, 0, 0, 0}}
     };
-
-    VertexPositionNormalUV animatedVertices[AnimatedVertexCount];
-    for (std::size_t vertexIndex = 0; vertexIndex < AnimatedVertexCount; vertexIndex++)
-    {
-        animatedVertices[vertexIndex] = bindVertices[vertexIndex].bindVertex;
-    }
 
     const std::uint16_t animatedIndices[] =
     {
@@ -202,7 +151,7 @@ int main()
     animatedMeshDesc.vertexDataSize = sizeof(animatedVertices);
     animatedMeshDesc.indices = animatedIndices;
     animatedMeshDesc.indexCount = static_cast<unsigned int>(sizeof(animatedIndices) / sizeof(animatedIndices[0]));
-    animatedMeshDesc.vertexBufferUsage = dvl::BufferUsage::Dynamic;
+    animatedMeshDesc.vertexBufferUsage = dvl::BufferUsage::Static;
 
     Mesh cpuSkinMesh = {};
     if (!renderer.CreateMesh(animatedMeshDesc, cpuSkinMesh))
@@ -213,13 +162,13 @@ int main()
     }
 
     Entity* wireframeAnimatedEntity = world.CreateEntity();
-    Material wireframeAnimatedMaterial = assetRegistry.GetWireframeMaterialInstance();
+    Material wireframeAnimatedMaterial = assetRegistry.GetSkinnedWireframeMaterialInstance();
     wireframeAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
     MeshRenderer& wireframeAnimatedMeshRenderer = wireframeAnimatedEntity->AddComponent<MeshRenderer>(&cpuSkinMesh, wireframeAnimatedMaterial);
     wireframeAnimatedMeshRenderer.localTransform.position.x = -0.5f;
 
     Entity* solidAnimatedEntity = world.CreateEntity();
-    Material solidAnimatedMaterial = assetRegistry.GetSolidMaterialInstance();
+    Material solidAnimatedMaterial = assetRegistry.GetSkinnedSolidMaterialInstance();
     solidAnimatedMaterial.color = glm::vec4(0.243f, 0.624f, 0.631f, 1.0f);
     MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&cpuSkinMesh, solidAnimatedMaterial);
     solidAnimatedMeshRenderer.localTransform.position.x = -0.5f;
@@ -253,8 +202,7 @@ int main()
 
         // Gameplay logic
         {
-            // TODO: Rework entity traversal with RegisterComponent system in world to avoid
-            // multiple traversal and casts
+            // TODO: Rework entity traversal with RegisterComponent system in world to avoid multiple traversal and casts
             for (const std::unique_ptr<Entity>& entity : world.GetEntities())
             {
                 for (const std::unique_ptr<Component>& component : entity->GetComponents())
@@ -275,6 +223,18 @@ int main()
             mainCamera.UpdateViewMatrix();
         }
 
+        renderer.BeginFrame(glm::vec4(0.32f, 0.45f, 0.65f, 1.0f));
+        renderer.BeginScene(mainCamera);
+
+        // TODO: Use future World::GetLights
+        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+        {
+            // With the future new register component system, it will support multiple lights per entity
+            const DirectionalLight* directionalLight = entity->GetComponent<DirectionalLight>();
+            if (directionalLight != nullptr)
+                renderer.SubmitLight(*directionalLight);
+        }
+
         // Animated skinmesh test
         {
             dvl::Transform animatedPose[BoneCount] = {bindPose[0], bindPose[1]};
@@ -287,20 +247,11 @@ int main()
             dvl::LocalToWorld(skeleton, animatedPose, dvl::Mat4::Identity(), worldPose);
             dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
 
-            SkinVerticesCpu(bindVertices, AnimatedVertexCount, skinningMatrices, animatedVertices);
-            renderer.UpdateMeshVertices(cpuSkinMesh, animatedVertices, sizeof(animatedVertices));
-        }
+            const glm::mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedMeshRenderer.localTransform.GetMatrix();
+            const glm::mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedMeshRenderer.localTransform.GetMatrix();
 
-        renderer.BeginFrame(glm::vec4(0.32f, 0.45f, 0.65f, 1.0f));
-        renderer.BeginScene(mainCamera);
-
-        // TODO: Use future World::GetLights
-        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
-        {
-            // With the future new register component system, it will support multiple lights per entity
-            const DirectionalLight* directionalLight = entity->GetComponent<DirectionalLight>();
-            if (directionalLight != nullptr)
-                renderer.SubmitLight(*directionalLight);
+            renderer.DrawSkinned(cpuSkinMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
+            renderer.DrawSkinned(cpuSkinMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
         }
 
         // TODO: Use future World::GetMeshRenders

@@ -5,12 +5,13 @@ varying vec3 vWorldPosition;
 uniform sampler2D albedoTexture;
 uniform vec4 materialColor;
 
-uniform int lightCount;
-uniform vec4 lightDirections[4];
-uniform vec4 lightColors[4];
-uniform vec3 cameraPosition;
-
 const int MAX_LIGHTS = 4;
+
+uniform int lightCount;
+uniform vec4 lightDirections[MAX_LIGHTS];
+uniform vec4 lightColors[MAX_LIGHTS];
+
+uniform vec3 cameraPosition;
 
 void main()
 {
