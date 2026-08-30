@@ -1,5 +1,7 @@
 #include "dvl/math/mat.h"
 
+#include <cmath>
+
 #include "dvl/math/transform.h"
 
 namespace dvl
@@ -69,6 +71,77 @@ namespace dvl
         return Translation(transform.translation.XYZ())
             * Rotation(transform.rotation)
             * Scale(transform.scale.XYZ());
+    }
+
+    Mat4 Mat4::Perspective(float fovYRadians, float aspectRatio, float nearPlane, float farPlane)
+    {
+        float f = 1.0f / std::tan(fovYRadians / 2.0f);
+        float nf = 1.0f / (nearPlane - farPlane);
+
+        Mat4 result;
+
+        result.m[0][0] = f / aspectRatio;
+        result.m[1][1] = f;
+        result.m[2][2] = (farPlane + nearPlane) * nf;
+        result.m[2][3] = -1.0f;
+        result.m[3][2] = (2.0f * farPlane * nearPlane) * nf;
+        result.m[3][3] = 0.0f;
+
+        return result;
+    }
+
+    Mat4 Mat4::Orthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane)
+    {
+        Mat4 result;
+
+        result.m[0][0] = 2.0f / (right - left);
+        result.m[1][1] = 2.0f / (top - bottom);
+        result.m[2][2] = -2.0f / (farPlane - nearPlane);
+        result.m[3][0] = -(right + left) / (right - left);
+        result.m[3][1] = -(top + bottom) / (top - bottom);
+        result.m[3][2] = -(farPlane + nearPlane) / (farPlane - nearPlane);
+
+        return result;
+    }
+
+    Mat4 Mat4::Inverse(const Mat4& matrix)
+    {
+        Mat4 result{};
+
+        const float det = matrix.m[0][0] * (matrix.m[1][1] * matrix.m[2][2] - matrix.m[1][2] * matrix.m[2][1]) -
+                          matrix.m[0][1] * (matrix.m[1][0] * matrix.m[2][2] - matrix.m[1][2] * matrix.m[2][0]) +
+                          matrix.m[0][2] * (matrix.m[1][0] * matrix.m[2][1] - matrix.m[1][1] * matrix.m[2][0]);
+
+        if (std::abs(det) < 1e-6f)
+            return Mat4::Identity();
+
+        const float invDet = 1.0f / det;
+
+        result.m[0][0] = (matrix.m[1][1] * matrix.m[2][2] - matrix.m[1][2] * matrix.m[2][1]) * invDet;
+        result.m[0][1] = (matrix.m[0][2] * matrix.m[2][1] - matrix.m[0][1] * matrix.m[2][2]) * invDet;
+        result.m[0][2] = (matrix.m[0][1] * matrix.m[1][2] - matrix.m[0][2] * matrix.m[1][1]) * invDet;
+
+        result.m[1][0] = (matrix.m[1][2] * matrix.m[2][0] - matrix.m[1][0] * matrix.m[2][2]) * invDet;
+        result.m[1][1] = (matrix.m[0][0] * matrix.m[2][2] - matrix.m[0][2] * matrix.m[2][0]) * invDet;
+        result.m[1][2] = (matrix.m[0][2] * matrix.m[1][0] - matrix.m[0][0] * matrix.m[1][2]) * invDet;
+
+        result.m[2][0] = (matrix.m[1][0] * matrix.m[2][1] - matrix.m[1][1] * matrix.m[2][0]) * invDet;
+        result.m[2][1] = (matrix.m[0][1] * matrix.m[2][0] - matrix.m[0][0] * matrix.m[2][1]) * invDet;
+        result.m[2][2] = (matrix.m[0][0] * matrix.m[1][1] - matrix.m[0][1] * matrix.m[1][0]) * invDet;
+
+        result.m[0][3] = 0.0f;
+        result.m[1][3] = 0.0f;
+        result.m[2][3] = 0.0f;
+
+        result.m[3][0] = -(matrix.m[3][0] * result.m[0][0] + matrix.m[3][1] * result.m[1][0] + matrix.m[3][2] * result.m[2][0]);
+
+        result.m[3][1] = -(matrix.m[3][0] * result.m[0][1] + matrix.m[3][1] * result.m[1][1] + matrix.m[3][2] * result.m[2][1]);
+
+        result.m[3][2] = -(matrix.m[3][0] * result.m[0][2] + matrix.m[3][1] * result.m[1][2] + matrix.m[3][2] * result.m[2][2]);
+
+        result.m[3][3] = 1.0f;
+
+        return result;
     }
 
     Mat4 Mat4::operator*(const Mat4& rhs) const

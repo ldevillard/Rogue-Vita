@@ -1,5 +1,7 @@
 #include "../unit_test.h"
 
+#include <cmath>
+
 #include "dvl/math/mat.h"
 #include "dvl/math/transform.h"
 
@@ -214,6 +216,140 @@ DVL_TEST(Mat4FromTransformAppliesScaleRotationThenTranslation)
     DVL_EXPECT_NEAR(transformedPoint.y, 22.0f, Epsilon);
     DVL_EXPECT_NEAR(transformedPoint.z, 42.0f, Epsilon);
     DVL_EXPECT_NEAR(transformedPoint.w, 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4PerspectiveMapsFrustumBoundsToNormalizedDeviceCoordinates)
+{
+    constexpr float FovY = Pi / 2.0f;
+    constexpr float AspectRatio = 2.0f;
+    constexpr float NearPlane = 1.0f;
+    constexpr float FarPlane = 11.0f;
+
+    const dvl::Mat4 perspective = dvl::Mat4::Perspective(FovY, AspectRatio, NearPlane, FarPlane);
+
+    const dvl::Vec4 nearCenterClip = perspective * dvl::Vec4(0.0f, 0.0f, -NearPlane, 1.0f);
+    const dvl::Vec4 farCenterClip = perspective * dvl::Vec4(0.0f, 0.0f, -FarPlane, 1.0f);
+
+    DVL_EXPECT_NEAR(nearCenterClip.z / nearCenterClip.w, -1.0f, Epsilon);
+    DVL_EXPECT_NEAR(farCenterClip.z / farCenterClip.w, 1.0f, Epsilon);
+
+    const float nearTop = NearPlane * std::tan(FovY / 2.0f);
+    const float nearRight = nearTop * AspectRatio;
+    const dvl::Vec4 nearTopRightClip = perspective * dvl::Vec4(nearRight, nearTop, -NearPlane, 1.0f);
+
+    DVL_EXPECT_NEAR(nearTopRightClip.x / nearTopRightClip.w, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(nearTopRightClip.y / nearTopRightClip.w, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(nearTopRightClip.z / nearTopRightClip.w, -1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4OrthographicMapsBoundsToNormalizedDeviceCoordinates)
+{
+    constexpr float Left = -2.0f;
+    constexpr float Right = 6.0f;
+    constexpr float Bottom = -3.0f;
+    constexpr float Top = 5.0f;
+    constexpr float NearPlane = 1.0f;
+    constexpr float FarPlane = 11.0f;
+
+    const dvl::Mat4 orthographic = dvl::Mat4::Orthographic(
+        Left, Right, Bottom, Top, NearPlane, FarPlane);
+
+    const dvl::Vec4 nearBottomLeft = orthographic * dvl::Vec4(Left, Bottom, -NearPlane, 1.0f);
+    DVL_EXPECT_NEAR(nearBottomLeft.x, -1.0f, Epsilon);
+    DVL_EXPECT_NEAR(nearBottomLeft.y, -1.0f, Epsilon);
+    DVL_EXPECT_NEAR(nearBottomLeft.z, -1.0f, Epsilon);
+    DVL_EXPECT_NEAR(nearBottomLeft.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 farTopRight = orthographic * dvl::Vec4(Right, Top, -FarPlane, 1.0f);
+    DVL_EXPECT_NEAR(farTopRight.x, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(farTopRight.y, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(farTopRight.z, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(farTopRight.w, 1.0f, Epsilon);
+
+    const dvl::Vec4 center = orthographic * dvl::Vec4(
+        (Left + Right) * 0.5f,
+        (Bottom + Top) * 0.5f,
+        -(NearPlane + FarPlane) * 0.5f,
+        1.0f);
+    DVL_EXPECT_NEAR(center.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(center.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(center.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(center.w, 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4InverseOfIdentityIsIdentity)
+{
+    const dvl::Mat4 inverse = dvl::Mat4::Inverse(dvl::Mat4::Identity());
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(inverse.m[column][row], expected, Epsilon);
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(Mat4InverseOfAffineTransformComposesToIdentityAndRestoresVectors)
+{
+    const dvl::Mat4 transform =
+        dvl::Mat4::Translation(dvl::Vec3(3.0f, -4.0f, 5.0f)) *
+        dvl::Mat4::Rotation(dvl::Quat::FromAxisAngle(dvl::Vec3(1.0f, 2.0f, -3.0f), Pi / 3.0f)) *
+        dvl::Mat4::Scale(dvl::Vec3(2.0f, 0.5f, -1.5f));
+    const dvl::Mat4 inverse = dvl::Mat4::Inverse(transform);
+
+    const dvl::Mat4 leftIdentity = transform * inverse;
+    const dvl::Mat4 rightIdentity = inverse * transform;
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(leftIdentity.m[column][row], expected, Epsilon);
+            DVL_EXPECT_NEAR(rightIdentity.m[column][row], expected, Epsilon);
+        }
+    }
+
+    const dvl::Vec4 point(1.5f, -2.0f, 4.0f, 1.0f);
+    const dvl::Vec4 restoredPoint = inverse * (transform * point);
+    DVL_EXPECT_NEAR(restoredPoint.x, point.x, Epsilon);
+    DVL_EXPECT_NEAR(restoredPoint.y, point.y, Epsilon);
+    DVL_EXPECT_NEAR(restoredPoint.z, point.z, Epsilon);
+    DVL_EXPECT_NEAR(restoredPoint.w, point.w, Epsilon);
+
+    const dvl::Vec4 direction(-1.0f, 3.0f, 2.0f, 0.0f);
+    const dvl::Vec4 restoredDirection = inverse * (transform * direction);
+    DVL_EXPECT_NEAR(restoredDirection.x, direction.x, Epsilon);
+    DVL_EXPECT_NEAR(restoredDirection.y, direction.y, Epsilon);
+    DVL_EXPECT_NEAR(restoredDirection.z, direction.z, Epsilon);
+    DVL_EXPECT_NEAR(restoredDirection.w, direction.w, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4InverseOfSingularAffineMatrixReturnsIdentity)
+{
+    const dvl::Mat4 singular = dvl::Mat4::Scale(dvl::Vec3(2.0f, 0.0f, -3.0f));
+    const dvl::Mat4 inverse = dvl::Mat4::Inverse(singular);
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(inverse.m[column][row], expected, Epsilon);
+        }
+    }
 
     return true;
 }
