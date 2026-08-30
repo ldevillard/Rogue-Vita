@@ -21,6 +21,11 @@ namespace dvl
         Float2,
         Float3,
         Float4,
+    
+        // 4 unsigned bytes in [0, 255]s
+        UByte4,
+        // 4 unsigned bytes normalized to [0.0, 1.0]
+        UNormByte4
     };
 
     enum class PrimitiveTopology

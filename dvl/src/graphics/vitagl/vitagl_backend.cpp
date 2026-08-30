@@ -319,15 +319,37 @@ namespace dvl::internal
             {
                 case VertexFormat::Float2:
                     nativeAttribute.componentCount = 2;
+                    nativeAttribute.type = GL_FLOAT;
+                    nativeAttribute.normalized = GL_FALSE;
                     break;
 
                 case VertexFormat::Float3:
                     nativeAttribute.componentCount = 3;
+                    nativeAttribute.type = GL_FLOAT;
+                    nativeAttribute.normalized = GL_FALSE;
                     break;
 
                 case VertexFormat::Float4:
                     nativeAttribute.componentCount = 4;
+                    nativeAttribute.type = GL_FLOAT;
+                    nativeAttribute.normalized = GL_FALSE;
                     break;
+
+                case VertexFormat::UByte4:
+                    nativeAttribute.componentCount = 4;
+                    nativeAttribute.type = GL_UNSIGNED_BYTE;
+                    nativeAttribute.normalized = GL_FALSE;
+                    break;
+
+                case VertexFormat::UNormByte4:
+                    nativeAttribute.componentCount = 4;
+                    nativeAttribute.type = GL_UNSIGNED_BYTE;
+                    nativeAttribute.normalized = GL_TRUE;
+                    break;
+
+                default:
+                    Log(LogLevel::Error, "Unsupported vertex format");
+                    return {};
             }
 
             pipeline.attributes.push_back(nativeAttribute);
@@ -512,7 +534,7 @@ namespace dvl::internal
         {
             glEnableVertexAttribArray(attribute.location);
 
-            glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE,
+            glVertexAttribPointer(attribute.location, attribute.componentCount, attribute.type, attribute.normalized,
                                   static_cast<GLsizei>(pipelineIt->second.vertexStride), 
                                   reinterpret_cast<const void*>(attribute.offset));
         }
@@ -543,7 +565,7 @@ namespace dvl::internal
         {
             glEnableVertexAttribArray(attribute.location);
 
-            glVertexAttribPointer(attribute.location, attribute.componentCount, GL_FLOAT, GL_FALSE,
+            glVertexAttribPointer(attribute.location, attribute.componentCount, attribute.type, attribute.normalized,
                                   static_cast<GLsizei>(pipelineIt->second.vertexStride),
                                   reinterpret_cast<const void*>(attribute.offset));
         }
