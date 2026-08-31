@@ -159,16 +159,16 @@ int main()
     }
 
     Entity* wireframeAnimatedEntity = world.CreateEntity();
-    Material wireframeAnimatedMaterial = assetRegistry.GetSkinnedWireframeMaterialInstance();
+    Material wireframeAnimatedMaterial = assetRegistry.GetWireframeMaterialInstance();
     wireframeAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
-    MeshRenderer& wireframeAnimatedMeshRenderer = wireframeAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, wireframeAnimatedMaterial);
-    wireframeAnimatedMeshRenderer.localTransform.position.x = -0.5f;
+    Transform wireframeAnimatedLocalTransform;
+    wireframeAnimatedLocalTransform.position.x = -0.5f;
 
     Entity* solidAnimatedEntity = world.CreateEntity();
-    Material solidAnimatedMaterial = assetRegistry.GetSkinnedSolidMaterialInstance();
+    Material solidAnimatedMaterial = assetRegistry.GetSolidMaterialInstance();
     solidAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
-    MeshRenderer& solidAnimatedMeshRenderer = solidAnimatedEntity->AddComponent<MeshRenderer>(&skinnedTestMesh, solidAnimatedMaterial);
-    solidAnimatedMeshRenderer.localTransform.position.x = -0.5f;
+    Transform solidAnimatedLocalTransform;
+    solidAnimatedLocalTransform.position.x = -0.5f;
 
     const dvl::Vec3 planeTopCenter = planeEntity->transform.position + dvl::Vec3(0.0f, planeEntity->transform.scale.y * 0.5f, 0.0f);
     dvl::Vec3 cameraFacingDirection = cameraEntity->transform.position - planeTopCenter;
@@ -244,8 +244,8 @@ int main()
             dvl::LocalToWorld(skeleton, animatedPose, dvl::Mat4::Identity(), worldPose);
             dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
 
-            const dvl::Mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedMeshRenderer.localTransform.GetMatrix();
-            const dvl::Mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedMeshRenderer.localTransform.GetMatrix();
+            const dvl::Mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedLocalTransform.GetMatrix();
+            const dvl::Mat4 solidModelMatrix = solidAnimatedEntity->transform.GetMatrix() * solidAnimatedLocalTransform.GetMatrix();
 
             renderer.DrawSkinned(skinnedTestMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
             renderer.DrawSkinned(skinnedTestMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);

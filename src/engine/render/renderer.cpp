@@ -251,7 +251,7 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const dvl::Mat4&
         return;
     }
 
-    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.renderPipelineHandle);
+    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.materialTemplate.staticPipeline);
     const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
 
     if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
@@ -314,7 +314,7 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const dvl
         return;
     }
 
-    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.renderPipelineHandle);
+    const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.materialTemplate.skinnedPipeline);
     const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
 
     if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
