@@ -30,9 +30,15 @@ struct MaterialHandle
     };
 };
 
+struct MaterialTemplate
+{
+    RenderPipelineHandle staticPipeline;
+    RenderPipelineHandle skinnedPipeline;
+};
+
 struct Material
 {
-    RenderPipelineHandle renderPipelineHandle;
+    MaterialTemplate materialTemplate;
 
     TextureHandle textureHandle;
     

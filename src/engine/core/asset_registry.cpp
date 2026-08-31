@@ -258,16 +258,6 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
     return _materials.at(_wireframeMaterialHandle);
 }
 
-const Material AssetRegistry::GetSkinnedSolidMaterialInstance() const
-{
-    return _materials.at(_skinnedSolidMaterialHandle);
-}
-
-const Material AssetRegistry::GetSkinnedWireframeMaterialInstance() const
-{
-    return _materials.at(_skinnedWireframeMaterialHandle);
-}
-
 void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
     const VertexPositionNormalUV CubeVertices[] =
@@ -422,8 +412,8 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     _pipelines.emplace(solidPipelineHandle, solidRenderPipeline);
     _pipelines.emplace(wireframePipelineHandle, wireframeRenderPipeline);
 
-    solidMaterial.renderPipelineHandle = solidPipelineHandle;
-    wireframeMaterial.renderPipelineHandle = wireframePipelineHandle;
+    solidMaterial.materialTemplate.staticPipeline = solidPipelineHandle;
+    wireframeMaterial.materialTemplate.staticPipeline = wireframePipelineHandle;
 
     _solidMaterialHandle.id = _nextMaterialId++;
     _wireframeMaterialHandle.id = _nextMaterialId++;
@@ -456,12 +446,6 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
         {"skinningMatrices", dvl::ShaderParameterType::Float4}
     };
 
-    Material skinnedSolidMaterial = {};
-    Material skinnedWireframeMaterial = {};
-
-    skinnedSolidMaterial.textureHandle = _defaultTextureHandle;
-    skinnedWireframeMaterial.textureHandle = _defaultTextureHandle;
-
     RenderPipelineDesc pipelineDesc = {};
     pipelineDesc.vertexShaderPath = "app0:/asset/shaders/skinned_vertex.vert";
     pipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
@@ -489,12 +473,6 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
     _pipelines.emplace(skinnedSolidPipelineHandle, skinnedSolidRenderPipeline);
     _pipelines.emplace(skinnedWireframePipelineHandle, skinnedWireframeRenderPipeline);
 
-    skinnedSolidMaterial.renderPipelineHandle = skinnedSolidPipelineHandle;
-    skinnedWireframeMaterial.renderPipelineHandle = skinnedWireframePipelineHandle;
-
-    _skinnedSolidMaterialHandle.id = _nextMaterialId++;
-    _skinnedWireframeMaterialHandle.id = _nextMaterialId++;
-
-    _materials.emplace(_skinnedSolidMaterialHandle, skinnedSolidMaterial);
-    _materials.emplace(_skinnedWireframeMaterialHandle, skinnedWireframeMaterial);
+    _materials.at(_solidMaterialHandle).materialTemplate.skinnedPipeline = skinnedSolidPipelineHandle;
+    _materials.at(_wireframeMaterialHandle).materialTemplate.skinnedPipeline = skinnedWireframePipelineHandle;
 }

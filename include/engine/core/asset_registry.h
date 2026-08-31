@@ -34,8 +34,6 @@ public:
     // Materials
     const Material GetSolidMaterialInstance() const;
     const Material GetWireframeMaterialInstance() const;
-    const Material GetSkinnedSolidMaterialInstance() const;
-    const Material GetSkinnedWireframeMaterialInstance() const;
 
     // Textures
     const Texture& GetDefaultTexture() const;
@@ -53,8 +51,6 @@ private:
     // Materials
     MaterialHandle _solidMaterialHandle;
     MaterialHandle _wireframeMaterialHandle;
-    MaterialHandle _skinnedSolidMaterialHandle;
-    MaterialHandle _skinnedWireframeMaterialHandle;
 
     // Textures
     TextureHandle _defaultTextureHandle;
