@@ -11,6 +11,7 @@
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
 #include "engine/render/material.h"
+#include "engine/render/debug_draw.h"
 #include "engine/render/render_pipeline.h"
 #include "engine/render/renderer.h"
 #include "engine/render/vertex.h"
@@ -29,6 +30,8 @@ int main()
     Renderer renderer = Renderer(ScreenWidth, ScreenHeight, assetRegistry);
 
     assetRegistry.Initialize(renderer);
+
+    DebugDraw debugDraw(assetRegistry);
 
     dvl::Input::Initialize();
     dvl::Time::Initialize();
@@ -249,6 +252,9 @@ int main()
 
             renderer.DrawSkinned(skinnedTestMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
             renderer.DrawSkinned(skinnedTestMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
+
+            debugDraw.DrawSkeleton(renderer, skeleton, worldPose, wireframeModelMatrix);
+            debugDraw.DrawSkeleton(renderer, skeleton, worldPose, solidModelMatrix);
         }
 
         // TODO: Use future World::GetMeshRenders
