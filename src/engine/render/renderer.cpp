@@ -164,7 +164,7 @@ bool Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc, RenderPipeli
             return false;
         }
 
-        renderPipeline.parameters.push_back({ parameterDesc.name, parameterHandle });
+        renderPipeline.parameters.push_back({ parameterDesc.type, parameterDesc.semantic, parameterHandle });
     }
 
     return true;
@@ -252,46 +252,23 @@ void Renderer::Draw(const Mesh& mesh, const Material& material, const dvl::Mat4&
     }
 
     const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.materialTemplate.staticPipeline);
-    const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
 
-    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
-        texture == nullptr)
+    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid())
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
         return;
     }
 
-    const Entity* cameraEntity = _activeCamera->GetEntity();
-    if (cameraEntity == nullptr)
-    {
-        dvl::Log(dvl::LogLevel::Error, "Invalid active camera entity!");
-        return;
-    }
-
     _device.SetPipeline(renderPipeline->pipeline);
 
-    // Parameters binding
+    DrawContext context;
+    context.camera = _activeCamera;
+    context.material = &material;
+    context.modelMatrix = &modelMatrix;
+
+    for (const ShaderParameterBinding& parameter : renderPipeline->parameters)
     {
-        const dvl::Mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
-        setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
-
-        const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
-
-        setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
-        setParameter(*renderPipeline, "materialColor", &material.color.x);
-        setParameter(*renderPipeline, "lightCount", &_lightCount);
-
-        if (_lightCount > 0)
-        {
-            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0].x, _lightCount);
-            setParameter(*renderPipeline, "lightColors", &_lightColors[0].x, _lightCount);
-        }
-
-        setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
-
-        _device.SetTexture({ texture->id });
-        const int textureSlot = 0;
-        setParameter(*renderPipeline, "albedoTexture", &textureSlot);
+        bindParameter(parameter, context);
     }
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
@@ -315,63 +292,25 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const dvl
     }
 
     const RenderPipeline* renderPipeline = _assetRegistry.GetRenderPipeline(material.materialTemplate.skinnedPipeline);
-    const Texture* texture = _assetRegistry.GetTexture(material.textureHandle);
 
-    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid() ||
-        texture == nullptr)
+    if (!mesh.IsValid() || renderPipeline == nullptr || !renderPipeline->IsValid())
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid mesh or material, draw call canceled!");
         return;
     }
 
-    const Entity* cameraEntity = _activeCamera->GetEntity();
-    if (cameraEntity == nullptr)
-    {
-        dvl::Log(dvl::LogLevel::Error, "Invalid active camera entity!");
-        return;
-    }
-
     _device.SetPipeline(renderPipeline->pipeline);
 
-    // Parameters binding
+    DrawContext context;
+    context.camera = _activeCamera;
+    context.material = &material;
+    context.modelMatrix = &modelMatrix;
+    context.skinningMatrices = skinningMatrices;
+    context.boneCount = static_cast<std::uint32_t>(boneCount);
+
+    for (const ShaderParameterBinding& parameter : renderPipeline->parameters)
     {
-        const dvl::Mat4 viewProjectionMatrix = _activeCamera->GetProjectionMatrix() * _activeCamera->GetViewMatrix();
-        setParameter(*renderPipeline, "viewProjectionMatrix", &viewProjectionMatrix[0][0]);
-
-        const dvl::Vec3 cameraPosition = cameraEntity->transform.position;
-
-        setParameter(*renderPipeline, "cameraPosition", &cameraPosition.x);
-        setParameter(*renderPipeline, "materialColor", &material.color.x);
-        setParameter(*renderPipeline, "lightCount", &_lightCount);
-
-        if (_lightCount > 0)
-        {
-            setParameter(*renderPipeline, "lightDirections", &_lightDirections[0].x, _lightCount);
-            setParameter(*renderPipeline, "lightColors", &_lightColors[0].x, _lightCount);
-        }
-
-        setParameter(*renderPipeline, "modelMatrix", &modelMatrix[0][0]);
-
-        _device.SetTexture({ texture->id });
-        const int textureSlot = 0;
-        setParameter(*renderPipeline, "albedoTexture", &textureSlot);
-
-        dvl::Vec4 packedSkinningMatrices[MaxBones * 3];
-
-        // Pack the 4x4 skinning matrices into an array of Vec4 (3 Vec4 per matrix)
-        for (int boneIndex = 0; boneIndex < boneCount; boneIndex++)
-        {
-            for (int row = 0; row < 3; row++)
-            {
-                packedSkinningMatrices[boneIndex * 3 + row] = dvl::Vec4(
-                    skinningMatrices[boneIndex][0][row],
-                    skinningMatrices[boneIndex][1][row],
-                    skinningMatrices[boneIndex][2][row],
-                    skinningMatrices[boneIndex][3][row]);
-            }
-        }
-
-        setParameter(*renderPipeline, "skinningMatrices", packedSkinningMatrices, boneCount * 3);
+        bindParameter(parameter, context);
     }
 
     _device.SetVertexBuffer(mesh.vertexBuffer);
@@ -380,8 +319,93 @@ void Renderer::DrawSkinned(const Mesh& mesh, const Material& material, const dvl
     _device.DrawIndexed(mesh.indexCount);
 }
 
-void Renderer::setParameter(const RenderPipeline& renderPipeline, const char* name, const void* data, unsigned int count)
+void Renderer::bindParameter(const ShaderParameterBinding& parameter, const DrawContext& context)
 {
-    const dvl::ShaderParameterHandle parameter = renderPipeline.GetParameter(name);
-    _device.SetShaderParameter(parameter, data, count);
+    switch (parameter.semantic)
+    {
+        case ShaderParameterSemantic::ViewProjection:
+        {
+            if (context.camera == nullptr)
+                return;
+
+            const dvl::Mat4 viewProjectionMatrix = context.camera->GetProjectionMatrix() * context.camera->GetViewMatrix();
+            _device.SetShaderParameter(parameter.handle, &viewProjectionMatrix[0][0], 1);
+            break;
+        }
+
+        case ShaderParameterSemantic::CameraPosition:
+        {
+            if (context.camera == nullptr || context.camera->GetEntity() == nullptr)
+                return;
+
+            const dvl::Vec3& cameraPosition = context.camera->GetEntity()->transform.position;
+            _device.SetShaderParameter(parameter.handle, &cameraPosition.x, 1);
+            break;
+        }
+
+        case ShaderParameterSemantic::ModelMatrix:
+            if (context.modelMatrix != nullptr)
+                _device.SetShaderParameter(parameter.handle, &(*context.modelMatrix)[0][0], 1);
+            break;
+
+        case ShaderParameterSemantic::MaterialColor:
+            if (context.material != nullptr)
+                _device.SetShaderParameter(parameter.handle, &context.material->color.x, 1);
+            break;
+
+        case ShaderParameterSemantic::AlbedoTexture:
+        {
+            if (context.material == nullptr)
+                return;
+
+            const Texture* texture = _assetRegistry.GetTexture(context.material->textureHandle);
+            if (texture == nullptr)
+            {
+                dvl::Log(dvl::LogLevel::Error, "Invalid albedo texture");
+                return;
+            }
+
+            _device.SetTexture({ texture->id });
+            const int textureSlot = 0;
+            _device.SetShaderParameter(parameter.handle, &textureSlot, 1);
+            break;
+        }
+
+        case ShaderParameterSemantic::LightCount:
+            _device.SetShaderParameter(parameter.handle, &_lightCount, 1);
+            break;
+
+        case ShaderParameterSemantic::LightDirections:
+            if (_lightCount > 0)
+                _device.SetShaderParameter(parameter.handle, &_lightDirections[0].x, _lightCount);
+            break;
+
+        case ShaderParameterSemantic::LightColors:
+            if (_lightCount > 0)
+                _device.SetShaderParameter(parameter.handle, &_lightColors[0].x, _lightCount);
+            break;
+
+        case ShaderParameterSemantic::SkinningMatrices:
+        {
+            if (context.skinningMatrices == nullptr || context.boneCount == 0 || context.boneCount > MaxBones)
+                return;
+
+            dvl::Vec4 packedSkinningMatrices[MaxBones * 3];
+
+            for (std::uint32_t boneIndex = 0; boneIndex < context.boneCount; boneIndex++)
+            {
+                for (int row = 0; row < 3; row++)
+                {
+                    packedSkinningMatrices[boneIndex * 3 + row] = dvl::Vec4(
+                        context.skinningMatrices[boneIndex][0][row],
+                        context.skinningMatrices[boneIndex][1][row],
+                        context.skinningMatrices[boneIndex][2][row],
+                        context.skinningMatrices[boneIndex][3][row]);
+                }
+            }
+
+            _device.SetShaderParameter(parameter.handle, packedSkinningMatrices, context.boneCount * 3);
+            break;
+        }
+    }
 }

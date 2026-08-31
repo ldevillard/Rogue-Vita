@@ -2,11 +2,14 @@
 
 #include <dvl/dvl.h>
 
+#include <cstdint>
+
 struct Mesh;
 struct MeshDesc;
 struct Material;
 struct RenderPipeline;
 struct RenderPipelineDesc;
+struct ShaderParameterBinding;
 struct Texture;
 struct TextureDesc;
 
@@ -14,6 +17,17 @@ class AssetRegistry;
 class Camera;
 class DirectionalLight;
 class Transform;
+
+struct DrawContext
+{
+    const Camera* camera = nullptr;
+    const Material* material = nullptr;
+
+    const dvl::Mat4* modelMatrix = nullptr;
+
+    const dvl::Mat4* skinningMatrices = nullptr;
+    std::uint32_t boneCount = 0;
+};
 
 class Renderer
 {
@@ -42,8 +56,7 @@ public:
     void DrawSkinned(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount);
 
 private:
-    void setParameter(const RenderPipeline& renderPipeline, const char* name,
-                      const void* data, unsigned int count = 1);
+    void bindParameter(const ShaderParameterBinding& parameter, const DrawContext& context);
 
     static constexpr int MaxLights = 4;
     static constexpr int MaxBones = 32;
