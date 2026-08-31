@@ -2,7 +2,6 @@
 
 #include <dvl/dvl.h>
 
-#include <string_view>
 #include <vector>
 
 #include "shader_parameter.h"
@@ -55,8 +54,6 @@ struct RenderPipeline
     dvl::PipelineHandle pipeline;
 
     std::vector<ShaderParameterBinding> parameters;
-
-    dvl::ShaderParameterHandle GetParameter(std::string_view name) const;
 
     bool IsValid() const;
 };

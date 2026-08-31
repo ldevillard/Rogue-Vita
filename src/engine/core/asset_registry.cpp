@@ -369,14 +369,14 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
 
     const ShaderParameterDesc parameters[] =
     {
-        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4},
-        {"modelMatrix", dvl::ShaderParameterType::Mat4},
-        {"materialColor", dvl::ShaderParameterType::Float4},
-        {"lightCount", dvl::ShaderParameterType::Int},
-        {"lightDirections", dvl::ShaderParameterType::Float4},
-        {"lightColors", dvl::ShaderParameterType::Float4},
-        {"cameraPosition", dvl::ShaderParameterType::Float3},
-        {"albedoTexture", dvl::ShaderParameterType::Int}
+        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ViewProjection},
+        {"modelMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ModelMatrix},
+        {"materialColor", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::MaterialColor},
+        {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
+        {"lightDirections", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightDirections},
+        {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
+        {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
+        {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture}
     };
 
     Material solidMaterial = {};
@@ -435,15 +435,15 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
 
     const ShaderParameterDesc parameters[] =
     {
-        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4},
-        {"modelMatrix", dvl::ShaderParameterType::Mat4},
-        {"materialColor", dvl::ShaderParameterType::Float4},
-        {"lightCount", dvl::ShaderParameterType::Int},
-        {"lightDirections", dvl::ShaderParameterType::Float4},
-        {"lightColors", dvl::ShaderParameterType::Float4},
-        {"cameraPosition", dvl::ShaderParameterType::Float3},
-        {"albedoTexture", dvl::ShaderParameterType::Int},
-        {"skinningMatrices", dvl::ShaderParameterType::Float4}
+        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ViewProjection},
+        {"modelMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ModelMatrix},
+        {"materialColor", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::MaterialColor},
+        {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
+        {"lightDirections", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightDirections},
+        {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
+        {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
+        {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture},
+        {"skinningMatrices", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::SkinningMatrices}
     };
 
     RenderPipelineDesc pipelineDesc = {};
