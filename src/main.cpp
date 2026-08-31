@@ -106,6 +106,7 @@ int main()
     const std::int16_t parents[] = {-1, 0};
 
     constexpr int BoneCount = 2;
+    constexpr int FrameCount = 2;
     constexpr int AnimatedVertexCount = 6;
 
     dvl::Transform bindPose[BoneCount];
@@ -163,13 +164,13 @@ int main()
 
     Entity* wireframeAnimatedEntity = world.CreateEntity();
     Material wireframeAnimatedMaterial = assetRegistry.GetWireframeMaterialInstance();
-    wireframeAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
+    wireframeAnimatedMaterial.color = dvl::Vec4(0.663f, 0.333f, 0.878f, 1.0f);
     Transform wireframeAnimatedLocalTransform;
     wireframeAnimatedLocalTransform.position.x = -0.5f;
 
     Entity* solidAnimatedEntity = world.CreateEntity();
     Material solidAnimatedMaterial = assetRegistry.GetSolidMaterialInstance();
-    solidAnimatedMaterial.color = dvl::Vec4(0.243f, 0.624f, 0.631f, 1.0f);
+    solidAnimatedMaterial.color = dvl::Vec4(0.663f, 0.333f, 0.878f, 1.0f);
     Transform solidAnimatedLocalTransform;
     solidAnimatedLocalTransform.position.x = -0.5f;
 
@@ -185,6 +186,29 @@ int main()
     solidAnimatedEntity->transform.position = planeTopCenter + cameraRight * (AnimatedEntitySpacing * 0.5f);
     solidAnimatedEntity->transform.LookDirection(cameraFacingDirection);
 
+    dvl::Transform keyframes[FrameCount * BoneCount] =
+    {
+        // Frame 0
+        bindPose[0],
+        bindPose[1],
+
+        // Frame 1
+        bindPose[0],
+        bindPose[1]
+    };
+
+    keyframes[BoneCount].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(20.0f));
+    keyframes[BoneCount + 1].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(70.0f));
+
+    dvl::Animation animation
+    {
+        1.0f,   // duration
+        1.0f,   // fps
+        BoneCount,
+        FrameCount,
+        keyframes
+    };
+
     /*
     float rotationAngle = 0.0f;
     */
@@ -196,7 +220,10 @@ int main()
         dvl::Input::Update();
 
         const float deltaTime = dvl::Time::GetDeltaTime();
+        
         animationTime += deltaTime;
+        if (animationTime >= animation.duration)
+            animationTime = 0;
 
         dvl::Tweener::Update(deltaTime);
 
@@ -237,14 +264,13 @@ int main()
 
         // Animated skinmesh test
         {
-            dvl::Transform animatedPose[BoneCount] = {bindPose[0], bindPose[1]};
-            animatedPose[0].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), std::sin(animationTime) * 0.5f);
-            animatedPose[1].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), std::sin(animationTime));
-
+            dvl::Transform pose[BoneCount];
             dvl::Mat4 worldPose[BoneCount];
             dvl::Mat4 skinningMatrices[BoneCount];
 
-            dvl::LocalToWorld(skeleton, animatedPose, dvl::Mat4::Identity(), worldPose);
+            dvl::Evaluate(animation, animationTime, pose);
+
+            dvl::LocalToWorld(skeleton, pose, dvl::Mat4::Identity(), worldPose);
             dvl::ComputeSkinningMatrices(skeleton, worldPose, skinningMatrices);
 
             const dvl::Mat4 wireframeModelMatrix = wireframeAnimatedEntity->transform.GetMatrix() * wireframeAnimatedLocalTransform.GetMatrix();
