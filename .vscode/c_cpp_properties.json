@@ -1,6 +1,33 @@
 {
     "configurations": [
         {
+            "name": "Desktop (GLFW)",
+            "compilerPath": "/usr/bin/g++",
+            "intelliSenseMode": "linux-gcc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/dvl/include",
+                "${workspaceFolder}/dvl/include/**",
+                "${workspaceFolder}/dvl/tool/cooker/include",
+                "${workspaceFolder}/dvl/tool/cooker/third_party",
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/**"
+            ],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}/include",
+                    "${workspaceFolder}/dvl/include",
+                    "${workspaceFolder}/dvl/tool/cooker/include",
+                    "${workspaceFolder}/dvl/tool/cooker/third_party",
+                    "${workspaceFolder}/src"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
+        },
+        {
             "name": "VitaSDK",
             "compilerPath": "/usr/local/vitasdk/bin/arm-vita-eabi-g++",
             "intelliSenseMode": "linux-gcc-arm",
@@ -15,10 +42,6 @@
                 "${workspaceFolder}/dvl/tool/cooker/third_party",
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/src/**",
-                "/usr/include/GL",
-                "/usr/include/GL/**",
-                "/usr/include/GLFW",
-                "/usr/include/GLFW/**",
                 "/usr/local/vitasdk/arm-vita-eabi/include",
                 "/usr/local/vitasdk/arm-vita-eabi/include/**",
                 "/usr/local/vitasdk/include",
@@ -35,15 +58,8 @@
                     "${workspaceFolder}/dvl/tool/cooker/include",
                     "${workspaceFolder}/dvl/tool/cooker/third_party",
                     "${workspaceFolder}/src",
-                    "${workspaceFolder}/src/**",
-                    "/usr/include/GL",
-                    "/usr/include/GL/**",
-                    "/usr/include/GLFW",
-                    "/usr/include/GLFW/**",
                     "/usr/local/vitasdk/arm-vita-eabi/include",
-                    "/usr/local/vitasdk/arm-vita-eabi/include/**",
-                    "/usr/local/vitasdk/include",
-                    "/usr/local/vitasdk/include/**"
+                    "/usr/local/vitasdk/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             },
