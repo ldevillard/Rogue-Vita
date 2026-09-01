@@ -38,11 +38,11 @@ int main()
 
     World world = {};
 
-    MeshHandle targetDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/target_dummy.dvlmesh", renderer);
+    MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
 
     /*
-    MeshHandle practiceDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/practice_dummy.dvlmesh", renderer);
-    MeshHandle trainingDummyMesh = assetRegistry.LoadMesh("app0:/asset/cooked/mesh/training_dummy.dvlmesh", renderer);
+    MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
+    MeshHandle trainingDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/training_dummy.dvlmesh"), renderer);
     */
 
     Entity* cameraEntity = world.CreateEntity();
@@ -54,7 +54,7 @@ int main()
     playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
     playerEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
-    solidMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/target_dummy.dvltex", renderer);
+    solidMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
 
     playerEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), solidMaterial);
     playerEntity->AddComponent<PlayerController>(mainCamera);
@@ -66,7 +66,7 @@ int main()
     targetEntity->transform.position = dvl::Vec3(-0.75f, 1.3f, 0.75f);
     targetEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material targetMaterial = assetRegistry.GetSolidMaterialInstance();
-    targetMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/practice_dummy.dvltex", renderer);
+    targetMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/practice_dummy.dvltex"), renderer);
     targetEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), targetMaterial);
 
     Entity* trainingEntity = world.CreateEntity();
@@ -74,7 +74,7 @@ int main()
     trainingEntity->transform.rotation.y = dvl::Radians(-135.0f);
     trainingEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material trainingMaterial = assetRegistry.GetSolidMaterialInstance();
-    trainingMaterial.textureHandle = assetRegistry.LoadTexture("app0:/asset/cooked/texture/training_dummy.dvltex", renderer);
+    trainingMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/training_dummy.dvltex"), renderer);
     trainingEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(trainingDummyMesh), trainingMaterial);
 
     constexpr float JumpHeight = 1.0f;

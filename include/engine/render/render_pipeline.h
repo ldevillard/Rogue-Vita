@@ -2,6 +2,7 @@
 
 #include <dvl/dvl.h>
 
+#include <string>
 #include <vector>
 
 #include "shader_parameter.h"
@@ -33,8 +34,8 @@ struct RenderPipelineHandle
 
 struct RenderPipelineDesc
 {
-    const char* vertexShaderPath = nullptr;
-    const char* fragmentShaderPath = nullptr;
+    std::string vertexShaderPath;
+    std::string fragmentShaderPath;
 
     const dvl::VertexAttribute* attributes = nullptr;
     std::size_t attributeCount = 0;

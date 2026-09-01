@@ -30,7 +30,7 @@ curl --fail --silent --show-error \
     -T "$EBOOT_PATH" \
     "ftp://$VITA_IP:1337//ux0:/app/$TITLE_ID/eboot.bin"
 
-upload_directory "$ASSET_PATH/shader" "asset/shaders"
+upload_directory "$ASSET_PATH/shader" "asset/shader"
 upload_directory "$ASSET_PATH/cooked" "asset/cooked"
 
 echo "[Vita] Launching $TITLE_ID..."
