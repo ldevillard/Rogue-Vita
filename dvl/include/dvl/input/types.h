@@ -4,7 +4,7 @@
 
 namespace dvl
 {
-    enum class GamepadButton : uint32_t
+    enum class GamepadButton : std::uint32_t
     {
         Cross    = 1u << 0,
         Circle   = 1u << 1,
@@ -35,7 +35,7 @@ namespace dvl
         StickState leftStick;
         StickState rightStick;
 
-        uint32_t buttons = 0;
-        uint32_t previousButtons = 0;
+        std::uint32_t buttons = 0;
+        std::uint32_t previousButtons = 0;
     };
 }
