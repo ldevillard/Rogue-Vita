@@ -1,54 +1,75 @@
-# You should only use Makefile-based build if you know what you're doing.
-# For most vitasdk projects, CMake is a better choice. See CMakeLists.txt for an example.
+# ----- Project Configuration -----
 
-# --- PROJECT CONFIGURATION ---
 PROJECT         := rogue-vita
 PROJECT_TITLE   := Rogue Vita
 PROJECT_TITLEID := VSDK00007
 
 MAKEFLAGS += -j$(shell nproc)
 
-EMUL_DEST := /mnt/c/Users/logan/Documents/Vita-Game
+# ----- Deployment Configuration -----
+
 VITA3K_FS  := /mnt/c/Users/logan/AppData/Roaming/Vita3K/Vita3K
 VITA3K_EXE := /mnt/c/Users/logan/Documents/Vita-Emul/Vita3K.exe
+VITA_IP    := 192.168.1.42
 
-VITA_IP := 192.168.1.42
+# ----- Terminal Colors -----
 
-# --- ANSI COLOR CODES ---
-GREEN        := \033[1;32m
-RED          := \033[1;31m
-YELLOW       := \033[1;33m
-RESET        := \033[0m
+GREEN  := \033[1;32m
+RED    := \033[1;31m
+YELLOW := \033[1;33m
+RESET  := \033[0m
 
-.PHONY: all package clean re emul remul run rrun test
+# ----- Make Helpers -----
 
-rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
+.PHONY: all package clean clean-desktop re emul remul run rrun desktop rdesktop test
 
-CC := arm-vita-eabi-gcc
-CXX := arm-vita-eabi-g++
-STRIP := arm-vita-eabi-strip
+rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
 INCLUDES := -I../common -Iinclude -Idvl/include
 
-CFLAGS += -Wl,-q -Wall -Wextra -Werror $(INCLUDES)
-CXXFLAGS += -Wl,-q -std=c++17 -Wall -Wextra -Wpedantic -Werror $(INCLUDES)
+# ----- Source Files -----
 
-SRC_C :=$(call rwildcard, src/, *.c)
-SRC_CPP :=$(call rwildcard, src/, *.cpp)
-DVL_SRC_CPP := $(filter-out dvl/src/log/desktop/%, $(call rwildcard, dvl/src/, *.cpp))
+SRC_C   := $(call rwildcard,src/,*.c)
+SRC_CPP := $(call rwildcard,src/,*.cpp)
 
-SHADER_ASSET_DIR := asset/shader
-SHADER_ASSETS := $(shell find $(SHADER_ASSET_DIR) -type f)
-SHADER_VPK_ARGS := $(foreach file,$(SHADER_ASSETS),--add $(file)=asset/shaders/$(patsubst $(SHADER_ASSET_DIR)/%,%,$(file)))
+DVL_VITA_SRC_CPP := $(shell find dvl/src -type f -name '*.cpp' \
+	! -path '*/desktop/*' \
+	! -path '*/opengl/*')
 
-COOKED_ASSET_DIR := asset/cooked
-COOKED_ASSETS := $(shell find $(COOKED_ASSET_DIR) -type f)
-COOKED_VPK_ARGS := $(foreach file,$(COOKED_ASSETS),--add $(file)=asset/cooked/$(patsubst $(COOKED_ASSET_DIR)/%,%,$(file)))
+DVL_DESKTOP_SRC_CPP := $(shell find dvl/src -type f -name '*.cpp' \
+	! -path '*/vita/*' \
+	! -path '*/vitagl/*')
 
-OBJS := $(addprefix out/, $(SRC_C:src/%.c=%.o)) \
-		$(addprefix out/, $(SRC_CPP:src/%.cpp=%.o)) \
-		$(addprefix out/, $(DVL_SRC_CPP:%.cpp=%.o))
-OBJ_DIRS := $(sort $(dir $(OBJS)))
+# ----- Vita Toolchain -----
+
+CC    := arm-vita-eabi-gcc
+CXX   := arm-vita-eabi-g++
+STRIP := arm-vita-eabi-strip
+
+CFLAGS   := -Wall -Wextra -Werror $(INCLUDES)
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(INCLUDES)
+LDFLAGS  := -Wl,-q
+
+OBJS := \
+	$(addprefix out/,$(SRC_C:src/%.c=%.o)) \
+	$(addprefix out/,$(SRC_CPP:src/%.cpp=%.o)) \
+	$(addprefix out/,$(DVL_VITA_SRC_CPP:%.cpp=%.o))
+
+# ----- Desktop Toolchain -----
+
+DESKTOP_CC  := gcc
+DESKTOP_CXX := g++
+
+DESKTOP_CFLAGS   := -Wall -Wextra -Werror -g -O0 $(INCLUDES)
+DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror -g -O0 $(INCLUDES)
+DESKTOP_LIBS     := -lglfw -lGL -ldl -pthread
+
+DESKTOP_OBJS := \
+	$(addprefix out-desktop/,$(SRC_C:src/%.c=%.o)) \
+	$(addprefix out-desktop/,$(SRC_CPP:src/%.cpp=%.o)) \
+	$(addprefix out-desktop/,$(DVL_DESKTOP_SRC_CPP:%.cpp=%.o))
+
+# ----- Vita Libraries -----
 
 VITA3K ?= 0
 
@@ -58,24 +79,35 @@ else
 	VITAGL_LIB := -lvitaGL
 endif
 
-# debug log on screen and vitaGL libs
-LIBS += $(VITAGL_LIB) \
-		-lvitashark \
-		-lSceShaccCgExt \
-		-lSceShaccCg_stub \
-		-ltaihen_stub \
-		-lSceCommonDialog_stub \
-		-lSceGxm_stub \
-		-lSceDisplay_stub \
-		-lSceCtrl_stub \
-		-lSceAppMgr_stub \
-		-lSceKernelDmacMgr_stub \
-		-lmathneon \
-		-lm \
-		-lc
+LIBS := \
+	$(VITAGL_LIB) \
+	-lvitashark \
+	-lSceShaccCgExt \
+	-lSceShaccCg_stub \
+	-ltaihen_stub \
+	-lSceCommonDialog_stub \
+	-lSceGxm_stub \
+	-lSceDisplay_stub \
+	-lSceCtrl_stub \
+	-lSceAppMgr_stub \
+	-lSceKernelDmacMgr_stub \
+	-lmathneon \
+	-lm \
+	-lc
 
-# --- MAIN RULE WITH COLOR OVERRAYS ---
-all: 
+# ----- Asset Packaging -----
+
+SHADER_ASSET_DIR := asset/shader
+SHADER_ASSETS := $(shell find $(SHADER_ASSET_DIR) -type f)
+SHADER_VPK_ARGS := $(foreach file,$(SHADER_ASSETS),--add $(file)=asset/shader/$(patsubst $(SHADER_ASSET_DIR)/%,%,$(file)))
+
+COOKED_ASSET_DIR := asset/cooked
+COOKED_ASSETS := $(shell find $(COOKED_ASSET_DIR) -type f)
+COOKED_VPK_ARGS := $(foreach file,$(COOKED_ASSETS),--add $(file)=asset/cooked/$(patsubst $(COOKED_ASSET_DIR)/%,%,$(file)))
+
+# ----- Vita Build -----
+
+all:
 	@echo "$(YELLOW)Starting build for $(PROJECT_TITLE)...$(RESET)"
 	@$(MAKE) package && \
 		echo "$(GREEN)✔ Success: $(PROJECT).vpk built successfully!$(RESET)" || \
@@ -104,37 +136,71 @@ $(PROJECT).velf: $(PROJECT).elf
 	vita-elf-create $< $@
 
 $(PROJECT).elf: $(OBJS)
-	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
+	$(CXX) $(LDFLAGS) $^ $(LIBS) -o $@
 
-$(OBJ_DIRS):
-	mkdir -p $@
+out/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-out/%.o : src/%.cpp | $(OBJ_DIRS)
-	arm-vita-eabi-g++ -c $(CXXFLAGS) -o $@ $<
+out/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	$(CC) -c $(CFLAGS) -o $@ $<
 
-out/%.o : src/%.c | $(OBJ_DIRS)
-	arm-vita-eabi-gcc -c $(CFLAGS) -o $@ $<
+out/dvl/%.o: dvl/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-out/dvl/%.o : dvl/%.cpp | $(OBJ_DIRS)
-	arm-vita-eabi-g++ -c $(CXXFLAGS) -o $@ $<
+# ----- Desktop Build -----
+
+desktop: rogue-vita-desktop
+
+rogue-vita-desktop: $(DESKTOP_OBJS)
+	$(DESKTOP_CXX) $^ $(DESKTOP_LIBS) -o $@
+	@echo "$(GREEN)✔ Desktop build successful!$(RESET)"
+
+out-desktop/%.o: src/%.cpp
+	@mkdir -p $(dir $@)
+	$(DESKTOP_CXX) -c $(DESKTOP_CXXFLAGS) -o $@ $<
+
+out-desktop/%.o: src/%.c
+	@mkdir -p $(dir $@)
+	$(DESKTOP_CC) -c $(DESKTOP_CFLAGS) -o $@ $<
+
+out-desktop/dvl/%.o: dvl/%.cpp
+	@mkdir -p $(dir $@)
+	$(DESKTOP_CXX) -c $(DESKTOP_CXXFLAGS) -o $@ $<
+
+rdesktop:
+	@$(MAKE) clean-desktop
+	@$(MAKE) desktop
+
+clean-desktop:
+	rm -f rogue-vita-desktop
+	rm -rf out-desktop/
+
+# ----- Cleanup and Rebuild -----
 
 clean:
 	@echo "$(YELLOW)Cleaning up build artifacts...$(RESET)"
-	rm -f *.velf *.elf *.vpk param.sfo eboot.bin $(OBJS)
-	rm -rf out/
+	rm -f *.velf *.elf *.vpk param.sfo eboot.bin rogue-vita-desktop
+	rm -rf out/ out-desktop/
 
 re:
-	$(MAKE) clean
-	$(MAKE) VITA3K=0
+	@$(MAKE) clean
+	@$(MAKE) VITA3K=0
+
+# ----- Vita3K Deployment -----
 
 emul:
-	$(MAKE) VITA3K=1
+	@$(MAKE) VITA3K=1
 	./script/deploy_emul.sh "$(PROJECT).vpk" "$(PROJECT_TITLEID)" "$(VITA3K_FS)" "$(VITA3K_EXE)"
 
 remul:
-	$(MAKE) clean
-	$(MAKE) VITA3K=1
+	@$(MAKE) clean
+	@$(MAKE) VITA3K=1
 	./script/deploy_emul.sh "$(PROJECT).vpk" "$(PROJECT_TITLEID)" "$(VITA3K_FS)" "$(VITA3K_EXE)"
+
+# ----- PlayStation Vita Deployment -----
 
 run: eboot.bin
 	@VITA_IP="$(VITA_IP)" \
@@ -146,6 +212,8 @@ run: eboot.bin
 rrun:
 	@$(MAKE) clean
 	@$(MAKE) run VITA3K=0
+
+# ----- Tests -----
 
 test:
 	@$(MAKE) -C dvl/tests run; \

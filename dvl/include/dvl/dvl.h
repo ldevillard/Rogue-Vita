@@ -1,6 +1,7 @@
 #pragma once
 
 #include "anim/anim.h"
+#include "filesystem/filesystem.h"
 #include "graphics/device.h"
 #include "graphics/types.h"
 #include "input/input.h"

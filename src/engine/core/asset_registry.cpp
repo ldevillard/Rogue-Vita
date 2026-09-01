@@ -386,8 +386,8 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
     wireframeMaterial.textureHandle = _defaultTextureHandle;
 
     RenderPipelineDesc pipelineDesc = {};
-    pipelineDesc.vertexShaderPath = "app0:/asset/shaders/vertex.vert";
-    pipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
+    pipelineDesc.vertexShaderPath = dvl::Filesystem::GetAssetPath("shader/vertex.vert");
+    pipelineDesc.fragmentShaderPath = dvl::Filesystem::GetAssetPath("shader/fragment.frag");
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
     pipelineDesc.vertexStride = sizeof(VertexPositionNormalUV);
@@ -447,8 +447,8 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
     };
 
     RenderPipelineDesc pipelineDesc = {};
-    pipelineDesc.vertexShaderPath = "app0:/asset/shaders/skinned_vertex.vert";
-    pipelineDesc.fragmentShaderPath = "app0:/asset/shaders/fragment.frag";
+    pipelineDesc.vertexShaderPath = dvl::Filesystem::GetAssetPath("shader/skinned_vertex.vert");
+    pipelineDesc.fragmentShaderPath = dvl::Filesystem::GetAssetPath("shader/fragment.frag");
     pipelineDesc.attributes = attributes;
     pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
     pipelineDesc.vertexStride = sizeof(SkinnedVertexPositionNormalUV);

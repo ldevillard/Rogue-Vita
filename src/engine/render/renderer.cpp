@@ -101,7 +101,7 @@ bool Renderer::CreateRenderPipeline(const RenderPipelineDesc& desc, RenderPipeli
         return false;
     }
 
-    if (desc.vertexShaderPath == nullptr || desc.fragmentShaderPath == nullptr ||
+    if (desc.vertexShaderPath.empty() || desc.fragmentShaderPath.empty() ||
         desc.attributes == nullptr || desc.attributeCount == 0 || desc.vertexStride == 0)
     {
         dvl::Log(dvl::LogLevel::Error, "Invalid render pipeline description");
