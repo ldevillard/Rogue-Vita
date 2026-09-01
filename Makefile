@@ -62,7 +62,7 @@ DESKTOP_CXX := g++
 
 DESKTOP_CFLAGS   := -Wall -Wextra -Werror -g -O0 $(INCLUDES)
 DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror -g -O0 $(INCLUDES)
-DESKTOP_LIBS     := -lglfw -lGL -ldl -pthread
+DESKTOP_LIBS     := -lglfw -lGLEW -lGL -ldl -pthread
 
 DESKTOP_OBJS := \
 	$(addprefix out-desktop/,$(SRC_C:src/%.c=%.o)) \
