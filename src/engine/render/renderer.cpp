@@ -14,8 +14,13 @@ Renderer::Renderer(int screenWidth, int screenHeight, const AssetRegistry& asset
     : _assetRegistry(assetRegistry)
 {
 	dvl::DeviceDesc desc;
+#if defined (__vita__)
 	desc.api = dvl::GraphicsAPI::VitaGL;
-	desc.width = screenWidth;
+#else
+    desc.api = dvl::GraphicsAPI::OpenGL;
+#endif
+    
+    desc.width = screenWidth;
 	desc.height = screenHeight;
 	desc.vsync = true;
 

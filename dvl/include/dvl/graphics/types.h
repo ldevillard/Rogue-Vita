@@ -4,7 +4,8 @@ namespace dvl
 {
     enum class GraphicsAPI
     {
-        VitaGL
+        VitaGL,
+        OpenGL
     };
 
     struct DeviceDesc
