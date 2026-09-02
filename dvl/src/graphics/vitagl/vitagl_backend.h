@@ -13,6 +13,8 @@ namespace dvl::internal
         bool Initialize(const DeviceDesc& desc) override;
         void Shutdown() override;
 
+        bool ShouldClose() const override;
+
         void BeginFrame(float r, float g, float b, float a) override;
         void EndFrame() override;
 

@@ -229,6 +229,11 @@ void Renderer::EndFrame()
     _device.EndFrame();
 }
 
+bool Renderer::ShouldClose() const
+{
+    return _device.ShouldClose();
+}
+
 void Renderer::BeginScene(const Camera& camera)
 {
     _activeCamera = &camera;

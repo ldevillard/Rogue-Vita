@@ -57,6 +57,14 @@ namespace dvl
         _backend.reset();
     }
 
+    bool Device::ShouldClose() const
+    {
+        if (!_backend)
+            return false;
+
+        return _backend->ShouldClose();
+    }
+
     void Device::BeginFrame(float r, float g, float b, float a)
     {
         if (!_backend)

@@ -78,6 +78,11 @@ namespace dvl::internal
         glfwTerminate();
     }
 
+    bool OpenGLBackend::ShouldClose() const
+    {
+        return glfwWindowShouldClose(_window) != 0;
+    }
+
     void OpenGLBackend::BeginFrame(float r, float g, float b, float a)
     {
         glClearColor(r, g, b, a);

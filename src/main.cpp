@@ -214,7 +214,7 @@ int main()
     */
     float animationTime = 0.0f;
 
-    while (true)
+    while (renderer.ShouldClose() == false)
     {
         dvl::Time::Update();
         dvl::Input::Update();
