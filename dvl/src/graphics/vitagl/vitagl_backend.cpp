@@ -54,6 +54,12 @@ namespace dvl::internal
         _shaders.clear();
     }
 
+    bool VitaGLBackend::ShouldClose() const
+    {
+        // VitaGL does not have a windowing system, so we can always return false
+        return false;
+    }
+
     void VitaGLBackend::BeginFrame(float r, float g, float b, float a)
     {
         glClearColor(r, g, b, a);

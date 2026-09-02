@@ -49,6 +49,8 @@ public:
     void BeginFrame(const dvl::Vec4& clearColor);
     void EndFrame();
 
+    bool ShouldClose() const;
+
     void BeginScene(const Camera& camera);
     void SubmitLight(const DirectionalLight& light);
 
