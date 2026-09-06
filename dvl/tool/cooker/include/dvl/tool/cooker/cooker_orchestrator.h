@@ -14,6 +14,7 @@ namespace dvl
     private:
         bool cookMesh() const;
         bool cookTexture() const;
+        bool cookSkeleton() const;
 
         std::filesystem::path _sourcePath;
         std::filesystem::path _destinationPath;

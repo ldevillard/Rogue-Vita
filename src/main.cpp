@@ -38,7 +38,7 @@ int main()
 
     World world = {};
 
-    MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
+    MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/training_dummy.dvlmesh"), renderer);
 
     /*
     MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
@@ -54,7 +54,7 @@ int main()
     playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
     playerEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
     Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
-    solidMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
+    solidMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/training_dummy.dvltex"), renderer);
 
     playerEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), solidMaterial);
     playerEntity->AddComponent<PlayerController>(mainCamera);
@@ -209,6 +209,17 @@ int main()
         keyframes
     };
 
+    // Test skeleton asset loading
+    SkeletonHandle skeletonHandle = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/training_dummy.dvlskel"));
+    const Skeleton* skeletonAsset = assetRegistry.GetSkeleton(skeletonHandle);
+
+    std::vector<dvl::Mat4> worldPoseAsset(skeletonAsset->boneCount);
+
+    for (int i = 0; i < skeletonAsset->boneCount; i++)
+    {
+        worldPoseAsset[i] = dvl::Mat4::Inverse(skeletonAsset->inverseBindMatrices[i]);
+    }
+
     /*
     float rotationAngle = 0.0f;
     */
@@ -282,6 +293,12 @@ int main()
             debugDraw.DrawSkeleton(renderer, skeleton, worldPose, wireframeModelMatrix);
             debugDraw.DrawSkeleton(renderer, skeleton, worldPose, solidModelMatrix);
         }
+
+        // Test loaded skeleton asset
+        dvl::Transform transform = {};
+        transform.translation = dvl::Vec4(3.0f, 1.0f, 3.0f, 0.0f);
+        transform.scale = dvl::Vec4(2.0f, 2.0f, 2.0f, 0.0f);
+        debugDraw.DrawSkeleton(renderer, { skeletonAsset->boneCount, skeletonAsset->parents.data(), skeletonAsset->inverseBindMatrices.data() }, worldPoseAsset.data(), dvl::Mat4::FromTransform(transform));
 
         // TODO: Use future World::GetMeshRenders
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())

@@ -16,6 +16,7 @@ public:
     // TODO: Use a line of two vertices instead of a raw cube
     void DrawLine(Renderer& renderer, const dvl::Vec3& from, const dvl::Vec3& to);
 
+    // TODO: Use engine side skeleton type instead of dvl::Skeleton
     void DrawSkeleton(Renderer& renderer, const dvl::Skeleton& skeleton, const dvl::Mat4* worldPose, const dvl::Mat4& modelMatrix);
 
 private:

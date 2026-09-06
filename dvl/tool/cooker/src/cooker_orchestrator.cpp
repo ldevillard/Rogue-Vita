@@ -3,6 +3,7 @@
 #include "dvl/log/log.h"
 #include "dvl/tool/cooker/mesh_cooker.h"
 #include "dvl/tool/cooker/texture_cooker.h"
+#include "dvl/tool/cooker/skeleton_cooker.h"
 
 namespace dvl
 {
@@ -30,7 +31,8 @@ namespace dvl
 
         const bool meshSuccess = cookMesh();
         const bool textureSuccess = cookTexture();
-        return meshSuccess && textureSuccess;
+        const bool skeletonSuccess = cookSkeleton();
+        return meshSuccess && textureSuccess && skeletonSuccess;
     }
 
     bool CookerOrchestrator::cookMesh() const
@@ -73,6 +75,29 @@ namespace dvl
             destination.replace_extension(textureCooker.GetOutputExtension());
 
             if (!textureCooker.Cook(source, destination))
+                success = false;
+        }
+
+        return success;
+    }
+
+    bool CookerOrchestrator::cookSkeleton() const
+    {
+        SkeletonCooker skeletonCooker;
+        bool success = true;
+
+        for (const std::filesystem::directory_entry& entry : std::filesystem::recursive_directory_iterator(_sourcePath))
+        {
+            const std::filesystem::path& source = entry.path();
+            const std::filesystem::path extension = source.extension();
+
+            if (!entry.is_regular_file() || (extension != ".fbx" && extension != ".FBX"))
+                continue;
+
+            std::filesystem::path destination = _destinationPath / source.stem();
+            destination.replace_extension(skeletonCooker.GetOutputExtension());
+
+            if (!skeletonCooker.Cook(source, destination))
                 success = false;
         }
 
