@@ -5,6 +5,7 @@
 
 #include <dvl/asset/mesh_format.h>
 #include <dvl/asset/texture_format.h>
+#include <dvl/asset/skeleton_format.h>
 
 #include "engine/render/vertex.h"
 #include "engine/render/renderer.h"
@@ -190,6 +191,91 @@ void AssetRegistry::UnloadTexture(const TextureHandle& textureHandle, Renderer& 
     _textures.erase(it);
 }
 
+SkeletonHandle AssetRegistry::LoadSkeleton(const std::filesystem::path& path)
+{
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file)
+    {
+        const std::string message = "Couldn't find skeleton to load with path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Error, message.c_str());
+        return {};
+    }
+
+    file.seekg(0, std::ios::end);
+
+    const std::streamsize fileSize = file.tellg();
+    if (fileSize < 0)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to get file size during skeleton loading!");
+        return {};
+    }
+
+    std::vector<std::uint8_t> data(static_cast<size_t>(fileSize));
+
+    file.seekg(0, std::ios::beg);
+
+    if (!file.read(reinterpret_cast<char*>(data.data()), fileSize))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to read file data during skeleton loading!");
+        return {};
+    }
+
+    // Load header
+    if (data.size() < sizeof(dvl::SkeletonFileHeader))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid skeleton header!");
+        return {};
+    }
+
+    dvl::SkeletonFileHeader header{};
+    std::memcpy(&header, data.data(), sizeof(header));
+
+    if (header.magic != dvl::SkeletonMagic || header.version != dvl::SkeletonVersion)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to deserialize skeleton!");
+        return {};
+    }
+
+    // Load parents
+    std::vector<std::int16_t> parents(header.boneCount);
+    const std::uint8_t* parentsPtr = data.data() + sizeof(dvl::SkeletonFileHeader);
+    std::memcpy(parents.data(), parentsPtr, sizeof(std::int16_t) * header.boneCount);
+
+    // Load inverse bind matrices
+    std::vector<dvl::Mat4> inverseBindMatrices(header.boneCount);
+    const std::uint8_t* matricesPtr = data.data() + sizeof(dvl::SkeletonFileHeader) + header.boneCount * sizeof(std::int16_t);
+    std::memcpy(inverseBindMatrices.data(), matricesPtr, sizeof(dvl::Mat4) * header.boneCount);
+
+    Skeleton skeleton = {};
+    skeleton.parents = std::move(parents);
+    skeleton.inverseBindMatrices = std::move(inverseBindMatrices);
+    skeleton.boneCount = header.boneCount;
+
+    SkeletonHandle skeletonHandle = {};
+    skeletonHandle.id = _nextSkeletonId++;
+
+    _skeletons.emplace(skeletonHandle, std::move(skeleton));
+
+    const std::string message = "Loaded skeleton successfully at path: " + std::string(path);
+    dvl::Log(dvl::LogLevel::Info, message.c_str());
+
+    return skeletonHandle;
+}
+
+void AssetRegistry::UnloadSkeleton(const SkeletonHandle& skeletonHandle)
+{
+    const auto it = _skeletons.find(skeletonHandle);
+
+    if (it == _skeletons.end())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Couldn't find skeleton to unload!");
+        return;
+    }
+
+    _skeletons.erase(it);
+}
+
 const Mesh* AssetRegistry::GetMesh(const MeshHandle& meshHandle) const
 {
     const auto it = _meshes.find(meshHandle);
@@ -231,6 +317,18 @@ const Texture* AssetRegistry::GetTexture(const TextureHandle& textureHandle) con
     const auto it = _textures.find(textureHandle);
 
     if (it != _textures.end())
+    {
+        return &it->second;
+    }
+
+    return nullptr;
+}
+
+const Skeleton* AssetRegistry::GetSkeleton(const SkeletonHandle& skeletonHandle) const
+{
+    const auto it = _skeletons.find(skeletonHandle);
+
+    if (it != _skeletons.end())
     {
         return &it->second;
     }

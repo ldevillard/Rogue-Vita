@@ -5,6 +5,7 @@
 
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
+#include "engine/render/skeleton.h"
 #include "engine/render/texture.h"
 
 class Renderer;
@@ -21,12 +22,16 @@ public:
     TextureHandle LoadTexture(const std::filesystem::path& path, Renderer& renderer);
     void UnloadTexture(const TextureHandle& textureHandle, Renderer& renderer);
 
+    SkeletonHandle LoadSkeleton(const std::filesystem::path& path);
+    void UnloadSkeleton(const SkeletonHandle& skeletonHandle);
+
     // TODO: Load and unload materials
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
     const Material* GetMaterial(const MaterialHandle& materialHandle) const;
     const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;
     const Texture* GetTexture(const TextureHandle& textureHandle) const;
+    const Skeleton* GetSkeleton(const SkeletonHandle& skeletonHandle) const;
 
     // Primitives
     const Mesh& GetCubeMesh() const;
@@ -66,4 +71,7 @@ private:
 
     std::unordered_map<TextureHandle, Texture, TextureHandle::Hasher> _textures;
     int _nextTextureId = 1;
+
+    std::unordered_map<SkeletonHandle, Skeleton, SkeletonHandle::Hasher> _skeletons;
+    int _nextSkeletonId = 1;
 };
