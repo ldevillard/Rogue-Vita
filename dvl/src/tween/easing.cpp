@@ -1,12 +1,12 @@
 #include "dvl/tween/easing.h"
 
+#include "dvl/math/math.h"
+
 #include <cmath>
 
 namespace
 {
-    // TODO: Add PI in a dvl math utility header
-    constexpr float Pi = 3.14159265358979323846f;
-    constexpr float HalfPi = Pi * 0.5f;
+    constexpr float HalfPi = dvl::Pi * 0.5f;
 
     constexpr float BackStrength = 1.70158f;
     constexpr float BackInOutStrengthMultiplier = 1.525f;
@@ -24,7 +24,7 @@ namespace
 
     float EaseInOutSine(float time)
     {
-        return (1.0f - std::cos(time * Pi)) * 0.5f;
+        return (1.0f - std::cos(time * dvl::Pi)) * 0.5f;
     }
 
     float EaseInBack(float time)
