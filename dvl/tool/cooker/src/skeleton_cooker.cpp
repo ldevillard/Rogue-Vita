@@ -4,13 +4,13 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <algorithm>
 #include <fstream>
 #include <unordered_map>
 #include <vector>
 
 #include "dvl/log/log.h"
 #include "dvl/math/math.h"
+#include "dvl/tool/cooker/asset_space_cooker_helper.h"
 
 #include "dvl/asset/skeleton_format.h"
 
@@ -57,8 +57,7 @@ namespace dvl
             aiProcess_GenSmoothNormals |
             aiProcess_ImproveCacheLocality |
             aiProcess_PreTransformVertices |
-            aiProcess_FlipUVs |
-            aiProcess_GenBoundingBoxes);
+            aiProcess_FlipUVs);
 
         if (meshScene == nullptr || !meshScene->HasMeshes())
         {
@@ -67,43 +66,13 @@ namespace dvl
             return false;
         }
 
-        aiAABB bounds = meshScene->mMeshes[0]->mAABB;
-        for (unsigned int meshIndex = 1; meshIndex < meshScene->mNumMeshes; meshIndex++)
+        AssetSpaceCookerHelper assetSpace;
+        if (!assetSpace.Initialize(*meshScene))
         {
-            const aiAABB& meshBounds = meshScene->mMeshes[meshIndex]->mAABB;
-            bounds.mMin.x = std::min(bounds.mMin.x, meshBounds.mMin.x);
-            bounds.mMin.y = std::min(bounds.mMin.y, meshBounds.mMin.y);
-            bounds.mMin.z = std::min(bounds.mMin.z, meshBounds.mMin.z);
-            bounds.mMax.x = std::max(bounds.mMax.x, meshBounds.mMax.x);
-            bounds.mMax.y = std::max(bounds.mMax.y, meshBounds.mMax.y);
-            bounds.mMax.z = std::max(bounds.mMax.z, meshBounds.mMax.z);
-        }
-
-        const aiVector3D center = (bounds.mMin + bounds.mMax) * 0.5f;
-        const aiVector3D size = bounds.mMax - bounds.mMin;
-        const float largestDimension = std::max({size.x, size.y, size.z});
-        const float assetScale = largestDimension > 0.0f ? largestDimension : 1.0f;
-
-        int upAxis = 1;
-        if (meshScene->mMetaData != nullptr)
-            meshScene->mMetaData->Get("UpAxis", upAxis);
-
-        if (upAxis != 1 && upAxis != 2)
-        {
-            const std::string message = "Unsupported up axis in skeleton '" + source.string() + "'";
+            const std::string message = "Failed to determine mesh space for skeleton '" + source.string() + "'";
             Log(LogLevel::Error, message.c_str());
             return false;
         }
-
-        const aiMatrix4x4 assetToMeshSpace = upAxis == 2
-            ? aiMatrix4x4(-assetScale, 0.0f, 0.0f, center.x,
-                            0.0f, 0.0f, assetScale, center.y,
-                            0.0f, assetScale, 0.0f, center.z,
-                            0.0f, 0.0f, 0.0f, 1.0f)
-            : aiMatrix4x4(assetScale, 0.0f, 0.0f, center.x,
-                          0.0f, assetScale, 0.0f, center.y,
-                          0.0f, 0.0f, assetScale, center.z,
-                          0.0f, 0.0f, 0.0f, 1.0f);
 
         const aiNode* meshNode = scene->mRootNode->FindNode(mesh->mName);
         if (meshNode == nullptr)
@@ -118,7 +87,7 @@ namespace dvl
             meshTransform = node->mTransformation * meshTransform;
 
         meshTransform.Inverse();
-        const aiMatrix4x4 bindTransform = meshTransform * assetToMeshSpace;
+        const aiMatrix4x4 bindTransform = meshTransform * assetSpace.ToSourceMatrix();
 
         std::vector<std::int16_t> parents(mesh->mNumBones, -1);
         std::vector<Mat4> inverseBindMatrices(mesh->mNumBones);
