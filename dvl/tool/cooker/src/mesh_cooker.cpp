@@ -4,21 +4,16 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
-#include <algorithm>
 #include <fstream>
 #include <limits>
 #include <vector>
 
 #include "dvl/asset/mesh_format.h"
 #include "dvl/log/log.h"
+#include "dvl/tool/cooker/asset_space_cooker_helper.h"
 
 namespace dvl
 {
-    aiVector3D ConvertZUpToYUp(const aiVector3D& value)
-    {
-        return {-value.x, value.z, value.y};
-    }
-
     bool MeshCooker::Cook(const std::filesystem::path& source, const std::filesystem::path& destination) const
     {
         Assimp::Importer importer;
@@ -38,58 +33,16 @@ namespace dvl
             return false;
         }
 
-        int upAxis = 1;
-        if (scene->mMetaData != nullptr)
-            scene->mMetaData->Get("UpAxis", upAxis);
-
-        if (upAxis != 1 && upAxis != 2)
+        AssetSpaceCookerHelper assetSpace;
+        if (!assetSpace.Initialize(*scene))
         {
-            const std::string message = "Unsupported up axis in mesh '" + source.string() + "'";
+            const std::string message = "Failed to determine mesh space for '" + source.string() + "'";
             Log(LogLevel::Error, message.c_str());
             return false;
         }
 
-        const bool requiresYUpConversion = upAxis == 2;
-
         std::vector<MeshVertexFormat> vertices;
         std::vector<std::uint16_t> indices;
-
-        aiVector3D minBounds
-        {
-            std::numeric_limits<float>::max(),
-            std::numeric_limits<float>::max(),
-            std::numeric_limits<float>::max()
-        };
-        
-        aiVector3D maxBounds
-        {
-            std::numeric_limits<float>::lowest(),
-            std::numeric_limits<float>::lowest(),
-            std::numeric_limits<float>::lowest()
-        };
-
-        for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
-        {
-            const aiMesh* mesh = scene->mMeshes[meshIndex];
-            if (!mesh->HasPositions())
-                continue;
-
-            for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
-            {
-                const aiVector3D& position = mesh->mVertices[vertexIndex];
-                minBounds.x = std::min(minBounds.x, position.x);
-                minBounds.y = std::min(minBounds.y, position.y);
-                minBounds.z = std::min(minBounds.z, position.z);
-                maxBounds.x = std::max(maxBounds.x, position.x);
-                maxBounds.y = std::max(maxBounds.y, position.y);
-                maxBounds.z = std::max(maxBounds.z, position.z);
-            }
-        }
-
-        const aiVector3D center = (minBounds + maxBounds) * 0.5f;
-        const aiVector3D size = maxBounds - minBounds;
-        const float largestDimension = std::max({size.x, size.y, size.z});
-        const float normalizationScale = largestDimension > 0.0f ? 1.0f / largestDimension : 1.0f;
 
         for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; ++meshIndex)
         {
@@ -110,12 +63,10 @@ namespace dvl
             vertices.reserve(resultingVertexCount);
             for (unsigned int vertexIndex = 0; vertexIndex < mesh->mNumVertices; ++vertexIndex)
             {
-                const aiVector3D sourcePosition = (mesh->mVertices[vertexIndex] - center) * normalizationScale;
+                const aiVector3D position = assetSpace.ToCookedPoint(mesh->mVertices[vertexIndex]);
                 const aiVector3D sourceNormal = mesh->HasNormals() ? mesh->mNormals[vertexIndex] : aiVector3D{};
                 const aiVector3D uv = mesh->HasTextureCoords(0) ? mesh->mTextureCoords[0][vertexIndex] : aiVector3D{};
-
-                const aiVector3D position = requiresYUpConversion ? ConvertZUpToYUp(sourcePosition) : sourcePosition;
-                const aiVector3D normal = requiresYUpConversion ? ConvertZUpToYUp(sourceNormal) : sourceNormal;
+                const aiVector3D normal = assetSpace.ToCookedDirection(sourceNormal);
 
                 vertices.push_back
                 ({
