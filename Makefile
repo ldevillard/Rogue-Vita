@@ -21,7 +21,10 @@ RESET  := \033[0m
 
 # ----- Make Helpers -----
 
-.PHONY: all package clean clean-desktop re emul remul run rrun desktop rdesktop test
+.PHONY: all package clean clean-desktop re emul remul run rrun desktop rdesktop test cook
+
+COOKER_DIR := dvl/tool/cooker
+COOKER := $(COOKER_DIR)/build/dvl-cooker
 
 rwildcard = $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
@@ -96,6 +99,11 @@ LIBS := \
 	-lc
 
 # ----- Asset Packaging -----
+
+cook:
+	@mkdir -p asset/cooked/mesh asset/cooked/skeleton asset/cooked/texture
+	@$(MAKE) -C $(COOKER_DIR)
+	@$(COOKER) asset/source asset/cooked
 
 SHADER_ASSET_DIR := asset/shader
 SHADER_ASSETS := $(shell find $(SHADER_ASSET_DIR) -type f)
