@@ -7,6 +7,7 @@
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
 #include "engine/component/mesh_renderer.h"
+#include "engine/component/skinned_mesh_renderer.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
@@ -30,15 +31,16 @@ int main()
     Renderer renderer = Renderer(ScreenWidth, ScreenHeight, assetRegistry);
 
     assetRegistry.Initialize(renderer);
-
     DebugDraw debugDraw(assetRegistry);
-
+    
     dvl::Input::Initialize();
     dvl::Time::Initialize();
 
     World world = {};
 
-    MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/training_dummy.dvlmesh"), renderer);
+    MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
+    SkeletonHandle targetDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/target_dummy.dvlskel"));
+    const Skeleton* targetDummySkeletonAsset = assetRegistry.GetSkeleton(targetDummySkeleton);
 
     /*
     MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
@@ -53,10 +55,10 @@ int main()
     Entity* playerEntity = world.CreateEntity();
     playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
     playerEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
-    Material solidMaterial = assetRegistry.GetSolidMaterialInstance();
-    solidMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/training_dummy.dvltex"), renderer);
+    Material solidMaterial = assetRegistry.GetWireframeMaterialInstance();
+    solidMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
 
-    playerEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), solidMaterial);
+    playerEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), solidMaterial, targetDummySkeletonAsset);
     playerEntity->AddComponent<PlayerController>(mainCamera);
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
@@ -209,17 +211,6 @@ int main()
         keyframes
     };
 
-    // Test skeleton asset loading
-    SkeletonHandle skeletonHandle = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/training_dummy.dvlskel"));
-    const Skeleton* skeletonAsset = assetRegistry.GetSkeleton(skeletonHandle);
-
-    std::vector<dvl::Mat4> worldPoseAsset(skeletonAsset->boneCount);
-
-    for (int i = 0; i < skeletonAsset->boneCount; i++)
-    {
-        worldPoseAsset[i] = dvl::Mat4::Inverse(skeletonAsset->inverseBindMatrices[i]);
-    }
-
     /*
     float rotationAngle = 0.0f;
     */
@@ -289,21 +280,26 @@ int main()
 
             renderer.DrawSkinned(skinnedTestMesh, wireframeAnimatedMaterial, wireframeModelMatrix, skinningMatrices, BoneCount);
             renderer.DrawSkinned(skinnedTestMesh, solidAnimatedMaterial, solidModelMatrix, skinningMatrices, BoneCount);
-
             debugDraw.DrawSkeleton(renderer, skeleton, worldPose, wireframeModelMatrix);
             debugDraw.DrawSkeleton(renderer, skeleton, worldPose, solidModelMatrix);
         }
-
-        // Test loaded skeleton asset
-        dvl::Transform transform = {};
-        transform.translation = dvl::Vec4(3.0f, 1.0f, 3.0f, 0.0f);
-        transform.scale = dvl::Vec4(2.0f, 2.0f, 2.0f, 0.0f);
-        debugDraw.DrawSkeleton(renderer, { skeletonAsset->boneCount, skeletonAsset->parents.data(), skeletonAsset->inverseBindMatrices.data() }, worldPoseAsset.data(), dvl::Mat4::FromTransform(transform));
 
         // TODO: Use future World::GetMeshRenders
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
             // With the future new register component system, it will support multiple mesh renderers per entity
+            const SkinnedMeshRenderer* skinnedMeshRenderer = entity->GetComponent<SkinnedMeshRenderer>();
+            if (skinnedMeshRenderer != nullptr)
+            {
+                const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
+
+                // T pose
+                std::vector<dvl::Mat4> skinningMatrices(skinnedMeshRenderer->skeleton->boneCount, dvl::Mat4::Identity());
+
+                renderer.DrawSkinned(*skinnedMeshRenderer->mesh, skinnedMeshRenderer->material, modelMatrix, skinningMatrices.data(), skinnedMeshRenderer->skeleton->boneCount);
+                continue;
+            }
+
             const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
             if (meshRenderer == nullptr)
                 continue;
