@@ -83,10 +83,7 @@ MeshHandle AssetRegistry::LoadMesh(const std::filesystem::path& path, Renderer& 
         return {};
     }
 
-    // Load vertices
-    std::vector<VertexPositionNormalUV> vertices(header.vertexCount);
     const std::uint8_t* vertexPtr = data.data() + sizeof(dvl::MeshFileHeader);
-    std::memcpy(vertices.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
 
     // Load indices
     std::vector<std::uint16_t> indices(header.indexCount);
@@ -94,14 +91,42 @@ MeshHandle AssetRegistry::LoadMesh(const std::filesystem::path& path, Renderer& 
     std::memcpy(indices.data(), indexPtr, sizeof(std::uint16_t) * header.indexCount);
 
     MeshDesc desc = {};
-    desc.vertexData = vertices.data();
-    desc.vertexDataSize = vertices.size() * sizeof(VertexPositionNormalUV);
     desc.indices = indices.data();
     desc.indexCount = indices.size();
 
     Mesh mesh = {};
     MeshHandle meshHandle = {};
-    if (renderer.CreateMesh(desc, mesh))
+    if (header.meshType == dvl::MeshType::Skinned)
+    {
+        std::vector<SkinnedVertexPositionNormalUV> vertices(header.vertexCount);
+        std::memcpy(vertices.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
+
+        desc.vertexData = vertices.data();
+        desc.vertexDataSize = vertices.size() * sizeof(SkinnedVertexPositionNormalUV);
+        renderer.CreateMesh(desc, mesh);
+    }
+    else
+    {
+        std::vector<VertexPositionNormalUV> vertices(header.vertexCount);
+        std::vector<dvl::MeshVertexFormat> source(header.vertexCount);
+        std::memcpy(source.data(), vertexPtr, sizeof(dvl::MeshVertexFormat) * header.vertexCount);
+
+        for (unsigned int index = 0; index < header.vertexCount; ++index)
+        {
+            vertices[index] =
+            {
+                source[index].x, source[index].y, source[index].z,
+                source[index].nx, source[index].ny, source[index].nz,
+                source[index].u, source[index].v
+            };
+        }
+
+        desc.vertexData = vertices.data();
+        desc.vertexDataSize = vertices.size() * sizeof(VertexPositionNormalUV);
+        renderer.CreateMesh(desc, mesh);
+    }
+
+    if (mesh.IsValid())
     {
         meshHandle.id = _nextMeshId++;
         _meshes.emplace(meshHandle, mesh);
