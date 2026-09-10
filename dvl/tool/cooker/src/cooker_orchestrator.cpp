@@ -48,7 +48,7 @@ namespace dvl
             if (!entry.is_regular_file() || (extension != ".fbx" && extension != ".FBX"))
                 continue;
 
-            std::filesystem::path destination = _destinationPath / source.filename();
+            std::filesystem::path destination = _destinationPath / "mesh" / source.filename();
             destination.replace_extension(meshCooker.GetOutputExtension());
 
             if (!meshCooker.Cook(source, destination))
@@ -71,7 +71,7 @@ namespace dvl
             if (!entry.is_regular_file() || (extension != ".png" && extension != ".PNG"))
                 continue;
 
-            std::filesystem::path destination = _destinationPath / source.stem();
+            std::filesystem::path destination = _destinationPath / "texture" / source.stem();
             destination.replace_extension(textureCooker.GetOutputExtension());
 
             if (!textureCooker.Cook(source, destination))
@@ -94,7 +94,7 @@ namespace dvl
             if (!entry.is_regular_file() || (extension != ".fbx" && extension != ".FBX"))
                 continue;
 
-            std::filesystem::path destination = _destinationPath / source.stem();
+            std::filesystem::path destination = _destinationPath / "skeleton" / source.stem();
             destination.replace_extension(skeletonCooker.GetOutputExtension());
 
             if (!skeletonCooker.Cook(source, destination))
