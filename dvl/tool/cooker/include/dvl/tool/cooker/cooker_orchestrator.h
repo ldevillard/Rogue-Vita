@@ -15,6 +15,7 @@ namespace dvl
         bool cookMesh() const;
         bool cookTexture() const;
         bool cookSkeleton() const;
+        bool cookAnimation() const;
 
         std::filesystem::path _sourcePath;
         std::filesystem::path _destinationPath;

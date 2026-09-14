@@ -101,7 +101,7 @@ LIBS := \
 # ----- Asset Packaging -----
 
 cook:
-	@mkdir -p asset/cooked/mesh asset/cooked/skeleton asset/cooked/texture
+	@mkdir -p asset/cooked/mesh asset/cooked/skeleton asset/cooked/texture asset/cooked/animation
 	@$(MAKE) -C $(COOKER_DIR)
 	@$(COOKER) asset/source asset/cooked
 
