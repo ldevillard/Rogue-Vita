@@ -8,7 +8,30 @@
             "program": "${workspaceFolder}/rogue-vita-desktop",
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
-            "stopAtEntry": false
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "setupCommands": [
+                {
+                    "description": "Enable GDB pretty printing",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Expand C++ structures",
+                    "text": "-gdb-set print pretty on",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Show dynamic C++ types",
+                    "text": "-gdb-set print object on",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Show complete pointer targets",
+                    "text": "-gdb-set print elements 0",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }
