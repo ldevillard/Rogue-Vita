@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 
+#include <dvl/asset/animation_format.h>
 #include <dvl/asset/mesh_format.h>
 #include <dvl/asset/texture_format.h>
 #include <dvl/asset/skeleton_format.h>
@@ -216,6 +217,88 @@ void AssetRegistry::UnloadTexture(const TextureHandle& textureHandle, Renderer& 
     _textures.erase(it);
 }
 
+AnimationHandle AssetRegistry::LoadAnimation(const std::filesystem::path& path)
+{
+    std::ifstream file(path, std::ios::binary);
+
+    if (!file)
+    {
+        const std::string message = "Couldn't find animation to load with path: " + std::string(path);
+        dvl::Log(dvl::LogLevel::Error, message.c_str());
+        return {};
+    }
+
+    file.seekg(0, std::ios::end);
+
+    const std::streamsize fileSize = file.tellg();
+    if (fileSize < 0)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to get file size during animation loading!");
+        return {};
+    }
+
+    std::vector<std::uint8_t> data(static_cast<size_t>(fileSize));
+
+    file.seekg(0, std::ios::beg);
+
+    if (!file.read(reinterpret_cast<char*>(data.data()), fileSize))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to read file data during animation loading!");
+        return {};
+    }
+
+    // Load header
+    if (data.size() < sizeof(dvl::AnimationFileHeader))
+    {
+        dvl::Log(dvl::LogLevel::Error, "Invalid animation header!");
+        return {};
+    }
+
+    dvl::AnimationFileHeader header{};
+    std::memcpy(&header, data.data(), sizeof(header));
+
+    if (header.magic != dvl::AnimationMagic || header.version != dvl::AnimationVersion)
+    {
+        dvl::Log(dvl::LogLevel::Error, "Failed to deserialize animation!");
+        return {};
+    }
+
+    // Load keyframes
+    std::vector<dvl::Transform> keyframes(static_cast<std::size_t>(header.boneCount) * header.frameCount);
+    const std::uint8_t* keyframesPtr = data.data() + sizeof(dvl::AnimationFileHeader);
+    std::memcpy(keyframes.data(), keyframesPtr, keyframes.size() * sizeof(dvl::Transform));
+
+    Animation animation = {};
+    animation.duration = header.duration;
+    animation.fps = header.fps;
+    animation.boneCount = static_cast<int>(header.boneCount);
+    animation.frameCount = static_cast<int>(header.frameCount);
+    animation.keyframes = std::move(keyframes);
+
+    AnimationHandle animationHandle = {};
+    animationHandle.id = _nextAnimationId++;
+
+    _animations.emplace(animationHandle, std::move(animation));
+
+    const std::string message = "Loaded animation successfully at path: " + std::string(path);
+    dvl::Log(dvl::LogLevel::Info, message.c_str());
+
+    return animationHandle;
+}
+
+void AssetRegistry::UnloadAnimation(const AnimationHandle& animationHandle)
+{
+    const auto it = _animations.find(animationHandle);
+
+    if (it == _animations.end())
+    {
+        dvl::Log(dvl::LogLevel::Error, "Couldn't find animation to unload!");
+        return;
+    }
+
+    _animations.erase(it);
+}
+
 SkeletonHandle AssetRegistry::LoadSkeleton(const std::filesystem::path& path)
 {
     std::ifstream file(path, std::ios::binary);
@@ -354,6 +437,18 @@ const Skeleton* AssetRegistry::GetSkeleton(const SkeletonHandle& skeletonHandle)
     const auto it = _skeletons.find(skeletonHandle);
 
     if (it != _skeletons.end())
+    {
+        return &it->second;
+    }
+
+    return nullptr;
+}
+
+const Animation* AssetRegistry::GetAnimation(const AnimationHandle& animationHandle) const
+{
+    const auto it = _animations.find(animationHandle);
+
+    if (it != _animations.end())
     {
         return &it->second;
     }
