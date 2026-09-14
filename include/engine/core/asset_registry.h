@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <unordered_map>
 
+#include "engine/render/animation.h"
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
 #include "engine/render/skeleton.h"
@@ -25,6 +26,9 @@ public:
     SkeletonHandle LoadSkeleton(const std::filesystem::path& path);
     void UnloadSkeleton(const SkeletonHandle& skeletonHandle);
 
+    AnimationHandle LoadAnimation(const std::filesystem::path& path);
+    void UnloadAnimation(const AnimationHandle& animationHandle);
+
     // TODO: Load and unload materials
 
     const Mesh* GetMesh(const MeshHandle& meshHandle) const;
@@ -32,6 +36,7 @@ public:
     const RenderPipeline* GetRenderPipeline(const RenderPipelineHandle& renderPipelineHandle) const;
     const Texture* GetTexture(const TextureHandle& textureHandle) const;
     const Skeleton* GetSkeleton(const SkeletonHandle& skeletonHandle) const;
+    const Animation* GetAnimation(const AnimationHandle& animationHandle) const;
 
     // Primitives
     const Mesh& GetCubeMesh() const;
@@ -74,4 +79,7 @@ private:
 
     std::unordered_map<SkeletonHandle, Skeleton, SkeletonHandle::Hasher> _skeletons;
     int _nextSkeletonId = 1;
+
+    std::unordered_map<AnimationHandle, Animation, AnimationHandle::Hasher> _animations;
+    int _nextAnimationId = 1;
 };

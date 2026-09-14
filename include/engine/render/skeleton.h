@@ -43,4 +43,9 @@ struct Skeleton
                 parents.size() == static_cast<size_t>(boneCount) && 
                 inverseBindMatrices.size() == static_cast<size_t>(boneCount);
     }
+
+    dvl::Skeleton GetView() const
+    {
+        return {boneCount, parents.data(), inverseBindMatrices.data()};
+    }
 };

@@ -93,9 +93,6 @@ namespace dvl
                                     aiProcess_ImproveCacheLocality |
                                     aiProcess_FlipUVs;
 
-        if (meshType == MeshType::Static)
-            postProcess |= aiProcess_PreTransformVertices;
-
         const aiScene* scene = importer.ReadFile(source.string(), postProcess);
 
         if (scene == nullptr || !scene->HasMeshes())

@@ -6,17 +6,14 @@ namespace dvl
     {
         for (int i = 0; i < skeleton.boneCount; i++)
         {
-            const Mat4 localTransform = Mat4::FromTransform(localPose[i]);
-            const std::int16_t parentIndex = skeleton.parents[i];
+            Mat4 boneTransform = Mat4::FromTransform(localPose[i]);
 
-            if (parentIndex < 0)
+            for (int parent = skeleton.parents[i]; parent >= 0; parent = skeleton.parents[parent])
             {
-                outWorldMatrices[i] = rootTransform * localTransform;
+                boneTransform = Mat4::FromTransform(localPose[parent]) * boneTransform;
             }
-            else
-            {
-                outWorldMatrices[i] = outWorldMatrices[parentIndex] * localTransform;
-            }
+
+            outWorldMatrices[i] = rootTransform * boneTransform;
         }
     }
 

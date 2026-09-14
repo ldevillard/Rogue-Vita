@@ -200,12 +200,12 @@ re:
 # ----- Vita3K Deployment -----
 
 emul:
-	@$(MAKE) VITA3K=1
+	@$(MAKE) package VITA3K=1
 	./script/deploy_emul.sh "$(PROJECT).vpk" "$(PROJECT_TITLEID)" "$(VITA3K_FS)" "$(VITA3K_EXE)"
 
 remul:
 	@$(MAKE) clean
-	@$(MAKE) VITA3K=1
+	@$(MAKE) package VITA3K=1
 	./script/deploy_emul.sh "$(PROJECT).vpk" "$(PROJECT_TITLEID)" "$(VITA3K_FS)" "$(VITA3K_EXE)"
 
 # ----- PlayStation Vita Deployment -----
