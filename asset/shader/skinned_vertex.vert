@@ -5,7 +5,7 @@ attribute vec2 aUV;
 attribute vec4 aBoneIndices;
 attribute vec4 aBoneWeights;
 
-const int MAX_BONES = 32;
+const int MAX_BONES = 64;
 const int MAX_BONE_INFLUENCES = 4;
 
 varying vec2 vUV;
