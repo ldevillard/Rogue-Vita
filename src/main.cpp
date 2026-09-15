@@ -1,7 +1,6 @@
 #include <dvl/dvl.h>
 
-#include <cmath>
-
+#include "engine/component/animator.h"
 #include "engine/component/behavior.h"
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
@@ -11,6 +10,7 @@
 #include "engine/core/world.h"
 #include "engine/render/material.h"
 #include "engine/render/renderer.h"
+#include "engine/system/animation_system.h"
 
 #include "game/component/player_controller.h"
 #include "game/component/spring_arm.h"
@@ -30,6 +30,7 @@ int main()
     dvl::Time::Initialize();
 
     World world = {};
+    AnimationSystem animationSystem = {};
 
     const MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
     const SkeletonHandle targetDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/target_dummy.dvlskel"));
@@ -37,13 +38,6 @@ int main()
     const MeshHandle pillarMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/ancient_pillar.dvlmesh"), renderer);
 
     const Skeleton* targetDummySkeletonAsset = assetRegistry.GetSkeleton(targetDummySkeleton);
-    const Animation* runAnimationAsset = assetRegistry.GetAnimation(runAnimationHandle);
-    const dvl::Skeleton targetSkeleton = targetDummySkeletonAsset->GetView();
-    const dvl::Animation runAnimation = runAnimationAsset->GetView();
-
-    std::vector<dvl::Transform> animatedPose(targetSkeleton.boneCount);
-    std::vector<dvl::Mat4> skinningMatrices(targetSkeleton.boneCount);
-    float runAnimationTime = 0.0f;
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
@@ -57,6 +51,7 @@ int main()
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
     playerEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(targetDummyMesh), playerMaterial, targetDummySkeletonAsset);
+    playerEntity->AddComponent<Animator>(targetDummySkeleton, runAnimationHandle);
     playerEntity->AddComponent<PlayerController>(mainCamera);
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
@@ -87,11 +82,6 @@ int main()
 
         const float deltaTime = dvl::Time::GetDeltaTime();
 
-        runAnimationTime = std::fmod(runAnimationTime + deltaTime, runAnimation.duration);
-        dvl::Evaluate(runAnimation, runAnimationTime, animatedPose.data());
-        dvl::LocalToWorld(targetSkeleton, animatedPose.data(), dvl::Mat4::Identity(), skinningMatrices.data());
-        dvl::ComputeSkinningMatrices(targetSkeleton, skinningMatrices.data(), skinningMatrices.data());
-
         dvl::Tweener::Update(deltaTime);
 
         // Gameplay logic
@@ -108,6 +98,8 @@ int main()
             mainCamera.UpdateViewMatrix();
         }
 
+        animationSystem.Update(world, assetRegistry, deltaTime);
+
         renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
         renderer.BeginScene(mainCamera);
 
@@ -123,9 +115,13 @@ int main()
             const SkinnedMeshRenderer* skinnedMeshRenderer = entity->GetComponent<SkinnedMeshRenderer>();
             if (skinnedMeshRenderer != nullptr)
             {
+                const Animator* animator = entity->GetComponent<Animator>();
+                if (animator == nullptr || !animator->IsValid())
+                    continue;
+
                 const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
-                renderer.DrawSkinned(*skinnedMeshRenderer->mesh, skinnedMeshRenderer->material, modelMatrix,
-                    skinningMatrices.data(), targetSkeleton.boneCount);
+                renderer.DrawSkinned(*skinnedMeshRenderer->mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
+                
                 continue;
             }
 
