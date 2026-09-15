@@ -61,7 +61,7 @@ private:
     void bindParameter(const ShaderParameterBinding& parameter, const DrawContext& context);
 
     static constexpr int MaxLights = 4;
-    static constexpr int MaxBones = 32;
+    static constexpr int MaxBones = 64;
 
     dvl::Device _device;
     const Camera* _activeCamera = nullptr;

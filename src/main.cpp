@@ -34,10 +34,22 @@ int main()
 
     const MeshHandle targetDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
     const SkeletonHandle targetDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/target_dummy.dvlskel"));
-    const AnimationHandle runAnimationHandle = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/target_dummy@run_forward_in_place.dvlanim"));
-    const MeshHandle pillarMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/ancient_pillar.dvlmesh"), renderer);
+    const AnimationHandle runAnimationHandle = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/target_dummy@walk_forward_in_place.dvlanim"));
+    const MeshHandle trainingDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/training_dummy.dvlmesh"), renderer);
+    const SkeletonHandle trainingDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/training_dummy.dvlskel"));
+    const AnimationHandle idleAnimationHandle = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/training_dummy@idle.dvlanim"));
+    const MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
+    const SkeletonHandle practiceDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/practice_dummy.dvlskel"));
+    const AnimationHandle practiceIdleAnimationHandle = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@idle.dvlanim"));
+    const MeshHandle dragonInfernoMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/dragon_inferno.dvlmesh"), renderer);
+    const SkeletonHandle dragonInfernoSkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/dragon_inferno.dvlskel"));
+    const AnimationHandle dragonFlyIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/dragon_inferno@fly_idle.dvlanim"));
+    //const MeshHandle pillarMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/ancient_pillar.dvlmesh"), renderer);
 
     const Skeleton* targetDummySkeletonAsset = assetRegistry.GetSkeleton(targetDummySkeleton);
+    const Skeleton* trainingDummySkeletonAsset = assetRegistry.GetSkeleton(trainingDummySkeleton);
+    const Skeleton* practiceDummySkeletonAsset = assetRegistry.GetSkeleton(practiceDummySkeleton);
+    const Skeleton* dragonInfernoSkeletonAsset = assetRegistry.GetSkeleton(dragonInfernoSkeleton);
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
@@ -46,7 +58,7 @@ int main()
 
     Entity* playerEntity = world.CreateEntity();
     playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
-    playerEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
+    playerEntity->transform.scale = dvl::Vec3(2.0f, 2.0f, 2.0f);
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
@@ -54,14 +66,43 @@ int main()
     playerEntity->AddComponent<Animator>(targetDummySkeleton, runAnimationHandle);
     playerEntity->AddComponent<PlayerController>(mainCamera);
 
+    Entity* trainingDummyEntity = world.CreateEntity();
+    trainingDummyEntity->transform.position = dvl::Vec3(-3.0f, 0.0f, 0.75f);
+    trainingDummyEntity->transform.scale = dvl::Vec3(2.5f, 2.5f, 2.5f);
+
+    Material trainingDummyMaterial = assetRegistry.GetSolidMaterialInstance();
+    trainingDummyMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/training_dummy.dvltex"), renderer);
+    SkinnedMeshRenderer& trainingDummyRenderer = trainingDummyEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(trainingDummyMesh), trainingDummyMaterial, trainingDummySkeletonAsset);
+    trainingDummyRenderer.localTransform.rotation.y = -dvl::Pi * 0.5f;
+    trainingDummyRenderer.localTransform.rotation.z = dvl::Pi;
+    trainingDummyEntity->AddComponent<Animator>(trainingDummySkeleton, idleAnimationHandle);
+
+    Entity* practiceDummyEntity = world.CreateEntity();
+    practiceDummyEntity->transform.position = dvl::Vec3(2.5f, 0.5f, 0.75f);
+    practiceDummyEntity->transform.scale = dvl::Vec3(2.0f, 2.0f, 2.0f);
+
+    Material practiceDummyMaterial = assetRegistry.GetSolidMaterialInstance();
+    practiceDummyMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/practice_dummy.dvltex"), renderer);
+    practiceDummyEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), practiceDummyMaterial, practiceDummySkeletonAsset);
+    practiceDummyEntity->AddComponent<Animator>(practiceDummySkeleton, practiceIdleAnimationHandle);
+
+    Entity* dragonInfernoEntity = world.CreateEntity();
+    dragonInfernoEntity->transform.position = dvl::Vec3(0.0f, 1.0f, 2.5f);
+    dragonInfernoEntity->transform.scale = dvl::Vec3(4.0f, 4.0f, 4.0f);
+
+    Material dragonInfernoMaterial = assetRegistry.GetSolidMaterialInstance();
+    dragonInfernoMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/dragon_inferno.dvltex"), renderer);
+    dragonInfernoEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(dragonInfernoMesh), dragonInfernoMaterial, dragonInfernoSkeletonAsset);
+    dragonInfernoEntity->AddComponent<Animator>(dragonInfernoSkeleton, dragonFlyIdleAnimation);
+
     cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
 
-    Entity* pillarEntity = world.CreateEntity();
-    pillarEntity->transform.position = dvl::Vec3(0.0f, 1.05f, 0.0f);
-    pillarEntity->transform.scale = dvl::Vec3(3.0f, 3.0f, 3.0f);
-    Material pillarMaterial = assetRegistry.GetSolidMaterialInstance();
-    pillarMaterial.color = dvl::Vec4(0.6f, 0.6f, 0.6f, 1.0f);
-    pillarEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(pillarMesh), pillarMaterial);
+    //Entity* pillarEntity = world.CreateEntity();
+    //pillarEntity->transform.position = dvl::Vec3(0.0f, 1.05f, 0.0f);
+    //pillarEntity->transform.scale = dvl::Vec3(3.0f, 3.0f, 3.0f);
+    //Material pillarMaterial = assetRegistry.GetSolidMaterialInstance();
+    //pillarMaterial.color = dvl::Vec4(0.6f, 0.6f, 0.6f, 1.0f);
+    //pillarEntity->AddComponent<MeshRenderer>(assetRegistry.GetMesh(pillarMesh), pillarMaterial);
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
