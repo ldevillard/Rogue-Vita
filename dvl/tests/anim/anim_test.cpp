@@ -525,3 +525,62 @@ DVL_TEST(EvaluateHandlesMultipleBonesCorrectly)
     
     return true;
 }
+
+DVL_TEST(BlendDoesNothingForAnEmptyPose)
+{
+    dvl::Blend(nullptr, nullptr, 0, 0.5f, nullptr);
+
+    return true;
+}
+
+DVL_TEST(BlendInterpolatesEveryTransformComponent)
+{
+    dvl::Transform poseA[2];
+    poseA[0].rotation = dvl::Quat::Identity();
+    poseA[0].translation = dvl::Vec4(0.0f, 2.0f, 4.0f, 0.0f);
+    poseA[0].scale = dvl::Vec4(1.0f, 2.0f, 3.0f, 0.0f);
+    poseA[1].translation = dvl::Vec4(-4.0f, 0.0f, 8.0f, 0.0f);
+
+    dvl::Transform poseB[2];
+    poseB[0].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f);
+    poseB[0].translation = dvl::Vec4(10.0f, 6.0f, 8.0f, 0.0f);
+    poseB[0].scale = dvl::Vec4(3.0f, 4.0f, 5.0f, 0.0f);
+    poseB[1].translation = dvl::Vec4(4.0f, 6.0f, 0.0f, 0.0f);
+
+    dvl::Transform output[2];
+    dvl::Blend(poseA, poseB, 2, 0.5f, output);
+
+    DVL_EXPECT_NEAR(output[0].rotation.w, std::cos(Pi / 8.0f), Epsilon);
+    DVL_EXPECT_NEAR(output[0].rotation.z, std::sin(Pi / 8.0f), Epsilon);
+    DVL_EXPECT_NEAR(output[0].translation.x, 5.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[0].translation.y, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[0].translation.z, 6.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[0].scale.x, 2.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[0].scale.y, 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[0].scale.z, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[1].translation.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[1].translation.y, 3.0f, Epsilon);
+    DVL_EXPECT_NEAR(output[1].translation.z, 4.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(BlendSupportsInPlaceOutput)
+{
+    dvl::Transform poseA;
+    poseA.translation = dvl::Vec4(2.0f, 4.0f, 6.0f, 0.0f);
+    poseA.scale = dvl::Vec4(1.0f, 1.0f, 1.0f, 0.0f);
+
+    dvl::Transform poseB;
+    poseB.translation = dvl::Vec4(6.0f, 8.0f, 10.0f, 0.0f);
+    poseB.scale = dvl::Vec4(3.0f, 3.0f, 3.0f, 0.0f);
+
+    dvl::Blend(&poseA, &poseB, 1, 0.5f, &poseA);
+
+    DVL_EXPECT_NEAR(poseA.translation.x, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(poseA.translation.y, 6.0f, Epsilon);
+    DVL_EXPECT_NEAR(poseA.translation.z, 8.0f, Epsilon);
+    DVL_EXPECT_NEAR(poseA.scale.x, 2.0f, Epsilon);
+
+    return true;
+}
