@@ -1,7 +1,6 @@
 #include "dvl/tool/cooker/skeleton_cooker.h"
 
 #include <assimp/Importer.hpp>
-#include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
 #include <fstream>
@@ -49,45 +48,15 @@ namespace dvl
             return false;
         }
 
-        Assimp::Importer meshImporter;
-        const aiScene* meshScene = meshImporter.ReadFile(
-            source.string(),
-            aiProcess_Triangulate |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_GenSmoothNormals |
-            aiProcess_ImproveCacheLocality |
-            aiProcess_PreTransformVertices |
-            aiProcess_FlipUVs);
-
-        if (meshScene == nullptr || !meshScene->HasMeshes())
-        {
-            const std::string message = "Failed to import mesh space for skeleton '" + source.string() + "': " + meshImporter.GetErrorString();
-            Log(LogLevel::Error, message.c_str());
-            return false;
-        }
-
         AssetSpaceCookerHelper assetSpace;
-        if (!assetSpace.Initialize(*meshScene))
+        if (!assetSpace.Initialize(*scene))
         {
             const std::string message = "Failed to determine mesh space for skeleton '" + source.string() + "'";
             Log(LogLevel::Error, message.c_str());
             return false;
         }
 
-        const aiNode* meshNode = scene->mRootNode->FindNode(mesh->mName);
-        if (meshNode == nullptr)
-        {
-            const std::string message = "Failed to find mesh node for skeleton '" + source.string() + "'";
-            Log(LogLevel::Error, message.c_str());
-            return false;
-        }
-
-        aiMatrix4x4 meshTransform;
-        for (const aiNode* node = meshNode; node != nullptr; node = node->mParent)
-            meshTransform = node->mTransformation * meshTransform;
-
-        meshTransform.Inverse();
-        const aiMatrix4x4 bindTransform = meshTransform * assetSpace.ToSourceMatrix();
+        const aiMatrix4x4 bindTransform = assetSpace.ToSourceMatrix();
 
         std::vector<std::int16_t> parents(mesh->mNumBones, -1);
         std::vector<Mat4> inverseBindMatrices(mesh->mNumBones);
