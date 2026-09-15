@@ -51,4 +51,14 @@ namespace dvl
             outPose[i].scale = Lerp(poseA[i].scale, poseB[i].scale, alpha);
         }
     }
+
+    void Blend(const Transform* poseA, const Transform* poseB, int boneCount, float t, Transform* outPose)
+    {
+        for (int i = 0; i < boneCount; i++)
+        {
+            outPose[i].rotation = Slerp(poseA[i].rotation, poseB[i].rotation, t);
+            outPose[i].translation = Lerp(poseA[i].translation, poseB[i].translation, t);
+            outPose[i].scale = Lerp(poseA[i].scale, poseB[i].scale, t);
+        }
+    }
 }

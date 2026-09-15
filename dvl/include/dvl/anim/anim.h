@@ -10,4 +10,5 @@ namespace dvl
     void ComputeSkinningMatrices(const Skeleton& skeleton, const Mat4* worldPose, Mat4* outSkinningMatrices);
 
     void Evaluate(const Animation& animation, float time, Transform* outPose);
+    void Blend(const Transform* poseA, const Transform* poseB, int boneCount, float t, Transform* outPose);
 }
