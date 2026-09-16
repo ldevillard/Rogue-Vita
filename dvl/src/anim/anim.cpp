@@ -1,24 +1,33 @@
 #include "dvl/anim/anim.h"
 
+#include "dvl/debug/profiler.h"
+
 namespace dvl
 {
     void LocalToWorld(const Skeleton& skeleton, const Transform* localPose, const Mat4& rootTransform, Mat4* outWorldMatrices)
     {
+        DVL_PROFILE_FUNCTION();
+
         for (int i = 0; i < skeleton.boneCount; i++)
         {
-            Mat4 boneTransform = Mat4::FromTransform(localPose[i]);
+            const Mat4 localTransform = Mat4::FromTransform(localPose[i]);
+            const int parentIndex = skeleton.parents[i];
 
-            for (int parent = skeleton.parents[i]; parent >= 0; parent = skeleton.parents[parent])
+            if (parentIndex < 0)
             {
-                boneTransform = Mat4::FromTransform(localPose[parent]) * boneTransform;
+                outWorldMatrices[i] = rootTransform * localTransform;
             }
-
-            outWorldMatrices[i] = rootTransform * boneTransform;
+            else
+            {
+                outWorldMatrices[i] = outWorldMatrices[parentIndex] * localTransform;
+            }
         }
     }
 
     void ComputeSkinningMatrices(const Skeleton& skeleton, const Mat4* worldPose, Mat4* outSkinningMatrices)
     {
+        DVL_PROFILE_FUNCTION();
+        
         for (int i = 0; i < skeleton.boneCount; i++)
         {
             outSkinningMatrices[i] = worldPose[i] * skeleton.inverseBindMatrices[i];
@@ -27,6 +36,8 @@ namespace dvl
 
     void Evaluate(const Animation& animation, float time, Transform* outPose)
     {
+        DVL_PROFILE_FUNCTION();
+
         const float frameFloat = time * animation.fps;
 
         int frameA = static_cast<int>(frameFloat);
@@ -54,6 +65,8 @@ namespace dvl
 
     void Blend(const Transform* poseA, const Transform* poseB, int boneCount, float t, Transform* outPose)
     {
+        DVL_PROFILE_FUNCTION();
+
         for (int i = 0; i < boneCount; i++)
         {
             outPose[i].rotation = Slerp(poseA[i].rotation, poseB[i].rotation, t);

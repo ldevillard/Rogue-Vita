@@ -4,12 +4,12 @@
 #include <assimp/scene.h>
 
 #include <fstream>
-#include <unordered_map>
 #include <vector>
 
 #include "dvl/log/log.h"
 #include "dvl/math/math.h"
 #include "dvl/tool/cooker/asset_space_cooker_helper.h"
+#include "dvl/tool/cooker/bone_order_cooker_helper.h"
 
 #include "dvl/asset/skeleton_format.h"
 
@@ -43,9 +43,8 @@ namespace dvl
         const aiMesh* mesh = scene->mMeshes[0];
         if (!mesh->HasBones())
         {
-            const std::string message = "No bones found in skeleton '" + source.string() + "'";
-            Log(LogLevel::Error, message.c_str());
-            return false;
+            // Static meshes do not produce a skeleton
+            return true;
         }
 
         AssetSpaceCookerHelper assetSpace;
@@ -60,23 +59,24 @@ namespace dvl
 
         std::vector<std::int16_t> parents(mesh->mNumBones, -1);
         std::vector<Mat4> inverseBindMatrices(mesh->mNumBones);
-        std::unordered_map<std::string, std::int16_t> boneIndices;
-        for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++)
-            boneIndices.emplace(mesh->mBones[boneIndex]->mName.C_Str(), static_cast<std::int16_t>(boneIndex));
+        
+        BoneOrderCookerHelper boneOrder;
+        if (!boneOrder.Initialize(*scene, *mesh))
+            return false;
 
         for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++)
         {
-            const aiBone* bone = mesh->mBones[boneIndex];
+            const aiBone* bone = boneOrder.bones[boneIndex];
 
             inverseBindMatrices[boneIndex] = ToMat4(bone->mOffsetMatrix * bindTransform);
 
             const aiNode* boneNode = scene->mRootNode->FindNode(bone->mName);
-            if (boneNode == nullptr || boneNode->mParent == nullptr)
+            if (boneNode->mParent == nullptr)
                 continue;
 
-            const auto parent = boneIndices.find(boneNode->mParent->mName.C_Str());
-            if (parent != boneIndices.end())
-                parents[boneIndex] = parent->second;
+            const auto parent = boneOrder.indices.find(boneNode->mParent->mName.C_Str());
+            if (parent != boneOrder.indices.end())
+                parents[boneIndex] = static_cast<std::int16_t>(parent->second);
         }
 
         const SkeletonFileHeader header =

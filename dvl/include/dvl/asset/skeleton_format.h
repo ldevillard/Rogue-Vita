@@ -5,7 +5,7 @@
 namespace dvl
 {
     constexpr std::uint32_t SkeletonMagic = MakeMagic('D', 'V', 'L', 'S');
-    constexpr std::uint32_t SkeletonVersion = 1;
+    constexpr std::uint32_t SkeletonVersion = 2;
 
     struct SkeletonFileHeader
     {

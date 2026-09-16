@@ -6,6 +6,7 @@
 
 namespace dvl
 {
+    // Bones must be ordered parent-first (guaranteed by the cooker)
     void LocalToWorld(const Skeleton& skeleton, const Transform* localPose, const Mat4& rootTransform, Mat4* outPose);
     void ComputeSkinningMatrices(const Skeleton& skeleton, const Mat4* worldPose, Mat4* outSkinningMatrices);
 

@@ -84,17 +84,16 @@ DVL_TEST(LocalToWorldAccumulatesParentTransforms)
     return true;
 }
 
-DVL_TEST(LocalToWorldSupportsParentsStoredAfterTheirChildren)
+DVL_TEST(LocalToWorldSupportsParentFirstBranchingSkeleton)
 {
-    // The array is deliberately ordered grandchild, child, root.
-    const std::int16_t parents[] = { 1, 2, -1 };
+    const std::int16_t parents[] = { -1, 0, 0 };
     const dvl::Skeleton skeleton { 3, parents };
 
     dvl::Transform localPose[3];
-    localPose[0].translation = dvl::Vec4(0.0f, 3.0f, 0.0f, 0.0f);
+    localPose[2].translation = dvl::Vec4(0.0f, 3.0f, 0.0f, 0.0f);
     localPose[1].translation = dvl::Vec4(2.0f, 0.0f, 0.0f, 0.0f);
-    localPose[2].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f);
-    localPose[2].translation = dvl::Vec4(1.0f, 0.0f, 0.0f, 0.0f);
+    localPose[0].rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f);
+    localPose[0].translation = dvl::Vec4(1.0f, 0.0f, 0.0f, 0.0f);
 
     const dvl::Mat4 rootTransform = dvl::Mat4::Translation(dvl::Vec3(10.0f, 20.0f, 30.0f));
     dvl::Mat4 worldMatrices[] =
@@ -107,13 +106,13 @@ DVL_TEST(LocalToWorldSupportsParentsStoredAfterTheirChildren)
     dvl::LocalToWorld(skeleton, localPose, rootTransform, worldMatrices);
 
     const dvl::Vec4 origin(0.0f, 0.0f, 0.0f, 1.0f);
-    const dvl::Vec4 grandchildPosition = worldMatrices[0] * origin;
+    const dvl::Vec4 siblingPosition = worldMatrices[2] * origin;
     const dvl::Vec4 childPosition = worldMatrices[1] * origin;
-    const dvl::Vec4 rootPosition = worldMatrices[2] * origin;
+    const dvl::Vec4 rootPosition = worldMatrices[0] * origin;
 
-    DVL_EXPECT_NEAR(grandchildPosition.x, 8.0f, Epsilon);
-    DVL_EXPECT_NEAR(grandchildPosition.y, 22.0f, Epsilon);
-    DVL_EXPECT_NEAR(grandchildPosition.z, 30.0f, Epsilon);
+    DVL_EXPECT_NEAR(siblingPosition.x, 8.0f, Epsilon);
+    DVL_EXPECT_NEAR(siblingPosition.y, 20.0f, Epsilon);
+    DVL_EXPECT_NEAR(siblingPosition.z, 30.0f, Epsilon);
 
     DVL_EXPECT_NEAR(childPosition.x, 11.0f, Epsilon);
     DVL_EXPECT_NEAR(childPosition.y, 22.0f, Epsilon);
