@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror -DDVL_PROFILING_ENABLED=0
 
 TARGET := dvl-tests
 TEST_SOURCES := main.cpp $(wildcard math/*.cpp) $(wildcard anim/*.cpp)

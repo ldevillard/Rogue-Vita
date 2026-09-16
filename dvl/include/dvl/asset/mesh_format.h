@@ -5,7 +5,7 @@
 namespace dvl
 {
     constexpr std::uint32_t MeshMagic = MakeMagic('D', 'V', 'L', 'M');
-    constexpr std::uint32_t MeshVersion = 2;
+    constexpr std::uint32_t MeshVersion = 3;
 
     enum class MeshType : std::uint32_t
     {

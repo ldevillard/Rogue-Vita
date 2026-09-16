@@ -6,7 +6,7 @@
 namespace dvl
 {
     constexpr std::uint32_t AnimationMagic = MakeMagic('D', 'V', 'L', 'A');
-    constexpr std::uint32_t AnimationVersion = 1;
+    constexpr std::uint32_t AnimationVersion = 2;
 
     struct AnimationFileHeader
     {

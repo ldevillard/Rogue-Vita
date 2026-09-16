@@ -2,7 +2,9 @@
 
 #include <cstdint>
 
+#ifndef DVL_PROFILING_ENABLED
 #define DVL_PROFILING_ENABLED 1
+#endif
 
 namespace dvl
 {

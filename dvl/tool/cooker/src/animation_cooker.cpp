@@ -10,6 +10,7 @@
 #include "dvl/asset/animation_format.h"
 #include "dvl/log/log.h"
 #include "dvl/tool/cooker/asset_space_cooker_helper.h"
+#include "dvl/tool/cooker/bone_order_cooker_helper.h"
 
 namespace dvl
 {
@@ -148,7 +149,18 @@ namespace dvl
         if (!scene->HasAnimations())
             return true;
 
+        if (!scene->HasMeshes())
+        {
+            Log(LogLevel::Error, "Animation has no mesh skeleton");
+            return false;
+        }
+
         const aiMesh& mesh = *scene->mMeshes[0];
+        
+        BoneOrderCookerHelper boneOrder;
+        if (!boneOrder.Initialize(*scene, mesh))
+            return false;
+        
         const aiAnimation& animation = *scene->mAnimations[0];
         const double ticksPerSecond = animation.mTicksPerSecond > 0.0 ? animation.mTicksPerSecond : AnimationFps;
         const float duration = static_cast<float>(animation.mDuration / ticksPerSecond);
@@ -162,7 +174,7 @@ namespace dvl
 
             for (unsigned int bone = 0; bone < mesh.mNumBones; bone++)
             {
-                const aiNode* boneNode = scene->mRootNode->FindNode(mesh.mBones[bone]->mName);
+                const aiNode* boneNode = scene->mRootNode->FindNode(boneOrder.bones[bone]->mName);
                 keyframes[frame * mesh.mNumBones + bone] = SampleBoneTransform(*boneNode, mesh, animation, time, rootToCooked);
             }
         }

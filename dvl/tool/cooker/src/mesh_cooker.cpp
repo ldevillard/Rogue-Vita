@@ -11,6 +11,7 @@
 #include "dvl/asset/mesh_format.h"
 #include "dvl/log/log.h"
 #include "dvl/tool/cooker/asset_space_cooker_helper.h"
+#include "dvl/tool/cooker/bone_order_cooker_helper.h"
 
 namespace dvl
 {
@@ -112,18 +113,16 @@ namespace dvl
 
         std::vector<MeshVertexFormat> vertices;
         std::vector<std::uint16_t> indices;
+
+        BoneOrderCookerHelper boneOrder;
+        if (meshType == MeshType::Skinned && !boneOrder.Initialize(*scene, *scene->mMeshes[0]))
+            return false;
+
         for (unsigned int meshIndex = 0; meshIndex < scene->mNumMeshes; meshIndex++)
         {
             const aiMesh* mesh = scene->mMeshes[meshIndex];
             if (!mesh->HasPositions())
                 continue;
-
-            if (meshType == MeshType::Skinned && mesh->mNumBones > std::numeric_limits<std::uint8_t>::max() + 1u)
-            {
-                const std::string message = "Skinned mesh '" + source.string() + "' has more than 256 bones";
-                Log(LogLevel::Error, message.c_str());
-                return false;
-            }
 
             const std::size_t baseVertex = vertices.size();
             const std::size_t resultingVertexCount = baseVertex + mesh->mNumVertices;
@@ -138,10 +137,13 @@ namespace dvl
             for (unsigned int boneIndex = 0; boneIndex < mesh->mNumBones; boneIndex++)
             {
                 const aiBone* bone = mesh->mBones[boneIndex];
+                
+                const unsigned int mappedBone = boneOrder.indices[bone->mName.C_Str()];
+                
                 for (unsigned int weightIndex = 0; weightIndex < bone->mNumWeights; weightIndex++)
                 {
                     const aiVertexWeight& weight = bone->mWeights[weightIndex];
-                    AddBoneInfluence(&meshInfluences[weight.mVertexId * 4], boneIndex, weight.mWeight);
+                    AddBoneInfluence(&meshInfluences[weight.mVertexId * 4], mappedBone, weight.mWeight);
                 }
             }
 
