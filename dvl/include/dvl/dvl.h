@@ -1,6 +1,7 @@
 #pragma once
 
 #include "anim/anim.h"
+#include "debug/profiler.h"
 #include "filesystem/filesystem.h"
 #include "graphics/device.h"
 #include "graphics/types.h"

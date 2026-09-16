@@ -9,9 +9,14 @@ namespace dvl
     std::uint64_t Time::_previousTime = 0;
     float Time::_deltaTime = 0.0f;
 
+    std::uint64_t Time::GetCurrentTimeMicroseconds()
+    {
+        return sceKernelGetProcessTimeWide();
+    }
+
     void Time::Initialize()
     {
-        _previousTime = sceKernelGetProcessTimeWide();
+        _previousTime = GetCurrentTimeMicroseconds();
         _deltaTime = 0.0f;
     }
 
@@ -20,7 +25,7 @@ namespace dvl
         constexpr float MicrosecondsToSeconds = 1.0f / 1'000'000.0f;
         constexpr float MaximumDeltaTime = 0.1f;
 
-        const std::uint64_t currentTime = sceKernelGetProcessTimeWide();
+        const std::uint64_t currentTime = GetCurrentTimeMicroseconds();
         const std::uint64_t elapsedTime = currentTime - _previousTime;
 
         _previousTime = currentTime;
