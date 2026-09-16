@@ -11,6 +11,7 @@ namespace dvl
         static void Update();
 
         static float GetDeltaTime();
+        static std::uint64_t GetCurrentTimeMicroseconds();
 
     private:
         static std::uint64_t _previousTime;
