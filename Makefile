@@ -6,6 +6,19 @@ PROJECT_TITLEID := VSDK00007
 
 MAKEFLAGS += -j$(shell nproc)
 
+# ----- Build configuration: release (default) or debug -----
+BUILD ?= release
+
+ifeq ($(BUILD),release)
+	OPTIMIZATION_FLAGS := -O3 -DNDEBUG -flto
+	LINK_OPTIMIZATION_FLAGS := -flto
+else ifeq ($(BUILD),debug)
+	OPTIMIZATION_FLAGS := -O0 -g3
+	LINK_OPTIMIZATION_FLAGS :=
+else
+	$(error Unsupported BUILD='$(BUILD)'; expected 'release' or 'debug')
+endif
+
 # ----- Deployment Configuration -----
 
 VITA3K_FS  := /mnt/c/Users/logan/AppData/Roaming/Vita3K/Vita3K
@@ -49,28 +62,29 @@ CC    := arm-vita-eabi-gcc
 CXX   := arm-vita-eabi-g++
 STRIP := arm-vita-eabi-strip
 
-CFLAGS   := -Wall -Wextra -Werror $(INCLUDES)
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(INCLUDES)
-LDFLAGS  := -Wl,-q
+CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+LDFLAGS  := -Wl,-q $(LINK_OPTIMIZATION_FLAGS)
 
 OBJS := \
-	$(addprefix out/,$(SRC_C:src/%.c=%.o)) \
-	$(addprefix out/,$(SRC_CPP:src/%.cpp=%.o)) \
-	$(addprefix out/,$(DVL_VITA_SRC_CPP:%.cpp=%.o))
+	$(addprefix out-$(BUILD)/,$(SRC_C:src/%.c=%.o)) \
+	$(addprefix out-$(BUILD)/,$(SRC_CPP:src/%.cpp=%.o)) \
+	$(addprefix out-$(BUILD)/,$(DVL_VITA_SRC_CPP:%.cpp=%.o))
 
 # ----- Desktop Toolchain -----
 
 DESKTOP_CC  := gcc
 DESKTOP_CXX := g++
 
-DESKTOP_CFLAGS   := -Wall -Wextra -Werror -g -O0 $(INCLUDES)
-DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror -g -O0 $(INCLUDES)
+DESKTOP_CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+DESKTOP_LDFLAGS  := $(LINK_OPTIMIZATION_FLAGS)
 DESKTOP_LIBS     := -lglfw -lGLEW -lGL -ldl -pthread
 
 DESKTOP_OBJS := \
-	$(addprefix out-desktop/,$(SRC_C:src/%.c=%.o)) \
-	$(addprefix out-desktop/,$(SRC_CPP:src/%.cpp=%.o)) \
-	$(addprefix out-desktop/,$(DVL_DESKTOP_SRC_CPP:%.cpp=%.o))
+	$(addprefix out-desktop-$(BUILD)/,$(SRC_C:src/%.c=%.o)) \
+	$(addprefix out-desktop-$(BUILD)/,$(SRC_CPP:src/%.cpp=%.o)) \
+	$(addprefix out-desktop-$(BUILD)/,$(DVL_DESKTOP_SRC_CPP:%.cpp=%.o))
 
 # ----- Vita Libraries -----
 
@@ -146,15 +160,15 @@ $(PROJECT).velf: $(PROJECT).elf
 $(PROJECT).elf: $(OBJS)
 	$(CXX) $(LDFLAGS) $^ $(LIBS) -o $@
 
-out/%.o: src/%.cpp
+out-$(BUILD)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
-out/%.o: src/%.c
+out-$(BUILD)/%.o: src/%.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-out/dvl/%.o: dvl/%.cpp
+out-$(BUILD)/dvl/%.o: dvl/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) -c $(CXXFLAGS) -o $@ $<
 
@@ -163,18 +177,18 @@ out/dvl/%.o: dvl/%.cpp
 desktop: rogue-vita-desktop
 
 rogue-vita-desktop: $(DESKTOP_OBJS)
-	$(DESKTOP_CXX) $^ $(DESKTOP_LIBS) -o $@
+	$(DESKTOP_CXX) $(DESKTOP_LDFLAGS) $^ $(DESKTOP_LIBS) -o $@
 	@echo "$(GREEN)✔ Desktop build successful!$(RESET)"
 
-out-desktop/%.o: src/%.cpp
+out-desktop-$(BUILD)/%.o: src/%.cpp
 	@mkdir -p $(dir $@)
 	$(DESKTOP_CXX) -c $(DESKTOP_CXXFLAGS) -o $@ $<
 
-out-desktop/%.o: src/%.c
+out-desktop-$(BUILD)/%.o: src/%.c
 	@mkdir -p $(dir $@)
 	$(DESKTOP_CC) -c $(DESKTOP_CFLAGS) -o $@ $<
 
-out-desktop/dvl/%.o: dvl/%.cpp
+out-desktop-$(BUILD)/dvl/%.o: dvl/%.cpp
 	@mkdir -p $(dir $@)
 	$(DESKTOP_CXX) -c $(DESKTOP_CXXFLAGS) -o $@ $<
 
@@ -184,14 +198,14 @@ rdesktop:
 
 clean-desktop:
 	rm -f rogue-vita-desktop
-	rm -rf out-desktop/
+	rm -rf out-desktop/ out-desktop-debug/ out-desktop-release/
 
 # ----- Cleanup and Rebuild -----
 
 clean:
 	@echo "$(YELLOW)Cleaning up build artifacts...$(RESET)"
 	rm -f *.velf *.elf *.vpk param.sfo eboot.bin rogue-vita-desktop
-	rm -rf out/ out-desktop/
+	rm -rf out/ out-debug/ out-release/ out-desktop/ out-desktop-debug/ out-desktop-release/
 
 re:
 	@$(MAKE) clean
