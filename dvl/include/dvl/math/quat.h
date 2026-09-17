@@ -29,5 +29,6 @@ namespace dvl
 
     float Dot(const Quat& a, const Quat& b);
 
+    Quat Nlerp(const Quat& a, const Quat& b, float t);
     Quat Slerp(const Quat& a, const Quat& b, float t);
 }

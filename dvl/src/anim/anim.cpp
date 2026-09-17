@@ -6,8 +6,6 @@ namespace dvl
 {
     void LocalToWorld(const Skeleton& skeleton, const Transform* localPose, const Mat4& rootTransform, Mat4* outWorldMatrices)
     {
-        DVL_PROFILE_FUNCTION();
-
         for (int i = 0; i < skeleton.boneCount; i++)
         {
             const Mat4 localTransform = Mat4::FromTransform(localPose[i]);
@@ -26,8 +24,6 @@ namespace dvl
 
     void ComputeSkinningMatrices(const Skeleton& skeleton, const Mat4* worldPose, Mat4* outSkinningMatrices)
     {
-        DVL_PROFILE_FUNCTION();
-        
         for (int i = 0; i < skeleton.boneCount; i++)
         {
             outSkinningMatrices[i] = worldPose[i] * skeleton.inverseBindMatrices[i];
@@ -36,8 +32,6 @@ namespace dvl
 
     void Evaluate(const Animation& animation, float time, Transform* outPose)
     {
-        DVL_PROFILE_FUNCTION();
-
         const float frameFloat = time * animation.fps;
 
         int frameA = static_cast<int>(frameFloat);
@@ -55,7 +49,7 @@ namespace dvl
 
         for (int i = 0; i < animation.boneCount; i++)
         {
-            outPose[i].rotation = Slerp(poseA[i].rotation, poseB[i].rotation, alpha);
+            outPose[i].rotation = Nlerp(poseA[i].rotation, poseB[i].rotation, alpha);
 
             outPose[i].translation = Lerp(poseA[i].translation, poseB[i].translation, alpha);
 
@@ -65,8 +59,6 @@ namespace dvl
 
     void Blend(const Transform* poseA, const Transform* poseB, int boneCount, float t, Transform* outPose)
     {
-        DVL_PROFILE_FUNCTION();
-
         for (int i = 0; i < boneCount; i++)
         {
             outPose[i].rotation = Slerp(poseA[i].rotation, poseB[i].rotation, t);

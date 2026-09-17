@@ -124,6 +124,26 @@ DVL_TEST(QuatSlerpInterpolatesNormalizedShortestPath)
     return true;
 }
 
+DVL_TEST(QuatNlerpInterpolatesNormalizedShortestPath)
+{
+    const dvl::Quat identity = dvl::Quat::Identity();
+    const dvl::Quat quarterTurn = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 0.0f, 1.0f), Pi / 2.0f);
+    const dvl::Quat midpoint = dvl::Nlerp(identity, quarterTurn, 0.5f);
+
+    DVL_EXPECT_NEAR(midpoint.z, std::sin(Pi / 8.0f), Epsilon);
+    DVL_EXPECT_NEAR(midpoint.w, std::cos(Pi / 8.0f), Epsilon);
+    DVL_EXPECT_NEAR(midpoint.Length(), 1.0f, Epsilon);
+
+    const dvl::Quat negatedIdentity(0.0f, 0.0f, 0.0f, -1.0f);
+    const dvl::Quat shortestPath = dvl::Nlerp(identity, negatedIdentity, 0.5f);
+    DVL_EXPECT_NEAR(shortestPath.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(shortestPath.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(shortestPath.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(shortestPath.w, 1.0f, Epsilon);
+
+    return true;
+}
+
 DVL_TEST(QuatMultiplicationIsAssociativeAndPreservesRotationLength)
 {
     const dvl::Quat xRotation = dvl::Quat::FromAxisAngle(dvl::Vec3(1.0f, 0.0f, 0.0f), Pi / 3.0f);
