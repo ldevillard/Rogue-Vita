@@ -426,7 +426,7 @@ DVL_TEST(EvaluateHandlesRotationInterpolation)
     dvl::Transform outPose[1];
     dvl::Evaluate(animation, 1.0f / 60.0f, outPose);
     
-    // The quaternion should be interpolated via Slerp
+    // Halfway Nlerp matches the exact 45-degree midpoint here
     // At 45 degrees, sin(angle) should be sqrt(2)/2
     const float expectedWComponent = std::cos(Pi / 8.0f);
     const float expectedZComponent = std::sin(Pi / 8.0f);

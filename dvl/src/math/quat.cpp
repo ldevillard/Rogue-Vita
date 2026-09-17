@@ -47,11 +47,10 @@ namespace dvl
 
     Quat Quat::operator*(const Quat& rhs) const
     {
-        return Quat(
-            w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
-            w * rhs.y - x * rhs.z + y * rhs.w + z * rhs.x,
-            w * rhs.z + x * rhs.y - y * rhs.x + z * rhs.w,
-            w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z);
+        return Quat(w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
+                    w * rhs.y - x * rhs.z + y * rhs.w + z * rhs.x,
+                    w * rhs.z + x * rhs.y - y * rhs.x + z * rhs.w,
+                    w * rhs.w - x * rhs.x - y * rhs.y - z * rhs.z);
     }
 
     Quat Quat::Identity()
@@ -68,16 +67,28 @@ namespace dvl
         const float halfAngle = angleRadians * 0.5f;
         const float sinHalfAngle = std::sin(halfAngle);
 
-        return Quat(
-            normalizedAxis.x * sinHalfAngle,
-            normalizedAxis.y * sinHalfAngle,
-            normalizedAxis.z * sinHalfAngle,
-            std::cos(halfAngle));
+        return Quat(normalizedAxis.x * sinHalfAngle,
+                    normalizedAxis.y * sinHalfAngle,
+                    normalizedAxis.z * sinHalfAngle,
+                    std::cos(halfAngle));
     }
 
     float Dot(const Quat& a, const Quat& b)
     {
         return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+    }
+
+    Quat Nlerp(const Quat& a, const Quat& b, float t)
+    {
+        // q and -q encode the same rotation. Flip the second quaternion so the linear interpolation follows the shortest arc
+        const float endSign = Dot(a, b) < 0.0f ? -1.0f : 1.0f;
+
+        const Quat result(a.x + (b.x * endSign - a.x) * t,
+                          a.y + (b.y * endSign - a.y) * t,
+                          a.z + (b.z * endSign - a.z) * t,
+                          a.w + (b.w * endSign - a.w) * t);
+
+        return result.Normalized();
     }
 
     Quat Slerp(const Quat& a, const Quat& b, float t)
@@ -101,11 +112,10 @@ namespace dvl
         constexpr float LinearThreshold = 0.9995f;
         if (dot > LinearThreshold)
         {
-            const Quat result(
-                start.x + (end.x - start.x) * t,
-                start.y + (end.y - start.y) * t,
-                start.z + (end.z - start.z) * t,
-                start.w + (end.w - start.w) * t);
+            const Quat result(start.x + (end.x - start.x) * t,
+                              start.y + (end.y - start.y) * t,
+                              start.z + (end.z - start.z) * t,
+                              start.w + (end.w - start.w) * t);
             return result.Normalized();
         }
 
@@ -114,10 +124,9 @@ namespace dvl
         const float startScale = std::sin((1.0f - t) * angle) / sinAngle;
         const float endScale = std::sin(t * angle) / sinAngle;
 
-        return Quat(
-            start.x * startScale + end.x * endScale,
-            start.y * startScale + end.y * endScale,
-            start.z * startScale + end.z * endScale,
-            start.w * startScale + end.w * endScale);
+        return Quat(start.x * startScale + end.x * endScale,
+                    start.y * startScale + end.y * endScale,
+                    start.z * startScale + end.z * endScale,
+                    start.w * startScale + end.w * endScale);
     }
 }

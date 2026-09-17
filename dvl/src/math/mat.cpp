@@ -68,9 +68,36 @@ namespace dvl
 
     Mat4 Mat4::FromTransform(const Transform& transform)
     {
-        return Translation(transform.translation.XYZ())
-            * Rotation(transform.rotation)
-            * Scale(transform.scale.XYZ());
+        // Build the T * R * S matrix directly without intermediate matrices
+        const Quat& q = transform.rotation;
+        const float xx = q.x * q.x;
+        const float yy = q.y * q.y;
+        const float zz = q.z * q.z;
+        const float xy = q.x * q.y;
+        const float xz = q.x * q.z;
+        const float yz = q.y * q.z;
+        const float xw = q.x * q.w;
+        const float yw = q.y * q.w;
+        const float zw = q.z * q.w;
+
+        Mat4 result;
+        result.m[0][0] = (1.0f - 2.0f * (yy + zz)) * transform.scale.x;
+        result.m[0][1] = (2.0f * (xy + zw)) * transform.scale.x;
+        result.m[0][2] = (2.0f * (xz - yw)) * transform.scale.x;
+
+        result.m[1][0] = (2.0f * (xy - zw)) * transform.scale.y;
+        result.m[1][1] = (1.0f - 2.0f * (xx + zz)) * transform.scale.y;
+        result.m[1][2] = (2.0f * (yz + xw)) * transform.scale.y;
+
+        result.m[2][0] = (2.0f * (xz + yw)) * transform.scale.z;
+        result.m[2][1] = (2.0f * (yz - xw)) * transform.scale.z;
+        result.m[2][2] = (1.0f - 2.0f * (xx + yy)) * transform.scale.z;
+
+        result.m[3][0] = transform.translation.x;
+        result.m[3][1] = transform.translation.y;
+        result.m[3][2] = transform.translation.z;
+        
+        return result;
     }
 
     Mat4 Mat4::Perspective(float fovYRadians, float aspectRatio, float nearPlane, float farPlane)
