@@ -23,7 +23,9 @@ namespace dvl
 #if DVL_PROFILING_ENABLED
 #define DVL_PROFILE_SCOPE(name) dvl::Profiler profiler(name)
 #define DVL_PROFILE_FUNCTION() DVL_PROFILE_SCOPE(__func__)
+#define DVL_PROFILE_FUNCTION_PRETTY() DVL_PROFILE_SCOPE(__PRETTY_FUNCTION__)
 #else
 #define DVL_PROFILE_SCOPE(name)
 #define DVL_PROFILE_FUNCTION()
+#define DVL_PROFILE_FUNCTION_PRETTY()
 #endif
