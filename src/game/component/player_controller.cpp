@@ -7,8 +7,8 @@
 #include "engine/component/camera.h"
 #include "engine/core/entity.h"
 
-PlayerController::PlayerController(Entity& entity, const Camera& camera)
-    : Behavior(entity), _camera(camera)
+PlayerController::PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations)
+    : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
 {
 }
 
@@ -40,7 +40,12 @@ void PlayerController::Update(float deltaTime)
     const dvl::Vec3 movement = right * input.x + forward * input.y;
 
     if (movement.LengthSquared() == 0.0f)
+    {
+        _animator.Play(_animations.idle, animationTransitionDuration);
         return;
+    }
+
+    _animator.Play(_animations.run, animationTransitionDuration);
 
     entity.transform.LookDirection(movement);
 
