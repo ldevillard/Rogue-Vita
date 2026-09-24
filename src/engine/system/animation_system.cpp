@@ -12,19 +12,21 @@ void AnimationSystem::Update(World& world, const AssetRegistry& assetRegistry, f
     for (const std::unique_ptr<Entity>& entity : world.GetEntities())
     {
         Animator* animator = entity->GetComponent<Animator>();
-        if (animator == nullptr)
+        if (animator == nullptr || !animator->IsPlaying())
             continue;
 
         const Skeleton* skeleton = assetRegistry.GetSkeleton(animator->GetSkeletonHandle());
-        const Animation* animation = assetRegistry.GetAnimation(animator->GetAnimationHandle());
 
-        if (skeleton == nullptr || animation == nullptr)
+        const Animation* currentAnimation = assetRegistry.GetAnimation(animator->GetCurrentAnimationHandle());
+        const Animation* nextAnimation = animator->IsTransitioning() ? assetRegistry.GetAnimation(animator->GetNextAnimationHandle()) : nullptr;
+
+        if (skeleton == nullptr || currentAnimation == nullptr || (animator->IsTransitioning() && nextAnimation == nullptr))
         {
             dvl::Log(dvl::LogLevel::Error, "AnimationSystem failed to resolve Animator assets");
-            animator->Clear();
+            animator->Stop();
             continue;
         }
 
-        animator->Update(deltaTime, *skeleton, *animation);
+        animator->Update(deltaTime, *skeleton, *currentAnimation, nextAnimation);
     }
 }
