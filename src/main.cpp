@@ -36,6 +36,8 @@ int main()
     const SkeletonHandle playerSkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/target_dummy.dvlskel"));
     const AnimationHandle playerIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/target_dummy@idle.dvlanim"));
     const AnimationHandle playerRunAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/target_dummy@run_forward_in_place.dvlanim"));
+    const AnimationHandle playerAttackAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/target_dummy@right_projectile_attack.dvlanim"));
+
     const MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
     const SkeletonHandle practiceDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/practice_dummy.dvlskel"));
     const AnimationHandle practiceDummyIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@idle.dvlanim"));
@@ -60,6 +62,7 @@ int main()
     {
         {playerIdleAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
+        {playerAttackAnimation, AnimationLoopMode::Once, 1.0f}
     };
     playerEntity->AddComponent<PlayerController>(mainCamera, playerAnimator, playerAnimations);
 
