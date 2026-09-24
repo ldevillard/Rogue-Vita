@@ -11,6 +11,7 @@ struct PlayerAnimation
 {
     AnimationClip idle;
     AnimationClip run;
+    AnimationClip attack;
 };
 
 class PlayerController : public Behavior
@@ -34,5 +35,7 @@ private:
     Animator& _animator;
     PlayerAnimation _animations;
 
+    bool _isAttacking = false;
+    
     dvl::ITween* _dashTween = nullptr;
 };

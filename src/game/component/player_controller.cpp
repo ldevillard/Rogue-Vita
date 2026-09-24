@@ -39,6 +39,20 @@ void PlayerController::Update(float deltaTime)
 
     const dvl::Vec3 movement = right * input.x + forward * input.y;
 
+    if (dvl::Input::IsButtonDown(dvl::GamepadButton::Square))
+    {
+        _animator.Play(_animations.attack, animationTransitionDuration);
+        _isAttacking = true;
+    }
+
+    if (_isAttacking)
+    {
+        if (!_animator.IsFinished())
+            return;
+
+        _isAttacking = false;
+    }
+
     if (movement.LengthSquared() == 0.0f)
     {
         _animator.Play(_animations.idle, animationTransitionDuration);
