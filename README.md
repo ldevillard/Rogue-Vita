@@ -4,7 +4,11 @@
 
 Rogue Vita project is project aims to create an isometric rogue-lite game using a custom engine!
 
-![Rogue Vita](showcases/rogue-vita.gif)
+<p>
+  <img src="showcases/rogue-vita.gif" width="505">
+  <img src="showcases/rogue-vita-animation.gif" width="500">
+</p>
+<p align="center"><i>Player controller with animations using custom engine and <code>dvl</code> framework</i></p>
 
 ## dvl 🛠️
 
@@ -29,7 +33,7 @@ It enables cross-platform development and currently supports the `PlayStation Vi
 
 ## Build & Run
 
-VitaSDK, VitaGL, Make, and a C++17 compiler are required.
+VitaSDK, VitaGL, Make, Assimp, GLFW, GLEW, and a C++17 compiler are required.
 
 - Vita: `make run`
 - Vita emulator: `make emul`
