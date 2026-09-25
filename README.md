@@ -5,8 +5,8 @@
 Rogue Vita project is project aims to create an isometric rogue-lite game using a custom engine!
 
 <p>
-  <img src="showcases/rogue-vita.gif" width="505">
-  <img src="showcases/rogue-vita-animation.gif" width="500">
+  <img src="showcases/rogue-vita.gif" width="404">
+  <img src="showcases/rogue-vita-animation.gif" width="400">
 </p>
 <p align="center"><i>Player controller with animations using custom engine and <code>dvl</code> framework</i></p>
 
