@@ -2,7 +2,7 @@
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-Rogue Vita project is project aims to create an isometric rogue-lite game using a custom engine!
+Rogue Vita project aims to create an isometric rogue-lite game using a custom engine!
 
 <p>
   <img src="showcases/rogue-vita.gif" width="404">
