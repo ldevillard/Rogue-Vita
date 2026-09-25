@@ -2,55 +2,37 @@
 
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-Rogue Vita is an experimental 3D isometric rogue-lite game built for the PlayStation Vita using C++ and VitaGL.
+Rogue Vita project is project aims to create an isometric rogue-lite game using a custom engine!
 
 ![Rogue Vita](showcases/rogue-vita.gif)
-*Current state of the project!*
 
 ## dvl 🛠️
 
-`dvl` is a lightweight and reusable C++ API developed alongside Rogue Vita. It separates the game from low-level systems by providing graphics, input, time, logging, tweening, math, and asset tools.
+The core framework, `dvl`, is used and developed alongside the engine. It separates the game from low-level systems by providing graphics, input, time, logging, tweening, mathematics, animation and tools for assets.
 
-Its public API is available through `#include <dvl/dvl.h>` and currently uses VitaGL as its rendering backend. The backend abstraction also allows new implementations to be added in the future, making support for other platforms possible.
+It enables cross-platform development and currently supports the `PlayStation Vita` via `VitaGL` and `PC` via `OpenGL`. It can be extended to support more platforms, `SDKs` or graphics `APIs`.
 
-## Features
+## Implemented features
 
 - 🎨 3D rendering with textured meshes and Phong lighting
-- 🧩 Entity and component gameplay framework
-- 🎮 Player movement, dash, and spring-arm camera
-- 📦 Custom mesh and texture cooker
-- 🧮 Animation-ready math library
+- 🧩 Entity-component framework
+- 🎮 Simple player controller
+- 📦 Custom asset cookers
+- 🧮 Skeletal animation
+- 💻 PC and PS Vita support
 
 ## Planned Next Features 🚀
 
-- 🦴 Animation framework available in `dvl`
+- 🎮 Basic gameplay
+- 🧭 NavMesh pathfinding
+- ✨ Particle system
 
-## Project Structure 📁
-
-```text
-Rogue-Vita/
-├── asset/          Game assets and shaders
-├── dvl/            Reusable engine API, tests, and tools
-│   ├── include/    Public dvl headers
-│   ├── src/        Runtime implementation
-│   ├── tests/      Unit tests
-│   └── tool/       Asset cooker
-├── include/        Game and engine headers
-└── src/            Game and engine implementation
-```
-
-## Build
+## Build & Run
 
 VitaSDK, VitaGL, Make, and a C++17 compiler are required.
 
-```bash
-git clone https://github.com/ldevillard/Rogue-Vita.git
-cd Rogue-Vita
-make
-```
-
-Run the tests with:
-
-```bash
-make test
-```
+- Vita: `make run`
+- Vita emulator: `make emul`
+- Desktop (Linux): `make desktop`
+- Asset cooking: `make cook`
+- Test running: `make test`
