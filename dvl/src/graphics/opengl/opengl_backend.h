@@ -10,6 +10,7 @@
 
 namespace dvl::internal
 {
+    // TODO: Unify the OpenGL and VitaGL backends
     class OpenGLBackend : public Backend
     {
     public:
