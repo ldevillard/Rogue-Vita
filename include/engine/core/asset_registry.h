@@ -40,27 +40,34 @@ public:
 
     // Primitives
     const Mesh& GetCubeMesh() const;
+    const Mesh& GetLineMesh() const;
 
     // Materials
     const Material GetSolidMaterialInstance() const;
     const Material GetWireframeMaterialInstance() const;
+    const Material GetDebugMaterialInstance() const;
 
     // Textures
     const Texture& GetDefaultTexture() const;
 
 private:
     void loadCubePrimitive(Renderer& renderer);
+    void loadLinePrimitive(Renderer& renderer);
+
     void loadDefaultTexture(Renderer& renderer);
 
     void loadMaterials(Renderer& renderer);
     void loadSkinnedMaterials(Renderer& renderer);
+    void loadDebugMaterial(Renderer& renderer);
 
     // Primitives
     MeshHandle _cubeMeshHandle;
+    MeshHandle _lineMeshHandle;
 
     // Materials
     MaterialHandle _solidMaterialHandle;
     MaterialHandle _wireframeMaterialHandle;
+    MaterialHandle _debugMaterialHandle;
 
     // Textures
     TextureHandle _defaultTextureHandle;

@@ -6,6 +6,7 @@
 
 #include "engine/component/camera.h"
 #include "engine/core/entity.h"
+#include "engine/debug/debug_draw.h"
 
 PlayerController::PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations)
     : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
@@ -22,6 +23,8 @@ void PlayerController::Update(float deltaTime)
 {
     if (_dashTween != nullptr)
         return;
+
+    DebugDraw::DrawLine(entity.transform.position, entity.transform.position + entity.transform.GetForward() * 2, dvl::Vec4(1.0f, 0.0f, 1.0f, 1.0f));
 
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 

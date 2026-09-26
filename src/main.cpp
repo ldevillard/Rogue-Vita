@@ -8,6 +8,7 @@
 #include "engine/component/skinned_mesh_renderer.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/world.h"
+#include "engine/debug/debug_draw.h"
 #include "engine/render/material.h"
 #include "engine/render/renderer.h"
 #include "engine/system/animation_system.h"
@@ -26,6 +27,8 @@ int main()
     Renderer renderer = Renderer(ScreenWidth, ScreenHeight, assetRegistry);
 
     assetRegistry.Initialize(renderer);
+    DebugDraw::Initialize(assetRegistry, &renderer);
+
     dvl::Input::Initialize();
     dvl::Time::Initialize();
 
@@ -102,6 +105,9 @@ int main()
 
         dvl::Tweener::Update(deltaTime);
 
+        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
+        renderer.BeginScene(mainCamera);
+        
         // Gameplay logic
         {
             for (const std::unique_ptr<Entity>& entity : world.GetEntities())
@@ -109,17 +115,14 @@ int main()
                 for (const std::unique_ptr<Component>& component : entity->GetComponents())
                 {
                     if (Behavior* behavior = dynamic_cast<Behavior*>(component.get()))
-                        behavior->Update(deltaTime);
+                    behavior->Update(deltaTime);
                 }
             }
-
+            
             mainCamera.UpdateViewMatrix();
         }
-
+        
         animationSystem.Update(world, assetRegistry, deltaTime);
-
-        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
-        renderer.BeginScene(mainCamera);
 
         for (const std::unique_ptr<Entity>& entity : world.GetEntities())
         {
