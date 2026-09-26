@@ -471,3 +471,59 @@ DVL_TEST(Mat4InverseOfSingularAffineMatrixReturnsIdentity)
 
     return true;
 }
+
+DVL_TEST(Mat4FromQuaternionNormalizesAndProducesExpectedRotation)
+{
+    const dvl::Mat4 matrix = dvl::Mat4::FromQuaternion(dvl::Quat(0.0f, 0.0f, 2.0f, 2.0f));
+    const dvl::Vec4 rotated = matrix * dvl::Vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    DVL_EXPECT_NEAR(rotated.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(rotated.y, 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(rotated.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(rotated.w, 1.0f, Epsilon);
+
+    const dvl::Mat4 zero = dvl::Mat4::FromQuaternion(dvl::Quat(0.0f, 0.0f, 0.0f, 0.0f));
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+            DVL_EXPECT_EQ(zero[column][row], column == row ? 1.0f : 0.0f);
+    }
+
+    return true;
+}
+
+DVL_TEST(Mat4FromTransformNormalizesRotationAndPreservesSignedScale)
+{
+    dvl::Transform transform;
+    transform.rotation = dvl::Quat(0.0f, 0.0f, 2.0f, 2.0f);
+    transform.scale = dvl::Vec4(-2.0f, 3.0f, 0.5f, 0.0f);
+    transform.translation = dvl::Vec4(10.0f, 20.0f, 30.0f, 0.0f);
+
+    const dvl::Mat4 matrix = dvl::Mat4::FromTransform(transform);
+    const dvl::Vec4 point = matrix * dvl::Vec4(1.0f, 2.0f, 4.0f, 1.0f);
+    DVL_EXPECT_NEAR(point.x, 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(point.y, 18.0f, Epsilon);
+    DVL_EXPECT_NEAR(point.z, 32.0f, Epsilon);
+    DVL_EXPECT_NEAR(point.w, 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4LookRotationReturnsIdentityForDegenerateDirections)
+{
+    const dvl::Mat4 matrices[] = {
+        dvl::Mat4::LookRotation(dvl::Vec3()),
+        dvl::Mat4::LookRotation(dvl::Vec3(0.0f, 0.0f, -1.0f), dvl::Vec3()),
+        dvl::Mat4::LookRotation(dvl::Vec3(0.0f, 2.0f, 0.0f)),
+        dvl::Mat4::LookRotation(dvl::Vec3(0.0f, -2.0f, 0.0f))
+    };
+    for (const dvl::Mat4& matrix : matrices)
+    {
+        for (int column = 0; column < 4; column++)
+        {
+            for (int row = 0; row < 4; row++)
+                DVL_EXPECT_EQ(matrix[column][row], column == row ? 1.0f : 0.0f);
+        }
+    }
+
+    return true;
+}

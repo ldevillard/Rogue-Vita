@@ -1,6 +1,9 @@
 #include "dvl/math/quat.h"
 
+#include <algorithm>
 #include <cmath>
+
+#include "dvl/math/mat.h"
 
 namespace dvl
 {
@@ -71,6 +74,27 @@ namespace dvl
                     normalizedAxis.y * sinHalfAngle,
                     normalizedAxis.z * sinHalfAngle,
                     std::cos(halfAngle));
+    }
+
+    Quat Quat::FromMatrix(const Mat4& matrix)
+    {
+        Quat q;
+
+        q.w = 0.5f * std::sqrt(std::max(0.0f, 1.0f + matrix.m[0][0] + matrix.m[1][1] + matrix.m[2][2]));
+        q.x = 0.5f * std::sqrt(std::max(0.0f, 1.0f + matrix.m[0][0] - matrix.m[1][1] - matrix.m[2][2]));
+        q.y = 0.5f * std::sqrt(std::max(0.0f, 1.0f - matrix.m[0][0] + matrix.m[1][1] - matrix.m[2][2]));
+        q.z = 0.5f * std::sqrt(std::max(0.0f, 1.0f - matrix.m[0][0] - matrix.m[1][1] + matrix.m[2][2]));
+
+        q.x = std::copysign(q.x, matrix.m[1][2] - matrix.m[2][1]);
+        q.y = std::copysign(q.y, matrix.m[2][0] - matrix.m[0][2]);
+        q.z = std::copysign(q.z, matrix.m[0][1] - matrix.m[1][0]);
+
+        return q.Normalized();
+    }
+
+    Quat Quat::LookRotation(const Vec3& forward, const Vec3& up)
+    {
+        return FromMatrix(Mat4::LookRotation(forward, up));
     }
 
     float Dot(const Quat& a, const Quat& b)

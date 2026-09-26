@@ -18,6 +18,7 @@ namespace dvl
         static Mat4 Scale(const Vec3& scale);
         static Mat4 Rotation(const Quat& rotation);
 
+        static Mat4 FromQuaternion(const Quat& rotation);
         static Mat4 FromTransform(const Transform& transform);
 
         static Mat4 Perspective(float fovYRadians, float aspectRatio, float nearPlane, float farPlane);

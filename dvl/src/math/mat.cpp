@@ -40,6 +40,11 @@ namespace dvl
 
     Mat4 Mat4::Rotation(const Quat& rotation)
     {
+        return FromQuaternion(rotation);
+    }
+
+    Mat4 Mat4::FromQuaternion(const Quat& rotation)
+    {
         const Quat q = rotation.Normalized();
         const float xx = q.x * q.x;
         const float yy = q.y * q.y;
@@ -68,35 +73,18 @@ namespace dvl
 
     Mat4 Mat4::FromTransform(const Transform& transform)
     {
-        // Build the T * R * S matrix directly without intermediate matrices
-        const Quat& q = transform.rotation;
-        const float xx = q.x * q.x;
-        const float yy = q.y * q.y;
-        const float zz = q.z * q.z;
-        const float xy = q.x * q.y;
-        const float xz = q.x * q.z;
-        const float yz = q.y * q.z;
-        const float xw = q.x * q.w;
-        const float yw = q.y * q.w;
-        const float zw = q.z * q.w;
-
-        Mat4 result;
-        result.m[0][0] = (1.0f - 2.0f * (yy + zz)) * transform.scale.x;
-        result.m[0][1] = (2.0f * (xy + zw)) * transform.scale.x;
-        result.m[0][2] = (2.0f * (xz - yw)) * transform.scale.x;
-
-        result.m[1][0] = (2.0f * (xy - zw)) * transform.scale.y;
-        result.m[1][1] = (1.0f - 2.0f * (xx + zz)) * transform.scale.y;
-        result.m[1][2] = (2.0f * (yz + xw)) * transform.scale.y;
-
-        result.m[2][0] = (2.0f * (xz + yw)) * transform.scale.z;
-        result.m[2][1] = (2.0f * (yz - xw)) * transform.scale.z;
-        result.m[2][2] = (1.0f - 2.0f * (xx + yy)) * transform.scale.z;
+        Mat4 result = FromQuaternion(transform.rotation);
+        for (int row = 0; row < 3; row++)
+        {
+            result.m[0][row] *= transform.scale.x;
+            result.m[1][row] *= transform.scale.y;
+            result.m[2][row] *= transform.scale.z;
+        }
 
         result.m[3][0] = transform.translation.x;
         result.m[3][1] = transform.translation.y;
         result.m[3][2] = transform.translation.z;
-        
+
         return result;
     }
 
@@ -155,9 +143,16 @@ namespace dvl
 
     Mat4 Mat4::LookRotation(const Vec3& forward, const Vec3& up)
     {
-        Vec3 f = forward.Normalized();
-        Vec3 r = Cross(f, up).Normalized();
-        Vec3 u = Cross(r, f);
+        if (forward.LengthSquared() == 0.0f || up.LengthSquared() == 0.0f)
+            return Identity();
+
+        const Vec3 f = forward.Normalized();
+        const Vec3 cross = Cross(f, up.Normalized());
+        if (cross.LengthSquared() == 0.0f)
+            return Identity();
+
+        const Vec3 r = cross.Normalized();
+        const Vec3 u = Cross(r, f);
 
         Mat4 result = Mat4::Identity();
 
