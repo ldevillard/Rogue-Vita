@@ -15,9 +15,11 @@
 void AssetRegistry::Initialize(Renderer& renderer)
 {
     loadCubePrimitive(renderer);
+    loadLinePrimitive(renderer);
     loadDefaultTexture(renderer);
     loadMaterials(renderer);
     loadSkinnedMaterials(renderer);
+    loadDebugMaterial(renderer);
 }
 
 void AssetRegistry::Shutdown(Renderer& renderer)
@@ -465,6 +467,11 @@ const Mesh& AssetRegistry::GetCubeMesh() const
 {
     return _meshes.at(_cubeMeshHandle);
 }
+    
+const Mesh& AssetRegistry::GetLineMesh() const
+{
+    return _meshes.at(_lineMeshHandle);
+}
 
 const Material AssetRegistry::GetSolidMaterialInstance() const
 {
@@ -476,8 +483,14 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
     return _materials.at(_wireframeMaterialHandle);
 }
 
+const Material AssetRegistry::GetDebugMaterialInstance() const
+{
+    return _materials.at(_debugMaterialHandle);
+}
+
 void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
+    // TODO: Encapsulate cube mesh data in a dedicated class
     const VertexPositionNormalUV CubeVertices[] =
     {
         // Front
@@ -556,6 +569,35 @@ void AssetRegistry::loadCubePrimitive(Renderer& renderer)
     {
         _cubeMeshHandle.id = _nextMeshId++;
         _meshes.emplace(_cubeMeshHandle, cubeMesh);
+    }
+}
+
+void AssetRegistry::loadLinePrimitive(Renderer& renderer)
+{
+    // TODO: Encapsulate line mesh data in a dedicated class
+    const VertexPosition LineVertices[] =
+    {
+        {0.0f, 0.0f, 0.0f},
+        {0.0f, 0.0f, -1.0f}
+    };
+
+    const std::uint16_t LineIndices[] =
+    {
+        0, 1
+    };
+
+    MeshDesc desc = {};
+    desc.vertexData = LineVertices;
+    desc.vertexDataSize = sizeof(LineVertices);
+    desc.indices = LineIndices;
+    desc.indexCount = sizeof(LineIndices) / sizeof(LineIndices[0]);
+
+    Mesh lineMesh = {};
+
+    if (renderer.CreateMesh(desc, lineMesh))
+    {
+        _lineMeshHandle.id = _nextMeshId++;
+        _meshes.emplace(_lineMeshHandle, lineMesh);
     }
 }
 
@@ -693,4 +735,45 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
 
     _materials.at(_solidMaterialHandle).materialTemplate.skinnedPipeline = skinnedSolidPipelineHandle;
     _materials.at(_wireframeMaterialHandle).materialTemplate.skinnedPipeline = skinnedWireframePipelineHandle;
+}
+
+void AssetRegistry::loadDebugMaterial(Renderer& renderer)
+{
+    const dvl::VertexAttribute attributes[] =
+    {
+        {"aPosition", dvl::VertexFormat::Float3, offsetof(VertexPositionColor, x)},
+    };
+
+    const ShaderParameterDesc parameters[] =
+    {
+        {"viewProjectionMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ViewProjection},
+        {"modelMatrix", dvl::ShaderParameterType::Mat4, ShaderParameterSemantic::ModelMatrix},
+        {"materialColor", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::MaterialColor},
+    };
+
+    RenderPipelineDesc pipelineDesc = {};
+    pipelineDesc.vertexShaderPath = dvl::Filesystem::GetAssetPath("shader/debug/debug_vertex.vert");
+    pipelineDesc.fragmentShaderPath = dvl::Filesystem::GetAssetPath("shader/debug/debug_fragment.frag");
+    pipelineDesc.attributes = attributes;
+    pipelineDesc.attributeCount = sizeof(attributes) / sizeof(attributes[0]);
+    pipelineDesc.vertexStride = sizeof(VertexPosition);
+    pipelineDesc.parameters = parameters;
+    pipelineDesc.parameterCount = sizeof(parameters) / sizeof(parameters[0]);
+    pipelineDesc.depthStencilState.depthTestEnabled = true;
+    pipelineDesc.depthStencilState.depthWriteEnabled = true;
+    pipelineDesc.topology = dvl::PrimitiveTopology::LineList;
+
+    RenderPipeline debugRenderPipeline = {};
+    renderer.CreateRenderPipeline(pipelineDesc, debugRenderPipeline);
+
+    RenderPipelineHandle debugPipelineHandle = {};
+    debugPipelineHandle.id = _nextPipelineId++;
+
+    _pipelines.emplace(debugPipelineHandle, debugRenderPipeline);
+
+    Material debugLineMaterial = {};
+    debugLineMaterial.materialTemplate.staticPipeline = debugPipelineHandle;
+
+    _debugMaterialHandle.id = _nextMaterialId++;
+    _materials.emplace(_debugMaterialHandle, debugLineMaterial);
 }
