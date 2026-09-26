@@ -7,8 +7,7 @@ class Transform
 {
 public:
     dvl::Vec3 position;
-    // TODO: Support quat to avoid gimball lock
-    dvl::Vec3 rotation;
+    dvl::Quat rotation;
     dvl::Vec3 scale = dvl::Vec3(1.0f, 1.0f, 1.0f);
 
     dvl::Vec3 GetForward() const;
