@@ -7,6 +7,7 @@
 #include "engine/component/mesh_renderer.h"
 #include "engine/component/skinned_mesh_renderer.h"
 #include "engine/core/asset_registry.h"
+#include "engine/core/entity.h"
 #include "engine/core/world.h"
 #include "engine/debug/debug_draw.h"
 #include "engine/render/material.h"
