@@ -25,6 +25,7 @@ void PlayerController::Update(float deltaTime)
         return;
 
     DebugDraw::DrawLine(entity.transform.position, entity.transform.position + entity.transform.GetForward() * 2, dvl::Vec4(1.0f, 0.0f, 1.0f, 1.0f));
+    DebugDraw::DrawWireCube(entity.transform.position, dvl::Vec3(1.0f, 1.0f, 1.0f), dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 

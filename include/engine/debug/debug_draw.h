@@ -13,11 +13,14 @@ class DebugDraw
 public:
     static void Initialize(const AssetRegistry& assetRegistry, Renderer* renderer);
 
-    static void DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, dvl::Vec4 color);
+    static void DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::Vec4& color);
+    static void DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color);
 
 private:
     static Renderer* _renderer;
     
     static Mesh _lineMesh;
+    static Mesh _wireCubeMesh;
+
     static Material _material;
 };
