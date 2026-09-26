@@ -346,6 +346,61 @@ DVL_TEST(Mat4LookAtTransformsEyeAndTargetIntoViewSpace)
     return true;
 }
 
+DVL_TEST(Mat4LookRotationIsIdentityForCanonicalForwardAndUp)
+{
+    const dvl::Mat4 rotation = dvl::Mat4::LookRotation(dvl::Vec3(0.0f, 0.0f, -1.0f));
+
+    for (int column = 0; column < 4; column++)
+    {
+        for (int row = 0; row < 4; row++)
+        {
+            const float expected = column == row ? 1.0f : 0.0f;
+            DVL_EXPECT_NEAR(rotation.m[column][row], expected, Epsilon);
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(Mat4LookRotationAlignsLocalNegativeZWithForward)
+{
+    const dvl::Vec3 forward(2.0f, 3.0f, 4.0f);
+    const dvl::Vec3 expectedForward = forward.Normalized();
+    const dvl::Mat4 rotation = dvl::Mat4::LookRotation(forward);
+    const dvl::Vec4 rotatedForward = rotation * dvl::Vec4(0.0f, 0.0f, -1.0f, 0.0f);
+
+    DVL_EXPECT_NEAR(rotatedForward.x, expectedForward.x, Epsilon);
+    DVL_EXPECT_NEAR(rotatedForward.y, expectedForward.y, Epsilon);
+    DVL_EXPECT_NEAR(rotatedForward.z, expectedForward.z, Epsilon);
+    DVL_EXPECT_NEAR(rotatedForward.w, 0.0f, Epsilon);
+
+    const dvl::Vec3 right(rotation.m[0][0], rotation.m[0][1], rotation.m[0][2]);
+    const dvl::Vec3 correctedUp(rotation.m[1][0], rotation.m[1][1], rotation.m[1][2]);
+    const dvl::Vec3 matrixForward(rotation.m[2][0], rotation.m[2][1], rotation.m[2][2]);
+    DVL_EXPECT_NEAR(right.Length(), 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(correctedUp.Length(), 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(matrixForward.Length(), 1.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(right, correctedUp), 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(right, matrixForward), 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Dot(correctedUp, matrixForward), 0.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(Mat4LookRotationUsesTheProvidedUpDirection)
+{
+    const dvl::Vec3 forward(1.0f, 0.0f, 0.0f);
+    const dvl::Vec3 up(0.0f, 0.0f, 1.0f);
+    const dvl::Mat4 rotation = dvl::Mat4::LookRotation(forward, up);
+    const dvl::Vec4 rotatedUp = rotation * dvl::Vec4(0.0f, 1.0f, 0.0f, 0.0f);
+
+    DVL_EXPECT_NEAR(rotatedUp.x, up.x, Epsilon);
+    DVL_EXPECT_NEAR(rotatedUp.y, up.y, Epsilon);
+    DVL_EXPECT_NEAR(rotatedUp.z, up.z, Epsilon);
+
+    return true;
+}
+
 DVL_TEST(Mat4InverseOfIdentityIsIdentity)
 {
     const dvl::Mat4 inverse = dvl::Mat4::Inverse(dvl::Mat4::Identity());

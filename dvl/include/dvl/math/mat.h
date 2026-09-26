@@ -23,6 +23,7 @@ namespace dvl
         static Mat4 Perspective(float fovYRadians, float aspectRatio, float nearPlane, float farPlane);
         static Mat4 Orthographic(float left, float right, float bottom, float top, float nearPlane, float farPlane);
         static Mat4 LookAt(const Vec3& eye, const Vec3& target, const Vec3& up);
+        static Mat4 LookRotation(const Vec3& forward, const Vec3& up = {0.0f, 1.0f, 0.0f});
         static Mat4 Inverse(const Mat4& matrix);
 
         Mat4 operator*(const Mat4& rhs) const;
