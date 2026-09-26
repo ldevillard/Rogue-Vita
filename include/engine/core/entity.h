@@ -7,10 +7,14 @@
 
 #include "engine/component/component.h"
 #include "engine/core/transform.h"
+#include "engine/core/world.h"
 
 class Entity
 {
 public:
+    Entity(World& world);
+    ~Entity();
+
     template <typename T, typename... Args>
     T& AddComponent(Args&&... args)
     {
@@ -20,6 +24,8 @@ public:
         T& componentReference = *component;
 
         _components.push_back(std::move(component));
+
+        _world.RegisterComponent(&componentReference);
 
         return componentReference;
     }
@@ -58,5 +64,7 @@ public:
     unsigned int id = 0;
 
 private:
+    World& _world;
+
     std::vector<std::unique_ptr<Component>> _components;
 };
