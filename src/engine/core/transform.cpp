@@ -31,28 +31,14 @@ dvl::Mat4 Transform::GetMatrix() const
 
 void Transform::LookAt(const dvl::Vec3& target)
 {
-    const dvl::Vec3 delta = target - position;
-
-    if (delta.LengthSquared() < 0.000001f)
-        return;
-
-    const dvl::Mat4 worldMatrix = dvl::Mat4::Inverse(dvl::Mat4::LookAt(position, target, dvl::Vec3(0.0f, 1.0f, 0.0f)));
-
-    rotation.y = std::asin(dvl::Clamp(worldMatrix[2][0], -1.0f, 1.0f));
-    rotation.x = std::atan2(-worldMatrix[2][1], worldMatrix[2][2]);
-    rotation.z = std::atan2(-worldMatrix[1][0], worldMatrix[0][0]);
+    LookDirection(target - position);
 }
 
 void Transform::LookDirection(const dvl::Vec3& direction)
 {
-    const float lengthSquared = direction.LengthSquared();
+    const dvl::Mat4 rotationMatrix = dvl::Mat4::LookRotation(direction);
 
-    if (lengthSquared < 0.000001f)
-        return;
-
-    const dvl::Vec3 forward = direction * dvl::InverseSqrt(lengthSquared);
-
-    rotation.x = 0.0f;
-    rotation.y = std::atan2(-forward.x, -forward.z);
-    rotation.z = 0.0f;
+    rotation.y = std::asin(dvl::Clamp(rotationMatrix[2][0], -1.0f, 1.0f));
+    rotation.x = std::atan2(-rotationMatrix[2][1], rotationMatrix[2][2]);
+    rotation.z = std::atan2(-rotationMatrix[1][0], rotationMatrix[0][0]);
 }

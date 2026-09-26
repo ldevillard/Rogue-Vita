@@ -30,7 +30,8 @@ namespace dvl
 
     enum class PrimitiveTopology
     {
-        TriangleList
+        TriangleList,
+        LineList
     };
 
     struct VertexAttribute

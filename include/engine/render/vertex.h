@@ -2,6 +2,11 @@
 
 #include <dvl/math/math.h>
 
+struct VertexPosition
+{
+    float x, y, z;
+};
+
 struct VertexPositionColor
 {
     float x, y, z;
