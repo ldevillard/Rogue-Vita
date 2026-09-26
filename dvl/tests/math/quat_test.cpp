@@ -1,6 +1,7 @@
 #include "../unit_test.h"
 
 #include "dvl/math/quat.h"
+#include "dvl/math/mat.h"
 
 namespace
 {
@@ -213,6 +214,107 @@ DVL_TEST(QuatSlerpHandlesNearlyIdenticalRotations)
     DVL_EXPECT_NEAR(midpoint.z, expected.z, Epsilon);
     DVL_EXPECT_NEAR(midpoint.w, expected.w, Epsilon);
     DVL_EXPECT_NEAR(midpoint.Length(), 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(QuatLookRotationUsesCanonicalForwardAndDefaultUp)
+{
+    const dvl::Quat identity = dvl::Quat::LookRotation(dvl::Vec3(0.0f, 0.0f, -2.0f));
+    DVL_EXPECT_NEAR(identity.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(identity.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(identity.z, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(identity.w, 1.0f, Epsilon);
+
+    const dvl::Vec3 forward(2.0f, 3.0f, 4.0f);
+    const dvl::Quat rotation = dvl::Quat::LookRotation(forward);
+    const dvl::Vec4 rotated = dvl::Mat4::Rotation(rotation) * dvl::Vec4(0.0f, 0.0f, -1.0f, 0.0f);
+    const dvl::Vec3 expected = forward.Normalized();
+    DVL_EXPECT_NEAR(rotated.x, expected.x, Epsilon);
+    DVL_EXPECT_NEAR(rotated.y, expected.y, Epsilon);
+    DVL_EXPECT_NEAR(rotated.z, expected.z, Epsilon);
+    DVL_EXPECT_TRUE(std::isfinite(rotation.Length()));
+    DVL_EXPECT_NEAR(rotation.Length(), 1.0f, Epsilon);
+
+    return true;
+}
+
+DVL_TEST(QuatLookRotationMatchesMatrixIncludingHalfTurnsAndCustomUp)
+{
+    const dvl::Vec3 forwards[] = {
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, 1.0f},
+        {0.0f, 0.0f, -1.0f},
+        {0.00001f, 0.0f, 1.0f},
+        {1.0f, 0.0f, 0.0f},
+        {2.0f, 3.0f, 4.0f},
+        {-3.0f, -1.0f, 2.0f}
+    };
+    const dvl::Vec3 ups[] = {
+        {0.0f, -1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, -1.0f, 0.0f},
+        {0.0f, 1.0f, 0.0f},
+        {0.0f, 0.0f, 3.0f},
+        {1.0f, 5.0f, -2.0f},
+        {2.0f, -4.0f, 1.0f}
+    };
+
+    for (int i = 0; i < 7; i++)
+    {
+        const dvl::Quat rotation = dvl::Quat::LookRotation(forwards[i], ups[i]);
+        DVL_EXPECT_TRUE(std::isfinite(rotation.Length()));
+        DVL_EXPECT_NEAR(rotation.Length(), 1.0f, Epsilon);
+        const dvl::Mat4 actual = dvl::Mat4::Rotation(rotation);
+        const dvl::Mat4 expected = dvl::Mat4::LookRotation(forwards[i], ups[i]);
+        for (int column = 0; column < 4; column++)
+        {
+            for (int row = 0; row < 4; row++)
+                DVL_EXPECT_NEAR(actual[column][row], expected[column][row], Epsilon);
+        }
+    }
+
+    return true;
+}
+
+DVL_TEST(QuatLookRotationReturnsIdentityForDegenerateDirections)
+{
+    const dvl::Quat rotations[] = {
+        dvl::Quat::LookRotation(dvl::Vec3()),
+        dvl::Quat::LookRotation(dvl::Vec3(0.0f, 0.0f, -1.0f), dvl::Vec3()),
+        dvl::Quat::LookRotation(dvl::Vec3(0.0f, 2.0f, 0.0f)),
+        dvl::Quat::LookRotation(dvl::Vec3(0.0f, -2.0f, 0.0f)),
+        dvl::Quat::LookRotation(dvl::Vec3(1.0f, 2.0f, 3.0f), dvl::Vec3(2.0f, 4.0f, 6.0f))
+    };
+    for (const dvl::Quat& rotation : rotations)
+    {
+        DVL_EXPECT_EQ(rotation.x, 0.0f);
+        DVL_EXPECT_EQ(rotation.y, 0.0f);
+        DVL_EXPECT_EQ(rotation.z, 0.0f);
+        DVL_EXPECT_EQ(rotation.w, 1.0f);
+    }
+
+    return true;
+}
+
+DVL_TEST(QuatFromMatrixReadsColumnMajorRotationAndIgnoresTranslation)
+{
+    dvl::Mat4 matrix;
+    matrix[0][0] = 0.0f;
+    matrix[0][1] = 1.0f;
+    matrix[1][0] = -1.0f;
+    matrix[1][1] = 0.0f;
+    matrix[3][0] = 12.0f;
+    matrix[3][1] = -3.0f;
+    matrix[3][2] = 7.0f;
+
+    const dvl::Quat rotation = dvl::Quat::FromMatrix(matrix);
+    DVL_EXPECT_TRUE(std::isfinite(rotation.Length()));
+    DVL_EXPECT_NEAR(rotation.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(rotation.y, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(rotation.z, std::sqrt(0.5f), Epsilon);
+    DVL_EXPECT_NEAR(rotation.w, std::sqrt(0.5f), Epsilon);
+    DVL_EXPECT_NEAR(rotation.Length(), 1.0f, Epsilon);
 
     return true;
 }

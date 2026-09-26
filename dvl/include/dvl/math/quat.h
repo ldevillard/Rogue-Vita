@@ -4,6 +4,8 @@
 
 namespace dvl
 {
+    class Mat4;
+
     class Quat
     {
     public:
@@ -19,7 +21,11 @@ namespace dvl
         Quat operator*(const Quat& rhs) const;
 
         static Quat Identity();
+
         static Quat FromAxisAngle(const Vec3& axis, float angleRadians);
+        static Quat FromMatrix(const Mat4& matrix);
+        
+        static Quat LookRotation(const Vec3& forward, const Vec3& up = {0.0f, 1.0f, 0.0f});
 
         float x;
         float y;
