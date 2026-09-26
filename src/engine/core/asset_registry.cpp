@@ -12,6 +12,9 @@
 #include "engine/render/renderer.h"
 #include "engine/render/render_pipeline.h"
 
+#include "engine/render/primitive/cube_mesh_data.h"
+#include "engine/render/primitive/line_mesh_data.h"
+
 void AssetRegistry::Initialize(Renderer& renderer)
 {
     loadCubePrimitive(renderer);
@@ -490,78 +493,11 @@ const Material AssetRegistry::GetDebugMaterialInstance() const
 
 void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 {
-    // TODO: Encapsulate cube mesh data in a dedicated class
-    const VertexPositionNormalUV CubeVertices[] =
-    {
-        // Front
-        {-0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 0.0f},
-        { 0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 0.0f},
-        {-0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 0.0f, 1.0f},
-        { 0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f, 1.0f, 1.0f},
-
-        // Back
-        { 0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f},
-        {-0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 0.0f},
-        { 0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 0.0f, 1.0f},
-        {-0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f},
-
-        // Left
-        {-0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 0.0f},
-        {-0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 0.0f},
-        {-0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f, 0.0f, 1.0f},
-        {-0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f, 1.0f, 1.0f},
-
-        // Right
-        { 0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 0.0f},
-        { 0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 0.0f},
-        { 0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f, 0.0f, 1.0f},
-        { 0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f, 1.0f, 1.0f},
-
-        // Top
-        {-0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f},
-        { 0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 0.0f},
-        {-0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 0.0f, 1.0f},
-        { 0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f, 1.0f, 1.0f},
-
-        // Bottom
-        {-0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 0.0f},
-        { 0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 0.0f},
-        {-0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 0.0f, 1.0f},
-        { 0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f, 1.0f, 1.0f}
-    };
-
-    const std::uint16_t CubeIndices[] =
-    {
-        // Front
-        0, 1, 3,
-        0, 3, 2,
-    
-        // Back
-        4, 5, 7,
-        4, 7, 6,
-    
-        // Left
-        8, 9, 11,
-        8, 11, 10,
-    
-        // Right
-        12, 13, 15,
-        12, 15, 14,
-    
-        // Top
-        16, 17, 19,
-        16, 19, 18,
-    
-        // Bottom
-        20, 21, 23,
-        20, 23, 22
-    };
-
     MeshDesc desc = {};
-    desc.vertexData = CubeVertices;
-    desc.vertexDataSize = sizeof(CubeVertices);
-    desc.indices = CubeIndices;
-    desc.indexCount = sizeof(CubeIndices) / sizeof(CubeIndices[0]);
+    desc.vertexData = CubeMeshData::vertices;
+    desc.vertexDataSize = sizeof(CubeMeshData::vertices);
+    desc.indices = CubeMeshData::indices;
+    desc.indexCount = sizeof( CubeMeshData::indices) / sizeof( CubeMeshData::indices[0]);
 
     Mesh cubeMesh = {};
 
@@ -574,23 +510,11 @@ void AssetRegistry::loadCubePrimitive(Renderer& renderer)
 
 void AssetRegistry::loadLinePrimitive(Renderer& renderer)
 {
-    // TODO: Encapsulate line mesh data in a dedicated class
-    const VertexPosition LineVertices[] =
-    {
-        {0.0f, 0.0f, 0.0f},
-        {0.0f, 0.0f, -1.0f}
-    };
-
-    const std::uint16_t LineIndices[] =
-    {
-        0, 1
-    };
-
     MeshDesc desc = {};
-    desc.vertexData = LineVertices;
-    desc.vertexDataSize = sizeof(LineVertices);
-    desc.indices = LineIndices;
-    desc.indexCount = sizeof(LineIndices) / sizeof(LineIndices[0]);
+    desc.vertexData = LineMeshData::vertices;
+    desc.vertexDataSize = sizeof(LineMeshData::vertices);
+    desc.indices = LineMeshData::indices;
+    desc.indexCount = sizeof(LineMeshData::indices) / sizeof(LineMeshData::indices[0]);
 
     Mesh lineMesh = {};
 
