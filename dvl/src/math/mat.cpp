@@ -153,6 +153,32 @@ namespace dvl
         return result;
     }
 
+    Mat4 Mat4::LookRotation(const Vec3& forward, const Vec3& up)
+    {
+        Vec3 f = forward.Normalized();
+        Vec3 r = Cross(f, up).Normalized();
+        Vec3 u = Cross(r, f);
+
+        Mat4 result = Mat4::Identity();
+
+        // right
+        result.m[0][0] = r.x;
+        result.m[0][1] = r.y;
+        result.m[0][2] = r.z;
+
+        // up
+        result.m[1][0] = u.x;
+        result.m[1][1] = u.y;
+        result.m[1][2] = u.z;
+
+        // forward
+        result.m[2][0] = -f.x;
+        result.m[2][1] = -f.y;
+        result.m[2][2] = -f.z;
+
+        return result;
+    }
+
     Mat4 Mat4::Inverse(const Mat4& matrix)
     {
         Mat4 result{};
