@@ -9,7 +9,6 @@
 #include <dvl/asset/skeleton_format.h>
 
 #include "engine/render/vertex.h"
-#include "engine/render/renderer.h"
 #include "engine/render/render_pipeline.h"
 
 #include "engine/render/primitive/cube_mesh_data.h"
@@ -17,8 +16,9 @@
 
 void AssetRegistry::Initialize(Renderer& renderer)
 {
-    loadCubePrimitive(renderer);
-    loadLinePrimitive(renderer);
+    _lineMeshHandle = loadPrimitive<LineMeshData>(renderer);
+    _cubeMeshHandle = loadPrimitive<CubeMeshData>(renderer);
+
     loadDefaultTexture(renderer);
     loadMaterials(renderer);
     loadSkinnedMaterials(renderer);
@@ -489,40 +489,6 @@ const Material AssetRegistry::GetWireframeMaterialInstance() const
 const Material AssetRegistry::GetDebugMaterialInstance() const
 {
     return _materials.at(_debugMaterialHandle);
-}
-
-void AssetRegistry::loadCubePrimitive(Renderer& renderer)
-{
-    MeshDesc desc = {};
-    desc.vertexData = CubeMeshData::vertices;
-    desc.vertexDataSize = sizeof(CubeMeshData::vertices);
-    desc.indices = CubeMeshData::indices;
-    desc.indexCount = sizeof( CubeMeshData::indices) / sizeof( CubeMeshData::indices[0]);
-
-    Mesh cubeMesh = {};
-
-    if (renderer.CreateMesh(desc, cubeMesh))
-    {
-        _cubeMeshHandle.id = _nextMeshId++;
-        _meshes.emplace(_cubeMeshHandle, cubeMesh);
-    }
-}
-
-void AssetRegistry::loadLinePrimitive(Renderer& renderer)
-{
-    MeshDesc desc = {};
-    desc.vertexData = LineMeshData::vertices;
-    desc.vertexDataSize = sizeof(LineMeshData::vertices);
-    desc.indices = LineMeshData::indices;
-    desc.indexCount = sizeof(LineMeshData::indices) / sizeof(LineMeshData::indices[0]);
-
-    Mesh lineMesh = {};
-
-    if (renderer.CreateMesh(desc, lineMesh))
-    {
-        _lineMeshHandle.id = _nextMeshId++;
-        _meshes.emplace(_lineMeshHandle, lineMesh);
-    }
 }
 
 void AssetRegistry::loadDefaultTexture(Renderer& renderer)

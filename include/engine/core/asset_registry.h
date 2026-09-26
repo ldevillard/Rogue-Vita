@@ -6,10 +6,9 @@
 #include "engine/render/animation.h"
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
+#include "engine/render/renderer.h"
 #include "engine/render/skeleton.h"
 #include "engine/render/texture.h"
-
-class Renderer;
 
 class AssetRegistry
 {
@@ -51,8 +50,26 @@ public:
     const Texture& GetDefaultTexture() const;
 
 private:
-    void loadCubePrimitive(Renderer& renderer);
-    void loadLinePrimitive(Renderer& renderer);
+    template<typename MeshData>
+    MeshHandle loadPrimitive(Renderer& renderer)
+    {
+        MeshDesc desc = {};
+        desc.vertexData = MeshData::vertices;
+        desc.vertexDataSize = sizeof(MeshData::vertices);
+        desc.indices = MeshData::indices;
+        desc.indexCount = sizeof( MeshData::indices) / sizeof(MeshData::indices[0]);
+
+        Mesh mesh = {};
+        MeshHandle meshHandle = {};
+
+        if (renderer.CreateMesh(desc, mesh))
+        {
+            meshHandle.id = _nextMeshId++;
+            _meshes.emplace(meshHandle, mesh);
+        }
+
+        return meshHandle;
+    }
 
     void loadDefaultTexture(Renderer& renderer);
 
