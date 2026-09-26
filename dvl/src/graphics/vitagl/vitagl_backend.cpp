@@ -552,6 +552,9 @@ namespace dvl::internal
             case PrimitiveTopology::TriangleList:
                 topology = GL_TRIANGLES;
                 break;
+            case PrimitiveTopology::LineList:
+                topology = GL_LINES;
+                break;
         }
 
         glDrawArrays(topology, 0, static_cast<GLsizei>(vertexCount));
@@ -582,6 +585,9 @@ namespace dvl::internal
         {
             case PrimitiveTopology::TriangleList:
                 topology = GL_TRIANGLES;
+                break;
+            case PrimitiveTopology::LineList:
+                topology = GL_LINES;
                 break;
         }
 
