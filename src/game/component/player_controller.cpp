@@ -1,5 +1,7 @@
 #include "game/component/player_controller.h"
 
+#include <cmath>
+
 #include <dvl/input/input.h>
 #include <dvl/math/math.h>
 #include <dvl/tween/tweener.h>
@@ -21,11 +23,10 @@ PlayerController::~PlayerController()
 
 void PlayerController::Update(float deltaTime)
 {
+    drawDebugFov();
+
     if (_dashTween != nullptr)
         return;
-
-    DebugDraw::DrawLine(entity.transform.position, entity.transform.position + entity.transform.GetForward() * 2, dvl::Vec4(1.0f, 0.0f, 1.0f, 1.0f));
-    DebugDraw::DrawWireCube(entity.transform.position, dvl::Vec3(1.0f, 1.0f, 1.0f), dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 
@@ -65,18 +66,17 @@ void PlayerController::Update(float deltaTime)
 
     _animator.Play(_animations.run, animationTransitionDuration);
 
-    entity.transform.LookDirection(movement);
-
     if (dvl::Input::IsButtonDown(dvl::GamepadButton::Circle))
     {
-        Dash();
+        dash();
         return;
     }
-
+    
+    entity.transform.rotation = dvl::Nlerp(entity.transform.rotation, dvl::Quat::LookRotation(movement), rotationSpeed * deltaTime);
     entity.transform.position += movement * moveSpeed * deltaTime;
 }
 
-void PlayerController::Dash()
+void PlayerController::dash()
 {
     const dvl::Vec3 from = entity.transform.position;
 
@@ -95,4 +95,25 @@ void PlayerController::Dash()
     {
         _dashTween = nullptr;
     });
+}
+
+void PlayerController::drawDebugFov()
+{
+    const float detectionRadius = 5.0f;
+    const float halfAngle = dvl::Radians(50.0f);
+
+    const dvl::Vec3 origin = entity.transform.position;
+    const dvl::Vec3 forward = entity.transform.GetForward();
+    const dvl::Vec3 right = entity.transform.GetRight();
+
+    const dvl::Vec3 rightLimit = forward * std::cos(halfAngle) + right * std::sin(halfAngle);
+
+    const dvl::Vec3 leftLimit = forward * std::cos(halfAngle) - right * std::sin(halfAngle);
+
+    const dvl::Vec4 blue(0.0f, 0.0f, 1.0f, 1.0f);
+    const dvl::Vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
+
+    DebugDraw::DrawLine(origin, origin + forward * detectionRadius, blue);
+    DebugDraw::DrawLine(origin, origin + rightLimit * detectionRadius, green);
+    DebugDraw::DrawLine(origin, origin + leftLimit * detectionRadius, green);
 }

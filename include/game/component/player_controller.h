@@ -23,12 +23,15 @@ public:
     void Update(float deltaTime) override;
 
     float moveSpeed = 5.0f;
+    float rotationSpeed = 20.0f;
+
     float dashDistance = 3.0f;
     float dashDuration = 0.15f;
     float animationTransitionDuration = 0.1f;
 
 private:
-    void Dash();
+    void dash();
+    void drawDebugFov();
 
     const Camera& _camera;
     
