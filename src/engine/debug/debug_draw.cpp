@@ -4,17 +4,23 @@
 #include "engine/render/renderer.h"
 
 Renderer* DebugDraw::_renderer = nullptr;
+
 Mesh DebugDraw::_lineMesh = {};
+Mesh DebugDraw::_wireCubeMesh = {};
+
 Material DebugDraw::_material = {};
 
 void DebugDraw::Initialize(const AssetRegistry& assetRegistry, Renderer* renderer)
 {
-    _lineMesh = assetRegistry.GetLineMesh();
-    _material = assetRegistry.GetDebugMaterialInstance();
     _renderer = renderer;
+
+    _lineMesh = assetRegistry.GetLineMesh();
+    _wireCubeMesh = assetRegistry.GetWireCubeMesh();
+
+    _material = assetRegistry.GetDebugMaterialInstance();
 }
 
-void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, dvl::Vec4 color)
+void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::Vec4& color)
 {
     if (_renderer == nullptr)
     {
@@ -30,4 +36,19 @@ void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, dvl::Vec4 c
     _material.color = color;
 
     _renderer->Draw(_lineMesh, _material, mat);
+}
+
+void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color)
+{
+    if (_renderer == nullptr)
+    {
+        dvl::Log(dvl::LogLevel::Error, "DebugDraw is not initialized, draw call canceled!");
+        return;
+    }
+
+    const dvl::Mat4 mat = dvl::Mat4::Translation(position) * dvl::Mat4::Scale(size);
+    
+    _material.color = color;
+
+    _renderer->Draw(_wireCubeMesh, _material, mat);
 }

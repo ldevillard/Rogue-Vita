@@ -13,11 +13,13 @@
 
 #include "engine/render/primitive/cube_mesh_data.h"
 #include "engine/render/primitive/line_mesh_data.h"
+#include "engine/render/primitive/wire_cube_mesh_data.h"
 
 void AssetRegistry::Initialize(Renderer& renderer)
 {
     _lineMeshHandle = loadPrimitive<LineMeshData>(renderer);
     _cubeMeshHandle = loadPrimitive<CubeMeshData>(renderer);
+    _wireCubeMeshHandle = loadPrimitive<WireCubeMeshData>(renderer);
 
     loadDefaultTexture(renderer);
     loadMaterials(renderer);
@@ -466,14 +468,19 @@ const Texture& AssetRegistry::GetDefaultTexture() const
     return _textures.at(_defaultTextureHandle);
 }
 
+const Mesh& AssetRegistry::GetLineMesh() const
+{
+    return _meshes.at(_lineMeshHandle);
+}
+
 const Mesh& AssetRegistry::GetCubeMesh() const
 {
     return _meshes.at(_cubeMeshHandle);
 }
-    
-const Mesh& AssetRegistry::GetLineMesh() const
+
+const Mesh& AssetRegistry::GetWireCubeMesh() const
 {
-    return _meshes.at(_lineMeshHandle);
+    return _meshes.at(_wireCubeMeshHandle);
 }
 
 const Material AssetRegistry::GetSolidMaterialInstance() const

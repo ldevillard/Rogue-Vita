@@ -38,8 +38,9 @@ public:
     const Animation* GetAnimation(const AnimationHandle& animationHandle) const;
 
     // Primitives
-    const Mesh& GetCubeMesh() const;
     const Mesh& GetLineMesh() const;
+    const Mesh& GetCubeMesh() const;
+    const Mesh& GetWireCubeMesh() const;
 
     // Materials
     const Material GetSolidMaterialInstance() const;
@@ -57,7 +58,7 @@ private:
         desc.vertexData = MeshData::vertices;
         desc.vertexDataSize = sizeof(MeshData::vertices);
         desc.indices = MeshData::indices;
-        desc.indexCount = sizeof( MeshData::indices) / sizeof(MeshData::indices[0]);
+        desc.indexCount = sizeof(MeshData::indices) / sizeof(MeshData::indices[0]);
 
         Mesh mesh = {};
         MeshHandle meshHandle = {};
@@ -78,8 +79,9 @@ private:
     void loadDebugMaterial(Renderer& renderer);
 
     // Primitives
-    MeshHandle _cubeMeshHandle;
     MeshHandle _lineMeshHandle;
+    MeshHandle _cubeMeshHandle;
+    MeshHandle _wireCubeMeshHandle;
 
     // Materials
     MaterialHandle _solidMaterialHandle;
