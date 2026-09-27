@@ -159,6 +159,9 @@ int main()
             DebugDraw::DrawWireCube(boxCollider->box.center, boxCollider->box.size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
         }
 
+        // Test sphere
+        DebugDraw::DrawWireSphere(dvl::Vec3(-1.0f, 1.0f, -2.0f), 0.5f, dvl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
+
         renderer.EndFrame();
     }
 

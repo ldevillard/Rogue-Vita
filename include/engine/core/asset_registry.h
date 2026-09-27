@@ -41,6 +41,7 @@ public:
     const Mesh& GetLineMesh() const;
     const Mesh& GetCubeMesh() const;
     const Mesh& GetWireCubeMesh() const;
+    const Mesh& GetWireSphereMesh() const;
 
     // Materials
     const Material GetSolidMaterialInstance() const;
@@ -82,6 +83,7 @@ private:
     MeshHandle _lineMeshHandle;
     MeshHandle _cubeMeshHandle;
     MeshHandle _wireCubeMeshHandle;
+    MeshHandle _wireSphereMeshHandle;
 
     // Materials
     MaterialHandle _solidMaterialHandle;
