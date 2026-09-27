@@ -34,6 +34,11 @@ namespace dvl
         return Vec2(x - rhs.x, y - rhs.y);
     }
 
+    Vec2 Vec2::operator*(const Vec2& rhs) const
+    {
+        return Vec2(x * rhs.x, y * rhs.y);
+    }
+
     Vec2 Vec2::operator*(float scalar) const
     {
         return Vec2(x * scalar, y * scalar);
@@ -122,6 +127,11 @@ namespace dvl
     Vec3 Vec3::operator-(const Vec3& rhs) const
     {
         return Vec3(x - rhs.x, y - rhs.y, z - rhs.z);
+    }
+
+    Vec3 Vec3::operator*(const Vec3& rhs) const
+    {
+        return Vec3(x * rhs.x, y * rhs.y, z * rhs.z);
     }
 
     Vec3 Vec3::operator*(float scalar) const
@@ -223,6 +233,11 @@ namespace dvl
         return Vec4(x - rhs.x, y - rhs.y, z - rhs.z, w - rhs.w);
     }
 
+    Vec4 Vec4::operator*(const Vec4& rhs) const
+    {
+        return Vec4(x * rhs.x, y * rhs.y, z * rhs.z, w * rhs.w);
+    }
+
     Vec4 Vec4::operator*(float scalar) const
     {
         return Vec4(x * scalar, y * scalar, z * scalar, w * scalar);
@@ -291,6 +306,21 @@ namespace dvl
         w /= length;
     }
 
+    Vec2 Abs(const Vec2& v)
+    {
+        return Vec2(std::abs(v.x), std::abs(v.y));
+    }
+
+    Vec3 Abs(const Vec3& v)
+    {
+        return Vec3(std::abs(v.x), std::abs(v.y), std::abs(v.z));
+    }
+
+    Vec4 Abs(const Vec4& v)
+    {
+        return Vec4(std::abs(v.x), std::abs(v.y), std::abs(v.z), std::abs(v.w));
+    }
+
     float Dot(const Vec2& a, const Vec2& b)
     {
         return a.x * b.x + a.y * b.y;
@@ -308,10 +338,7 @@ namespace dvl
 
     Vec3 Cross(const Vec3& a, const Vec3& b)
     {
-        return Vec3(
-            a.y * b.z - a.z * b.y,
-            a.z * b.x - a.x * b.z,
-            a.x * b.y - a.y * b.x);
+        return Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
     }
 
     Vec2 Lerp(const Vec2& a, const Vec2& b, float t)

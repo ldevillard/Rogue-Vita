@@ -13,6 +13,7 @@ namespace dvl
 
         Vec2 operator+(const Vec2& rhs) const;
         Vec2 operator-(const Vec2& rhs) const;
+        Vec2 operator*(const Vec2& rhs) const;
         Vec2 operator*(float scalar) const;
         Vec2 operator/(float scalar) const;
 
@@ -41,6 +42,7 @@ namespace dvl
 
         Vec3 operator+(const Vec3& rhs) const;
         Vec3 operator-(const Vec3& rhs) const;
+        Vec3 operator*(const Vec3& rhs) const;
         Vec3 operator*(float scalar) const;
         Vec3 operator/(float scalar) const;
 
@@ -71,6 +73,7 @@ namespace dvl
 
         Vec4 operator+(const Vec4& rhs) const;
         Vec4 operator-(const Vec4& rhs) const;
+        Vec4 operator*(const Vec4& rhs) const;
         Vec4 operator*(float scalar) const;
         Vec4 operator/(float scalar) const;
 
@@ -89,6 +92,10 @@ namespace dvl
         float z;
         float w;
     };
+
+    Vec2 Abs(const Vec2& v);
+    Vec3 Abs(const Vec3& v);
+    Vec4 Abs(const Vec4& v);
 
     float Dot(const Vec2& a, const Vec2& b);
     float Dot(const Vec3& a, const Vec3& b);

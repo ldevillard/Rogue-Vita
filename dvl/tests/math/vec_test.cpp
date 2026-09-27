@@ -541,3 +541,229 @@ DVL_TEST(Vec4LerpSupportsSymmetryAndExtrapolation)
 
     return true;
 }
+
+DVL_TEST(Vec2AbsReturnsMagnitudesWithoutChangingInput)
+{
+    dvl::Vec2 value(-1.5f, 2.5f);
+    const dvl::Vec2 result = dvl::Abs(value);
+    const dvl::Vec2 oppositeResult = dvl::Abs(value * -1.0f);
+
+    DVL_EXPECT_EQ(result.x, 1.5f);
+    DVL_EXPECT_EQ(oppositeResult.x, 1.5f);
+    DVL_EXPECT_EQ(value.x, -1.5f);
+    DVL_EXPECT_EQ(result.y, 2.5f);
+    DVL_EXPECT_EQ(oppositeResult.y, 2.5f);
+    DVL_EXPECT_EQ(value.y, 2.5f);
+
+    return true;
+}
+
+DVL_TEST(Vec2AbsConvertsSignedZerosToPositiveZero)
+{
+    for (float zero : {0.0f, -0.0f})
+    {
+        const dvl::Vec2 value(zero, zero);
+        const dvl::Vec2 result = dvl::Abs(value);
+
+        DVL_EXPECT_EQ(result.x, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.x));
+        DVL_EXPECT_EQ(std::signbit(value.x), std::signbit(zero));
+        DVL_EXPECT_EQ(result.y, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.y));
+        DVL_EXPECT_EQ(std::signbit(value.y), std::signbit(zero));
+    }
+
+    return true;
+}
+
+DVL_TEST(Vec3AbsReturnsMagnitudesWithoutChangingInput)
+{
+    dvl::Vec3 value(-1.5f, 2.5f, -3.5f);
+    const dvl::Vec3 result = dvl::Abs(value);
+    const dvl::Vec3 oppositeResult = dvl::Abs(value * -1.0f);
+
+    DVL_EXPECT_EQ(result.x, 1.5f);
+    DVL_EXPECT_EQ(oppositeResult.x, 1.5f);
+    DVL_EXPECT_EQ(value.x, -1.5f);
+    DVL_EXPECT_EQ(result.y, 2.5f);
+    DVL_EXPECT_EQ(oppositeResult.y, 2.5f);
+    DVL_EXPECT_EQ(value.y, 2.5f);
+    DVL_EXPECT_EQ(result.z, 3.5f);
+    DVL_EXPECT_EQ(oppositeResult.z, 3.5f);
+    DVL_EXPECT_EQ(value.z, -3.5f);
+
+    return true;
+}
+
+DVL_TEST(Vec3AbsConvertsSignedZerosToPositiveZero)
+{
+    for (float zero : {0.0f, -0.0f})
+    {
+        const dvl::Vec3 value(zero, zero, zero);
+        const dvl::Vec3 result = dvl::Abs(value);
+
+        DVL_EXPECT_EQ(result.x, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.x));
+        DVL_EXPECT_EQ(std::signbit(value.x), std::signbit(zero));
+        DVL_EXPECT_EQ(result.y, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.y));
+        DVL_EXPECT_EQ(std::signbit(value.y), std::signbit(zero));
+        DVL_EXPECT_EQ(result.z, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.z));
+        DVL_EXPECT_EQ(std::signbit(value.z), std::signbit(zero));
+    }
+
+    return true;
+}
+
+DVL_TEST(Vec4AbsReturnsMagnitudesWithoutChangingInput)
+{
+    dvl::Vec4 value(-1.5f, 2.5f, -3.5f, 4.5f);
+    const dvl::Vec4 result = dvl::Abs(value);
+    const dvl::Vec4 oppositeResult = dvl::Abs(value * -1.0f);
+
+    DVL_EXPECT_EQ(result.x, 1.5f);
+    DVL_EXPECT_EQ(oppositeResult.x, 1.5f);
+    DVL_EXPECT_EQ(value.x, -1.5f);
+    DVL_EXPECT_EQ(result.y, 2.5f);
+    DVL_EXPECT_EQ(oppositeResult.y, 2.5f);
+    DVL_EXPECT_EQ(value.y, 2.5f);
+    DVL_EXPECT_EQ(result.z, 3.5f);
+    DVL_EXPECT_EQ(oppositeResult.z, 3.5f);
+    DVL_EXPECT_EQ(value.z, -3.5f);
+    DVL_EXPECT_EQ(result.w, 4.5f);
+    DVL_EXPECT_EQ(oppositeResult.w, 4.5f);
+    DVL_EXPECT_EQ(value.w, 4.5f);
+
+    return true;
+}
+
+DVL_TEST(Vec4AbsConvertsSignedZerosToPositiveZero)
+{
+    for (float zero : {0.0f, -0.0f})
+    {
+        const dvl::Vec4 value(zero, zero, zero, zero);
+        const dvl::Vec4 result = dvl::Abs(value);
+
+        DVL_EXPECT_EQ(result.x, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.x));
+        DVL_EXPECT_EQ(std::signbit(value.x), std::signbit(zero));
+        DVL_EXPECT_EQ(result.y, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.y));
+        DVL_EXPECT_EQ(std::signbit(value.y), std::signbit(zero));
+        DVL_EXPECT_EQ(result.z, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.z));
+        DVL_EXPECT_EQ(std::signbit(value.z), std::signbit(zero));
+        DVL_EXPECT_EQ(result.w, 0.0f);
+        DVL_EXPECT_FALSE(std::signbit(result.w));
+        DVL_EXPECT_EQ(std::signbit(value.w), std::signbit(zero));
+    }
+
+    return true;
+}
+
+DVL_TEST(Vec2ComponentMultiplicationPreservesOperandsAndIdentities)
+{
+    dvl::Vec2 a(-2.0f, 3.0f);
+    dvl::Vec2 b(-0.5f, -4.0f);
+    const dvl::Vec2 product = a * b;
+    const dvl::Vec2 reverse = b * a;
+    const dvl::Vec2 identity = a * dvl::Vec2::One();
+    const dvl::Vec2 zero = a * dvl::Vec2::Zero();
+
+    DVL_EXPECT_EQ(product.x, 1.0f);
+    DVL_EXPECT_EQ(reverse.x, product.x);
+    DVL_EXPECT_EQ(identity.x, -2.0f);
+    DVL_EXPECT_EQ(zero.x, 0.0f);
+    DVL_EXPECT_EQ(a.x, -2.0f);
+    DVL_EXPECT_EQ(b.x, -0.5f);
+    DVL_EXPECT_EQ(product.y, -12.0f);
+    DVL_EXPECT_EQ(reverse.y, product.y);
+    DVL_EXPECT_EQ(identity.y, 3.0f);
+    DVL_EXPECT_EQ(zero.y, 0.0f);
+    DVL_EXPECT_EQ(a.y, 3.0f);
+    DVL_EXPECT_EQ(b.y, -4.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3ComponentMultiplicationPreservesOperandsAndIdentities)
+{
+    dvl::Vec3 a(-2.0f, 3.0f, -4.0f);
+    dvl::Vec3 b(-0.5f, -4.0f, 2.0f);
+    const dvl::Vec3 product = a * b;
+    const dvl::Vec3 reverse = b * a;
+    const dvl::Vec3 identity = a * dvl::Vec3::One();
+    const dvl::Vec3 zero = a * dvl::Vec3::Zero();
+
+    DVL_EXPECT_EQ(product.x, 1.0f);
+    DVL_EXPECT_EQ(reverse.x, product.x);
+    DVL_EXPECT_EQ(identity.x, -2.0f);
+    DVL_EXPECT_EQ(zero.x, 0.0f);
+    DVL_EXPECT_EQ(a.x, -2.0f);
+    DVL_EXPECT_EQ(b.x, -0.5f);
+    DVL_EXPECT_EQ(product.y, -12.0f);
+    DVL_EXPECT_EQ(reverse.y, product.y);
+    DVL_EXPECT_EQ(identity.y, 3.0f);
+    DVL_EXPECT_EQ(zero.y, 0.0f);
+    DVL_EXPECT_EQ(a.y, 3.0f);
+    DVL_EXPECT_EQ(b.y, -4.0f);
+    DVL_EXPECT_EQ(product.z, -8.0f);
+    DVL_EXPECT_EQ(reverse.z, product.z);
+    DVL_EXPECT_EQ(identity.z, -4.0f);
+    DVL_EXPECT_EQ(zero.z, 0.0f);
+    DVL_EXPECT_EQ(a.z, -4.0f);
+    DVL_EXPECT_EQ(b.z, 2.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4ComponentMultiplicationPreservesOperandsAndIdentities)
+{
+    dvl::Vec4 a(-2.0f, 3.0f, -4.0f, 0.5f);
+    dvl::Vec4 b(-0.5f, -4.0f, 2.0f, 6.0f);
+    const dvl::Vec4 product = a * b;
+    const dvl::Vec4 reverse = b * a;
+    const dvl::Vec4 identity = a * dvl::Vec4::One();
+    const dvl::Vec4 zero = a * dvl::Vec4::Zero();
+
+    DVL_EXPECT_EQ(product.x, 1.0f);
+    DVL_EXPECT_EQ(reverse.x, product.x);
+    DVL_EXPECT_EQ(identity.x, -2.0f);
+    DVL_EXPECT_EQ(zero.x, 0.0f);
+    DVL_EXPECT_EQ(a.x, -2.0f);
+    DVL_EXPECT_EQ(b.x, -0.5f);
+    DVL_EXPECT_EQ(product.y, -12.0f);
+    DVL_EXPECT_EQ(reverse.y, product.y);
+    DVL_EXPECT_EQ(identity.y, 3.0f);
+    DVL_EXPECT_EQ(zero.y, 0.0f);
+    DVL_EXPECT_EQ(a.y, 3.0f);
+    DVL_EXPECT_EQ(b.y, -4.0f);
+    DVL_EXPECT_EQ(product.z, -8.0f);
+    DVL_EXPECT_EQ(reverse.z, product.z);
+    DVL_EXPECT_EQ(identity.z, -4.0f);
+    DVL_EXPECT_EQ(zero.z, 0.0f);
+    DVL_EXPECT_EQ(a.z, -4.0f);
+    DVL_EXPECT_EQ(b.z, 2.0f);
+    DVL_EXPECT_EQ(product.w, 3.0f);
+    DVL_EXPECT_EQ(reverse.w, product.w);
+    DVL_EXPECT_EQ(identity.w, 0.5f);
+    DVL_EXPECT_EQ(zero.w, 0.0f);
+    DVL_EXPECT_EQ(a.w, 0.5f);
+    DVL_EXPECT_EQ(b.w, 6.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec3ComponentMultiplicationCombinesWithAbsAndScalarForHalfExtents)
+{
+    const dvl::Vec3 size(4.0f, 2.0f, 6.0f);
+    const dvl::Vec3 scale(-2.0f, 0.5f, -3.0f);
+    const dvl::Vec3 halfExtents = size * dvl::Abs(scale) * 0.5f;
+
+    DVL_EXPECT_EQ(halfExtents.x, 4.0f);
+    DVL_EXPECT_EQ(halfExtents.y, 0.5f);
+    DVL_EXPECT_EQ(halfExtents.z, 9.0f);
+
+    return true;
+}
