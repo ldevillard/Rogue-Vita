@@ -119,6 +119,17 @@ namespace dvl
         }
 
         UpdateKeyboardStick(_state);
+
+        // For PC debug support
+        GLFWwindow* window = glfwGetCurrentContext();
+        if (window != nullptr)
+        {
+            if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+                _state.buttons |= ToMask(GamepadButton::Square);
+
+            if (IsKeyPressed(window, GLFW_KEY_SPACE))
+                _state.buttons |= ToMask(GamepadButton::Circle);
+        }
     }
 
     const GamepadState& Input::GetState()
