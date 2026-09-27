@@ -3,6 +3,7 @@
 #include "anim/anim.h"
 #include "debug/profiler.h"
 #include "filesystem/filesystem.h"
+#include "geometry/geometry.h"
 #include "graphics/device.h"
 #include "graphics/types.h"
 #include "input/input.h"

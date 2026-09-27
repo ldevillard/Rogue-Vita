@@ -156,7 +156,7 @@ int main()
         for (BoxCollider* boxCollider : world.GetComponents<BoxCollider>())
         {
             const Transform& transform = boxCollider->GetTransform();
-            DebugDraw::DrawWireCube(boxCollider->center, boxCollider->size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
+            DebugDraw::DrawWireCube(boxCollider->box.center, boxCollider->box.size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
         }
 
         renderer.EndFrame();
