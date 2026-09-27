@@ -8,6 +8,8 @@ namespace dvl
         Vec2();
         Vec2(float x, float y);
 
+        static Vec2 Zero();
+
         Vec2 operator+(const Vec2& rhs) const;
         Vec2 operator-(const Vec2& rhs) const;
         Vec2 operator*(float scalar) const;
@@ -33,6 +35,8 @@ namespace dvl
         Vec3();
         Vec3(float x, float y, float z);
 
+        static Vec3 Zero();
+
         Vec3 operator+(const Vec3& rhs) const;
         Vec3 operator-(const Vec3& rhs) const;
         Vec3 operator*(float scalar) const;
@@ -57,6 +61,8 @@ namespace dvl
     {
         Vec4();
         Vec4(float x, float y, float z, float w);
+
+        static Vec4 Zero();
 
         Vec3 XYZ() const;
 
