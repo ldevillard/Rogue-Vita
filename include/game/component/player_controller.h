@@ -25,6 +25,8 @@ public:
 
     float moveSpeed = 5.0f;
     float rotationSpeed = 20.0f;
+    float detectionRadius = 2.5f;
+    float minDistance = 1.0f;
 
     float dashDistance = 3.0f;
     float dashDuration = 0.15f;
@@ -32,6 +34,8 @@ public:
 
 private:
     void dash();
+    void attack();
+
     void drawDebugFov();
 
     const Camera& _camera;
@@ -40,6 +44,7 @@ private:
     PlayerAnimation _animations;
 
     bool _isAttacking = false;
+    dvl::Quat _aimRotation;
     
     dvl::ITween* _dashTween = nullptr;
 };

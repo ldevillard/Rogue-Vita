@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "mat.h"
 #include "quat.h"
 #include "transform.h"
@@ -8,6 +10,7 @@
 namespace dvl
 {
     constexpr float Pi = 3.14159265358979323846f;
+    constexpr float Infinity = std::numeric_limits<float>::infinity();
 
     float Radians(float degrees);
     float Degrees(float radians);

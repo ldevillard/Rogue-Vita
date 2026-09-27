@@ -7,8 +7,10 @@
 #include <dvl/tween/tweener.h>
 
 #include "engine/component/camera.h"
+#include "engine/component/collider.h"
 #include "engine/core/entity.h"
 #include "engine/debug/debug_draw.h"
+#include "engine/physics/physics.h"
 
 PlayerController::PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations)
     : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
@@ -44,8 +46,10 @@ void PlayerController::Update(float deltaTime)
 
     const dvl::Vec3 movement = right * input.x + forward * input.y;
 
-    if (dvl::Input::IsButtonDown(dvl::GamepadButton::Square))
+    if (!_isAttacking && dvl::Input::IsButtonDown(dvl::GamepadButton::Square))
     {
+        attack();
+
         _animator.Play(_animations.attack, animationTransitionDuration);
         _isAttacking = true;
     }
@@ -53,7 +57,10 @@ void PlayerController::Update(float deltaTime)
     if (_isAttacking)
     {
         if (!_animator.IsFinished())
+        {
+            entity.transform.rotation = dvl::Nlerp(entity.transform.rotation, _aimRotation, rotationSpeed * deltaTime);
             return;
+        }
 
         _isAttacking = false;
     }
@@ -97,9 +104,49 @@ void PlayerController::dash()
     });
 }
 
+void PlayerController::attack()
+{
+    _aimRotation = entity.transform.rotation;
+    
+    std::vector<Collider*> colliders = Physics::OverlapSphere(entity.transform.position, detectionRadius);
+    
+    const Transform* target = nullptr;
+    float bestScore = -dvl::Infinity;
+
+    for (Collider* collider : colliders)
+    {
+        if (collider->GetEntity() == &entity)
+        {
+            continue;
+        }
+
+        const Transform& colliderTransform = collider->GetTransform();
+        
+        if ((colliderTransform.position - entity.transform.position).LengthSquared() > 1)
+        {
+            dvl::Vec3 direction = (colliderTransform.position - entity.transform.position).Normalized();
+            float score = dvl::Dot(entity.transform.GetForward(), direction);
+
+            // Field of view condition
+            if (score > std::cos(dvl::Radians(50.0f)) && score > bestScore)
+            {
+                target = &colliderTransform;
+                bestScore = score;
+            }
+        }
+
+        DebugDraw::DrawWireCube(collider->GetTransform().position, dvl::Vec3::One(), dvl::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+    }
+
+    if (target != nullptr)
+    {
+        dvl::Vec3 direction = (target->position - entity.transform.position).Normalized();
+        _aimRotation = dvl::Quat::LookRotation(direction);
+    }
+}
+
 void PlayerController::drawDebugFov()
 {
-    const float detectionRadius = 5.0f;
     const float halfAngle = dvl::Radians(50.0f);
 
     const dvl::Vec3 origin = entity.transform.position;
@@ -111,9 +158,11 @@ void PlayerController::drawDebugFov()
     const dvl::Vec3 leftLimit = forward * std::cos(halfAngle) - right * std::sin(halfAngle);
 
     const dvl::Vec4 blue(0.0f, 0.0f, 1.0f, 1.0f);
-    const dvl::Vec4 green(0.0f, 1.0f, 0.0f, 1.0f);
+    const dvl::Vec4 magenta(1.0f, 0.0f, 1.0f, 1.0f);
 
     DebugDraw::DrawLine(origin, origin + forward * detectionRadius, blue);
-    DebugDraw::DrawLine(origin, origin + rightLimit * detectionRadius, green);
-    DebugDraw::DrawLine(origin, origin + leftLimit * detectionRadius, green);
+    DebugDraw::DrawLine(origin, origin + rightLimit * detectionRadius, magenta);
+    DebugDraw::DrawLine(origin, origin + leftLimit * detectionRadius, magenta);
+
+    DebugDraw::DrawCircle(entity.transform.position, detectionRadius, dvl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
 }

@@ -70,7 +70,7 @@ int main()
     {
         {playerIdleAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
-        {playerAttackAnimation, AnimationLoopMode::Once, 2.0f}
+        {playerAttackAnimation, AnimationLoopMode::Once, 1.5f}
     };
     playerEntity->AddComponent<PlayerController>(mainCamera, playerAnimator, playerAnimations);
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
@@ -93,7 +93,7 @@ int main()
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
-    planeEntity->transform.scale = dvl::Vec3(4.0f, 0.1f, 4.0f);
+    planeEntity->transform.scale = dvl::Vec3(6.0f, 0.1f, 6.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = dvl::Vec4(0.4f, 0.4f, 0.4f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
@@ -161,9 +161,6 @@ int main()
             const Transform& transform = boxCollider->GetTransform();
             DebugDraw::DrawWireCube(boxCollider->box.center, boxCollider->box.size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
         }
-
-        // Test sphere
-        DebugDraw::DrawWireSphere(dvl::Vec3(-1.0f, 1.0f, -2.0f), 0.5f, dvl::Vec4(0.0f, 1.0f, 1.0f, 1.0f));
 
         renderer.EndFrame();
     }
