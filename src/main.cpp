@@ -111,30 +111,28 @@ int main()
         
         // Gameplay logic
         {
-            for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+            for (Behavior* behavior : world.GetComponents<Behavior>())
             {
-                for (const std::unique_ptr<Component>& component : entity->GetComponents())
-                {
-                    if (Behavior* behavior = dynamic_cast<Behavior*>(component.get()))
-                    behavior->Update(deltaTime);
-                }
+                behavior->Update(deltaTime);
             }
-            
+
             mainCamera.UpdateViewMatrix();
         }
         
         animationSystem.Update(world, assetRegistry, deltaTime);
 
-        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+        for (DirectionalLight* directionalLight : world.GetComponents<DirectionalLight>())
         {
-            const DirectionalLight* directionalLight = entity->GetComponent<DirectionalLight>();
-            if (directionalLight != nullptr)
-                renderer.SubmitLight(*directionalLight);
+            renderer.SubmitLight(*directionalLight);
         }
 
-        for (const std::unique_ptr<Entity>& entity : world.GetEntities())
+        // Render logic
+        for (const MeshRenderer* meshRenderer : world.GetComponents<MeshRenderer>())
         {
-            const SkinnedMeshRenderer* skinnedMeshRenderer = entity->GetComponent<SkinnedMeshRenderer>();
+            const Entity* entity = meshRenderer->GetEntity();
+
+            const SkinnedMeshRenderer* skinnedMeshRenderer = dynamic_cast<const SkinnedMeshRenderer*>(meshRenderer);
+
             if (skinnedMeshRenderer != nullptr)
             {
                 const Animator* animator = entity->GetComponent<Animator>();
@@ -147,12 +145,8 @@ int main()
                 continue;
             }
 
-            const MeshRenderer* meshRenderer = entity->GetComponent<MeshRenderer>();
-            if (meshRenderer != nullptr)
-            {
-                const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
-                renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
-            }
+            const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
+            renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
         }
 
         renderer.EndFrame();
