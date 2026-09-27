@@ -15,6 +15,9 @@ public:
     dvl::Vec3 GetUp() const;
     dvl::Mat4 GetMatrix() const;
 
+    // Converts a local point to world space, applying scale, rotation and translation
+    dvl::Vec3 TransformPoint(const dvl::Vec3& point) const;
+
     // TODO: Update with quat when it will be available
     void LookAt(const dvl::Vec3& target);
     void LookDirection(const dvl::Vec3& direction);

@@ -11,6 +11,7 @@
 #include "engine/core/entity.h"
 #include "engine/core/world.h"
 #include "engine/debug/debug_draw.h"
+#include "engine/physics/physics.h"
 #include "engine/render/material.h"
 #include "engine/render/renderer.h"
 #include "engine/system/animation_system.h"
@@ -36,6 +37,8 @@ int main()
 
     World world = {};
     AnimationSystem animationSystem = {};
+
+    Physics::Initialize(&world);
 
     const MeshHandle playerMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/target_dummy.dvlmesh"), renderer);
     const SkeletonHandle playerSkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/target_dummy.dvlskel"));
@@ -67,7 +70,7 @@ int main()
     {
         {playerIdleAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
-        {playerAttackAnimation, AnimationLoopMode::Once, 1.0f}
+        {playerAttackAnimation, AnimationLoopMode::Once, 2.0f}
     };
     playerEntity->AddComponent<PlayerController>(mainCamera, playerAnimator, playerAnimations);
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));

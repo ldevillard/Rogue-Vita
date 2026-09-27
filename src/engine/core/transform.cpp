@@ -25,6 +25,12 @@ dvl::Mat4 Transform::GetMatrix() const
     return dvl::Mat4::Translation(position) * dvl::Mat4::Rotation(rotation) * dvl::Mat4::Scale(scale);
 }
 
+dvl::Vec3 Transform::TransformPoint(const dvl::Vec3& point) const
+{
+    const dvl::Vec4 transformed = GetMatrix() * dvl::Vec4(point.x, point.y, point.z, 1.0f);
+    return dvl::Vec3(transformed.x, transformed.y, transformed.z);
+}
+
 void Transform::LookAt(const dvl::Vec3& target)
 {
     LookDirection(target - position);
