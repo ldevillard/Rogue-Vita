@@ -2,8 +2,8 @@ CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror -DDVL_PROFILING_ENABLED=0
 
 TARGET := dvl-tests
-TEST_SOURCES := main.cpp $(wildcard math/*.cpp) $(wildcard anim/*.cpp)
-DVL_SOURCES := ../src/math/mat.cpp ../src/math/math.cpp ../src/math/quat.cpp ../src/math/vec.cpp ../src/anim/anim.cpp
+TEST_SOURCES := main.cpp $(wildcard math/*.cpp) $(wildcard anim/*.cpp) $(wildcard physics/*.cpp)
+DVL_SOURCES := ../src/math/mat.cpp ../src/math/math.cpp ../src/math/quat.cpp ../src/math/vec.cpp ../src/anim/anim.cpp ../src/physics/intersection.cpp
 
 .PHONY: all run clean
 

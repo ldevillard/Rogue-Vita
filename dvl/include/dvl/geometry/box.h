@@ -1,6 +1,6 @@
 #pragma once
 
-#include "dvl/math/vec.h"
+#include "dvl/math/math.h"
 
 namespace dvl
 {
@@ -8,5 +8,12 @@ namespace dvl
     {
         Vec3 center;
         Vec3 size;
+    };
+
+    struct Obb
+    {
+        Vec3 center;
+        Vec3 halfExtents;
+        Quat rotation;
     };
 }
