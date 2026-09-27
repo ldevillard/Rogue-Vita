@@ -29,6 +29,15 @@ DVL_TEST(Vec2ZeroReturnsZeroVector)
     return true;
 }
 
+DVL_TEST(Vec2OneReturnsOneVector)
+{
+    const dvl::Vec2 one = dvl::Vec2::One();
+    DVL_EXPECT_EQ(one.x, 1.0f);
+    DVL_EXPECT_EQ(one.y, 1.0f);
+
+    return true;
+}
+
 DVL_TEST(Vec2ArithmeticOperatorsReturnExpectedValues)
 {
     const dvl::Vec2 a(2.0f, 4.0f);
@@ -172,6 +181,16 @@ DVL_TEST(Vec3ZeroReturnsZeroVector)
     return true;
 }
 
+DVL_TEST(Vec3OneReturnsOneVector)
+{
+    const dvl::Vec3 one = dvl::Vec3::One();
+    DVL_EXPECT_EQ(one.x, 1.0f);
+    DVL_EXPECT_EQ(one.y, 1.0f);
+    DVL_EXPECT_EQ(one.z, 1.0f);
+
+    return true;
+}
+
 DVL_TEST(Vec3ArithmeticOperatorsReturnExpectedValues)
 {
     const dvl::Vec3 a(2.0f, 4.0f, 6.0f);
@@ -296,6 +315,17 @@ DVL_TEST(Vec4ZeroReturnsZeroVector)
     DVL_EXPECT_EQ(zero.y, 0.0f);
     DVL_EXPECT_EQ(zero.z, 0.0f);
     DVL_EXPECT_EQ(zero.w, 0.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4OneReturnsOneVector)
+{
+    const dvl::Vec4 one = dvl::Vec4::One();
+    DVL_EXPECT_EQ(one.x, 1.0f);
+    DVL_EXPECT_EQ(one.y, 1.0f);
+    DVL_EXPECT_EQ(one.z, 1.0f);
+    DVL_EXPECT_EQ(one.w, 1.0f);
 
     return true;
 }

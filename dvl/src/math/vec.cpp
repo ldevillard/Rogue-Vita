@@ -19,6 +19,11 @@ namespace dvl
         return Vec2(0.0f, 0.0f);
     }
 
+    Vec2 Vec2::One()
+    {
+        return Vec2(1.0f, 1.0f);
+    }
+
     Vec2 Vec2::operator+(const Vec2& rhs) const
     {
         return Vec2(x + rhs.x, y + rhs.y);
@@ -102,6 +107,11 @@ namespace dvl
     Vec3 Vec3::Zero()
     {
         return Vec3(0.0f, 0.0f, 0.0f);
+    }
+
+    Vec3 Vec3::One()
+    {
+        return Vec3(1.0f, 1.0f, 1.0f);
     }
 
     Vec3 Vec3::operator+(const Vec3& rhs) const
@@ -191,6 +201,11 @@ namespace dvl
     Vec4 Vec4::Zero()
     {
         return Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    }
+
+    Vec4 Vec4::One()
+    {
+        return Vec4(1.0f, 1.0f, 1.0f, 1.0f);
     }
 
     Vec3 Vec4::XYZ() const
