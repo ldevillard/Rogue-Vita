@@ -62,8 +62,8 @@ CC    := arm-vita-eabi-gcc
 CXX   := arm-vita-eabi-g++
 STRIP := arm-vita-eabi-strip
 
-CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
-CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES) -MMD -MP
+CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES) -MMD -MP
 LDFLAGS  := -Wl,-q $(LINK_OPTIMIZATION_FLAGS)
 
 OBJS := \
@@ -76,8 +76,8 @@ OBJS := \
 DESKTOP_CC  := gcc
 DESKTOP_CXX := g++
 
-DESKTOP_CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
-DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES)
+DESKTOP_CFLAGS   := -Wall -Wextra -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES) -MMD -MP
+DESKTOP_CXXFLAGS := -std=c++17 -Wall -Wextra -Wpedantic -Werror $(OPTIMIZATION_FLAGS) $(INCLUDES) -MMD -MP
 DESKTOP_LDFLAGS  := $(LINK_OPTIMIZATION_FLAGS)
 DESKTOP_LIBS     := -lglfw -lGLEW -lGL -ldl -pthread
 
@@ -242,3 +242,7 @@ test:
 		test_status=$$?; \
 		$(MAKE) -C dvl/tests clean; \
 		exit $$test_status
+
+$(OBJS) $(DESKTOP_OBJS): Makefile
+
+-include $(OBJS:.o=.d) $(DESKTOP_OBJS:.o=.d)

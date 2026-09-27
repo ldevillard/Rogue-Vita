@@ -13,4 +13,5 @@ param.sfo
 *.dvlskel
 *.dvlanim
 *.o
+*.d
 rogue-vita-desktop
