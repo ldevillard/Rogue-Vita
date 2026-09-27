@@ -30,6 +30,7 @@ It enables cross-platform development and currently supports the `PlayStation Vi
 - 🎮 Basic gameplay
 - 🧭 NavMesh pathfinding
 - ✨ Particle system
+- 🪵 Physics API
 
 ## Build & Run
 
