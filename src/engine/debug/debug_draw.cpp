@@ -38,7 +38,7 @@ void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::
     _renderer->Draw(_lineMesh, _material, mat);
 }
 
-void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color)
+void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
 {
     if (_renderer == nullptr)
     {
@@ -46,7 +46,7 @@ void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, c
         return;
     }
 
-    const dvl::Mat4 mat = dvl::Mat4::Translation(position) * dvl::Mat4::Scale(size);
+    const dvl::Mat4 mat = parentTransform * dvl::Mat4::Translation(position) * dvl::Mat4::Scale(size);
     
     _material.color = color;
 

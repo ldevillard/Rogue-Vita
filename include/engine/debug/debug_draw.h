@@ -14,7 +14,7 @@ public:
     static void Initialize(const AssetRegistry& assetRegistry, Renderer* renderer);
 
     static void DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::Vec4& color);
-    static void DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color);
+    static void DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color, const dvl::Mat4& parentTransform = dvl::Mat4::Identity());
 
 private:
     static Renderer* _renderer;

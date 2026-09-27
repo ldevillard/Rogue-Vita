@@ -4,6 +4,7 @@
 #include <vector>
 
 class Entity;
+class Transform;
 
 class Component
 {
@@ -12,6 +13,7 @@ public:
     virtual ~Component() = default;
 
     const Entity* GetEntity() const;
+    const Transform& GetTransform() const;
 
     virtual const std::vector<std::type_index>& GetTypes() const = 0;
 

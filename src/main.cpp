@@ -2,6 +2,7 @@
 
 #include "engine/component/animator.h"
 #include "engine/component/behavior.h"
+#include "engine/component/box_collider.h"
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
 #include "engine/component/mesh_renderer.h"
@@ -52,11 +53,11 @@ int main()
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
     cameraEntity->transform.position = dvl::Vec3(-5.0f, 5.0f, -5.0f);
-    cameraEntity->transform.LookAt(dvl::Vec3(0.0f, 0.0f, 0.0f));
+    cameraEntity->transform.LookAt(dvl::Vec3::Zero());
 
     Entity* playerEntity = world.CreateEntity();
-    playerEntity->transform.position = dvl::Vec3(0.75f, 1.0f, -0.75f);
-    playerEntity->transform.scale = dvl::Vec3(2.0f, 2.0f, 2.0f);
+    playerEntity->transform.position = dvl::Vec3(0.75f, 0.5f, -0.75f);
+    playerEntity->transform.scale = dvl::Vec3::One();
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
@@ -69,12 +70,14 @@ int main()
         {playerAttackAnimation, AnimationLoopMode::Once, 1.0f}
     };
     playerEntity->AddComponent<PlayerController>(mainCamera, playerAnimator, playerAnimations);
+    playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
 
     Entity* practiceDummyEntity = world.CreateEntity();
     practiceDummyEntity->transform.position = dvl::Vec3(0.0f, 0.5f, 0.0f);
-    practiceDummyEntity->transform.scale = dvl::Vec3(2.0f, 2.0f, 2.0f);
+    practiceDummyEntity->transform.scale = dvl::Vec3::One();
+    practiceDummyEntity->AddComponent<BoxCollider>(dvl::Vec3(0.0f, 0.25f, 0.0f), dvl::Vec3(0.5f, 0.8f, 0.5f));
 
     dvl::Vec3 practiceDummyCameraDirection = cameraEntity->transform.position - practiceDummyEntity->transform.position;
     practiceDummyCameraDirection.y = 0.0f;
@@ -87,7 +90,7 @@ int main()
 
     Entity* planeEntity = world.CreateEntity();
     planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
-    planeEntity->transform.scale = dvl::Vec3(8.0f, 0.1f, 8.0f);
+    planeEntity->transform.scale = dvl::Vec3(4.0f, 0.1f, 4.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = dvl::Vec4(0.4f, 0.4f, 0.4f, 1.0f);
     planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
@@ -147,6 +150,13 @@ int main()
 
             const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
             renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
+        }
+
+        // Debug editor only logic
+        for (BoxCollider* boxCollider : world.GetComponents<BoxCollider>())
+        {
+            const Transform& transform = boxCollider->GetTransform();
+            DebugDraw::DrawWireCube(boxCollider->center, boxCollider->size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
         }
 
         renderer.EndFrame();
