@@ -62,33 +62,40 @@ const Entity* World::FindEntity(unsigned int id) const
 
 void World::RegisterComponent(Component* component)
 {
-    _registeredComponents[typeid(*component)].push_back(component);
+    for (std::type_index type : component->GetTypes())
+    {
+        _registeredComponents[type].push_back(component);
+    }
 }
 
 void World::UnRegisterComponent(Component* component)
 {
-    auto componentGroup = _registeredComponents.find(typeid(*component));
-    if (componentGroup == _registeredComponents.end())
+    for (std::type_index type : component->GetTypes())
     {
-        dvl::Log(dvl::LogLevel::Error, "Couldn't find type of component to be erased!");
-        return;
-    }
 
-    std::vector<Component*>& components = componentGroup->second;
-
-    auto it = std::find(components.begin(), components.end(), component);
-    
-    if (it == components.end())
-    {
-        dvl::Log(dvl::LogLevel::Error, "Couldn't find component to be erased!");
-        return ;
-    }
-
-    components.erase(it);
-
-    if (components.empty())
-    {
-        _registeredComponents.erase(componentGroup);
+        auto componentGroup = _registeredComponents.find(type);
+        if (componentGroup == _registeredComponents.end())
+        {
+            dvl::Log(dvl::LogLevel::Error, "Couldn't find type of component to be erased!");
+            continue;
+        }
+        
+        std::vector<Component*>& components = componentGroup->second;
+        
+        auto it = std::find(components.begin(), components.end(), component);
+        
+        if (it == components.end())
+        {
+            dvl::Log(dvl::LogLevel::Error, "Couldn't find component to be erased!");
+            continue;
+        }
+        
+        components.erase(it);
+        
+        if (components.empty())
+        {
+            _registeredComponents.erase(componentGroup);
+        }
     }
 }
     

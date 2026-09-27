@@ -8,6 +8,7 @@ class DirectionalLight : public Component
 {
 public:
     DirectionalLight(Entity& entity);
+    COMPONENT_TYPES(DirectionalLight, Component)
 
     dvl::Vec3 direction = dvl::Vec3(0.0f, -1.0f, 0.0f);
     dvl::Vec3 color = dvl::Vec3(1.0f, 1.0f, 1.0f);

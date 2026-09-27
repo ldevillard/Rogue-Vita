@@ -18,6 +18,7 @@ class PlayerController : public Behavior
 {
 public:
     PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations);
+    COMPONENT_TYPES(PlayerController, Behavior, Component)
     ~PlayerController() override;
 
     void Update(float deltaTime) override;

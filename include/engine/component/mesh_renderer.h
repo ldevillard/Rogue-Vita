@@ -9,6 +9,7 @@ class MeshRenderer : public Component
 {
 public:
     MeshRenderer(Entity& entity, const Mesh* mesh, const Material& material);
+    COMPONENT_TYPES(MeshRenderer, Component)
 
     Transform localTransform;
 

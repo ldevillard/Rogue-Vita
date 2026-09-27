@@ -25,6 +25,23 @@ public:
     
     const std::vector<std::unique_ptr<Entity>>& GetEntities() const;
 
+    // TODO: Check if use a ForEachComponent can be relevent
+    template <typename T>
+    const std::vector<T*> GetComponents()
+    {
+        const std::vector<Component*>& components = _registeredComponents[typeid(T)];
+
+        std::vector<T*> result;
+        result.reserve(components.size());
+
+        for (Component* component : components)
+        {
+            result.push_back(static_cast<T*>(component));
+        }
+
+        return result;
+    }
+
 private:
     unsigned int _nextId = 1;
 

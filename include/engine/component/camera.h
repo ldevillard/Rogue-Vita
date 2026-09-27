@@ -14,6 +14,7 @@ public:
     };
 
     Camera(Entity& entity, float screenWidth, float screenHeight, ProjectionType projectionType = Perspective);
+    COMPONENT_TYPES(Camera, Component)
 
     void UpdateViewMatrix();
 

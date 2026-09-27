@@ -10,6 +10,7 @@ class SpringArm : public Behavior
 {
 public:
     SpringArm(Entity& entity, const Transform& target);
+    COMPONENT_TYPES(SpringArm, Behavior, Component)
 
     void Update(float deltaTime) override;
 
