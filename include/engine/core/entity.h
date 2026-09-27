@@ -19,8 +19,7 @@ public:
     T& AddComponent(Args&&... args)
     {
         static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-        static_assert(std::is_same_v<typename T::RegisteredType, T>,
-                      "T must declare COMPONENT_TYPES for its own type");
+        static_assert(std::is_same_v<typename T::RegisteredType, T>, "T must declare COMPONENT_TYPES for its own type");
 
         std::unique_ptr<T> component = std::make_unique<T>(*this, std::forward<Args>(args)...);
         T& componentReference = *component;
