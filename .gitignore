@@ -15,5 +15,4 @@ param.sfo
 *.o
 *.d
 rogue-vita-desktop
-/asset/source/
 /asset/cooked/

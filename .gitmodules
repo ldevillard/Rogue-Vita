@@ -1,0 +1,3 @@
+[submodule "asset/source"]
+	path = asset/source
+	url = https://github.com/ldevillard/Rogue-Vita-Asset.git
