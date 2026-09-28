@@ -17,6 +17,7 @@ namespace dvl
 
         void Normalize();
         Quat Normalized() const;
+        Quat Conjugated() const;
 
         Quat operator*(const Quat& rhs) const;
 

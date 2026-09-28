@@ -318,3 +318,57 @@ DVL_TEST(QuatFromMatrixReadsColumnMajorRotationAndIgnoresTranslation)
 
     return true;
 }
+
+DVL_TEST(QuatConjugatedPreservesScalarAndDoesNotMutateSource)
+{
+    const dvl::Quat value(1.0f, -2.0f, 3.0f, -4.0f);
+    const dvl::Quat conjugate = value.Conjugated();
+    DVL_EXPECT_EQ(conjugate.x, -1.0f);
+    DVL_EXPECT_EQ(conjugate.y, 2.0f);
+    DVL_EXPECT_EQ(conjugate.z, -3.0f);
+    DVL_EXPECT_EQ(conjugate.w, -4.0f);
+    DVL_EXPECT_EQ(value.x, 1.0f);
+    DVL_EXPECT_EQ(value.y, -2.0f);
+    DVL_EXPECT_EQ(value.z, 3.0f);
+    DVL_EXPECT_EQ(value.w, -4.0f);
+
+    const dvl::Quat restored = conjugate.Conjugated();
+    DVL_EXPECT_EQ(restored.x, value.x);
+    DVL_EXPECT_EQ(restored.y, value.y);
+    DVL_EXPECT_EQ(restored.z, value.z);
+    DVL_EXPECT_EQ(restored.w, value.w);
+    return true;
+}
+
+DVL_TEST(QuatConjugatedProductEqualsSquaredLength)
+{
+    const dvl::Quat values[] = {
+        dvl::Quat::Identity(),
+        {0.0f, 0.0f, 0.0f, 0.0f},
+        {1.0f, -2.0f, 3.0f, -4.0f},
+        dvl::Quat::FromAxisAngle({1.0f, 2.0f, -3.0f}, Pi / 3.0f)
+    };
+    for (const auto& value : values)
+    {
+        for (const auto& product : {value * value.Conjugated(), value.Conjugated() * value})
+        {
+            DVL_EXPECT_NEAR(product.x, 0.0f, Epsilon);
+            DVL_EXPECT_NEAR(product.y, 0.0f, Epsilon);
+            DVL_EXPECT_NEAR(product.z, 0.0f, Epsilon);
+            DVL_EXPECT_NEAR(product.w, value.LengthSquared(), Epsilon);
+        }
+    }
+    return true;
+}
+
+DVL_TEST(QuatConjugatedReversesUnitRotation)
+{
+    const dvl::Quat rotation = dvl::Quat::FromAxisAngle({1.0f, -2.0f, 3.0f}, Pi / 3.0f);
+    const dvl::Vec4 vector(2.0f, -5.0f, 7.0f, 0.0f);
+    const dvl::Vec4 rotated = dvl::Mat4::Rotation(rotation) * vector;
+    const dvl::Vec4 restored = dvl::Mat4::Rotation(rotation.Conjugated()) * rotated;
+    DVL_EXPECT_NEAR(restored.x, vector.x, Epsilon);
+    DVL_EXPECT_NEAR(restored.y, vector.y, Epsilon);
+    DVL_EXPECT_NEAR(restored.z, vector.z, Epsilon);
+    return true;
+}

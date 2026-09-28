@@ -48,6 +48,11 @@ namespace dvl
         return Quat(x / length, y / length, z / length, w / length);
     }
 
+    Quat Quat::Conjugated() const
+    {
+        return Quat(-x, -y, -z, w);
+    }
+
     Quat Quat::operator*(const Quat& rhs) const
     {
         return Quat(w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y,
