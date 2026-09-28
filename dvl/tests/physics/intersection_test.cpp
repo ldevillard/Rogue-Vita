@@ -64,3 +64,79 @@ DVL_TEST(SphereObbSupportsDegenerateBox)
 
     return true;
 }
+
+DVL_TEST(RayObbReturnsNearestSurfaceAndOutwardNormal)
+{
+    const dvl::Obb box{{0.0f, 0.0f, 0.0f}, dvl::Vec3::One(), dvl::Quat::Identity()};
+    float distance;
+    dvl::Vec3 normal;
+    for (float sign : {-1.0f, 1.0f})
+    {
+        const dvl::Ray ray{{3.0f * sign, 0.0f, 0.0f}, {-sign, 0.0f, 0.0f}};
+        DVL_EXPECT_TRUE(dvl::Intersects(ray, box, distance, normal));
+        DVL_EXPECT_NEAR(distance, 2.0f, 0.0001f);
+        DVL_EXPECT_NEAR(normal.x, sign, 0.0001f);
+        DVL_EXPECT_NEAR(normal.y, 0.0f, 0.0001f);
+        DVL_EXPECT_NEAR(normal.z, 0.0f, 0.0001f);
+    }
+    return true;
+}
+
+DVL_TEST(RayObbHandlesMissesParallelRaysAndZeroDirection)
+{
+    const dvl::Obb box{dvl::Vec3::Zero(), dvl::Vec3::One(), dvl::Quat::Identity()};
+    const dvl::Ray misses[] = {
+        {{-3.0f, 2.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+        {{3.0f, 0.0f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+        {{0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 0.0f}},
+        {{-3.0f, 0.0f, 0.0f}, dvl::Vec3(1.0f, 2.0f, 0.0f).Normalized()}
+    };
+    for (const auto& ray : misses)
+    {
+        float distance = 42.0f;
+        dvl::Vec3 normal = dvl::Vec3::One();
+        DVL_EXPECT_FALSE(dvl::Intersects(ray, box, distance, normal));
+        DVL_EXPECT_EQ(distance, 42.0f);
+        DVL_EXPECT_EQ(normal.x, 1.0f);
+        DVL_EXPECT_EQ(normal.y, 1.0f);
+        DVL_EXPECT_EQ(normal.z, 1.0f);
+    }
+    return true;
+}
+
+DVL_TEST(RayObbHandlesInsideBoundaryAndTangency)
+{
+    const dvl::Obb box{dvl::Vec3::Zero(), dvl::Vec3::One(), dvl::Quat::Identity()};
+    float distance;
+    dvl::Vec3 normal;
+    DVL_EXPECT_TRUE(dvl::Intersects(dvl::Ray{{0.0f, 0.0f, 0.0f}, {0.0f, 1.0f, 0.0f}}, box, distance, normal));
+    DVL_EXPECT_NEAR(distance, 1.0f, 0.0001f);
+    DVL_EXPECT_NEAR(normal.y, 1.0f, 0.0001f);
+    for (float sign : {-1.0f, 1.0f})
+    {
+        DVL_EXPECT_TRUE(dvl::Intersects(dvl::Ray{{1.0f, 0.0f, 0.0f}, {sign, 0.0f, 0.0f}}, box, distance, normal));
+        DVL_EXPECT_NEAR(distance, 0.0f, 0.0001f);
+        DVL_EXPECT_NEAR(normal.x, 1.0f, 0.0001f);
+    }
+    DVL_EXPECT_TRUE(dvl::Intersects(dvl::Ray{{-3.0f, 1.0f, 1.0f}, {1.0f, 0.0f, 0.0f}}, box, distance, normal));
+    DVL_EXPECT_NEAR(distance, 2.0f, 0.0001f);
+    return true;
+}
+
+DVL_TEST(RayObbUsesRotationAndTranslation)
+{
+    const dvl::Obb box{
+        {10.0f, -3.0f, 2.0f}, {2.0f, 0.5f, 1.0f},
+        dvl::Quat::FromAxisAngle({0.0f, 0.0f, 1.0f}, dvl::Radians(45.0f))
+    };
+    const dvl::Vec3 axis = dvl::Vec3(1.0f, 1.0f, 0.0f).Normalized();
+    const dvl::Ray ray{box.center + axis * 5.0f, axis * -1.0f};
+    float distance;
+    dvl::Vec3 normal;
+    DVL_EXPECT_TRUE(dvl::Intersects(ray, box, distance, normal));
+    DVL_EXPECT_NEAR(distance, 3.0f, 0.0001f);
+    DVL_EXPECT_NEAR(normal.x, axis.x, 0.0001f);
+    DVL_EXPECT_NEAR(normal.y, axis.y, 0.0001f);
+    DVL_EXPECT_NEAR(normal.z, 0.0f, 0.0001f);
+    return true;
+}
