@@ -34,6 +34,8 @@ It enables cross-platform development and currently supports the `PlayStation Vi
 
 ## Build & Run
 
+Game assets are not included.
+
 VitaSDK, VitaGL, Make, Assimp, GLFW, GLEW, and a C++17 compiler are required.
 
 - Vita: `make run`
