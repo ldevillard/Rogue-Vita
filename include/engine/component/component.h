@@ -27,6 +27,7 @@ std::vector<std::type_index> MakeTypes()
     return { typeid(T)... };
 }
 
+// TODO: Think about an append method (by calling the parent method) to avoid the need of specify the types in the macro
 // IMPORTANT: Include component's own type and every base type, ex: COMPONENT_TYPES(PlayerController, Behavior, Component)
 #define COMPONENT_TYPES(Self, ...)                                                       \
     using RegisteredType = Self;                                                         \
