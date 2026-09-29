@@ -11,7 +11,7 @@ class Renderer;
 class DebugDraw
 {
 public:
-    static void Initialize(const AssetRegistry& assetRegistry, Renderer* renderer);
+    static void Initialize(AssetRegistry& assetRegistry, Renderer* renderer);
 
     static void DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::Vec4& color);
     static void DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color, const dvl::Mat4& parentTransform = dvl::Mat4::Identity());
@@ -21,10 +21,10 @@ public:
 private:
     static Renderer* _renderer;
     
-    static Mesh _lineMesh;
-    static Mesh _wireCubeMesh;
-    static Mesh _wireSphereMesh;
-    static Mesh _circleMesh;
+    static const Mesh* _lineMesh;
+    static const Mesh* _wireCubeMesh;
+    static const Mesh* _wireSphereMesh;
+    static const Mesh* _circleMesh;
 
     static Material _material;
 };

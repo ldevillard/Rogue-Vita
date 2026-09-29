@@ -50,9 +50,6 @@ int main()
     const SkeletonHandle practiceDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/practice_dummy.dvlskel"));
     const AnimationHandle practiceDummyIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@idle.dvlanim"));
 
-    const Skeleton* playerSkeletonAsset = assetRegistry.GetSkeleton(playerSkeleton);
-    const Skeleton* practiceDummySkeletonAsset = assetRegistry.GetSkeleton(practiceDummySkeleton);
-
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
     cameraEntity->transform.position = dvl::Vec3(-5.0f, 5.0f, -5.0f);
@@ -64,7 +61,7 @@ int main()
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
-    playerEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(playerMesh), playerMaterial, playerSkeletonAsset);
+    playerEntity->AddComponent<SkinnedMeshRenderer>(playerMesh, playerMaterial, playerSkeleton);
     Animator& playerAnimator = playerEntity->AddComponent<Animator>(playerSkeleton, playerIdleAnimation);
     const PlayerAnimation playerAnimations =
     {
@@ -88,7 +85,7 @@ int main()
 
     Material practiceDummyMaterial = assetRegistry.GetSolidMaterialInstance();
     practiceDummyMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/practice_dummy.dvltex"), renderer);
-    practiceDummyEntity->AddComponent<SkinnedMeshRenderer>(assetRegistry.GetMesh(practiceDummyMesh), practiceDummyMaterial, practiceDummySkeletonAsset);
+    practiceDummyEntity->AddComponent<SkinnedMeshRenderer>(practiceDummyMesh, practiceDummyMaterial, practiceDummySkeleton);
     practiceDummyEntity->AddComponent<Animator>(practiceDummySkeleton, practiceDummyIdleAnimation);
 
     Entity* planeEntity = world.CreateEntity();
@@ -96,7 +93,7 @@ int main()
     planeEntity->transform.scale = dvl::Vec3(6.0f, 0.1f, 6.0f);
     Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
     planeMaterial.color = dvl::Vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    planeEntity->AddComponent<MeshRenderer>(&assetRegistry.GetCubeMesh(), planeMaterial);
+    planeEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMeshHandle(), planeMaterial);
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
@@ -135,6 +132,10 @@ int main()
         // Render logic
         for (const MeshRenderer* meshRenderer : world.GetComponents<MeshRenderer>())
         {
+            const Mesh* mesh = assetRegistry.GetMesh(meshRenderer->meshHandle);
+            if (mesh == nullptr)
+                continue;
+
             const Entity* entity = meshRenderer->GetEntity();
 
             const SkinnedMeshRenderer* skinnedMeshRenderer = dynamic_cast<const SkinnedMeshRenderer*>(meshRenderer);
@@ -146,13 +147,13 @@ int main()
                     continue;
 
                 const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
-                renderer.DrawSkinned(*skinnedMeshRenderer->mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
+                renderer.DrawSkinned(*mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
                 
                 continue;
             }
 
             const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
-            renderer.Draw(*meshRenderer->mesh, meshRenderer->material, modelMatrix);
+            renderer.Draw(*mesh, meshRenderer->material, modelMatrix);
         }
 
         // Debug editor only logic

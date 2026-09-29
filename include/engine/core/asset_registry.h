@@ -38,11 +38,11 @@ public:
     const Animation* GetAnimation(const AnimationHandle& animationHandle) const;
 
     // Primitives
-    const Mesh& GetLineMesh() const;
-    const Mesh& GetCubeMesh() const;
-    const Mesh& GetWireCubeMesh() const;
-    const Mesh& GetWireSphereMesh() const;
-    const Mesh& GetCircleMesh() const;
+    MeshHandle GetLineMeshHandle() const;
+    MeshHandle GetCubeMeshHandle() const;
+    MeshHandle GetWireCubeMeshHandle() const;
+    MeshHandle GetWireSphereMeshHandle() const;
+    MeshHandle GetCircleMeshHandle() const;
 
     // Materials
     const Material GetSolidMaterialInstance() const;

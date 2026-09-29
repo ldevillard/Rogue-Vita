@@ -472,29 +472,29 @@ const Texture& AssetRegistry::GetDefaultTexture() const
     return _textures.at(_defaultTextureHandle);
 }
 
-const Mesh& AssetRegistry::GetLineMesh() const
+MeshHandle AssetRegistry::GetLineMeshHandle() const
 {
-    return _meshes.at(_lineMeshHandle);
+    return _lineMeshHandle;
 }
 
-const Mesh& AssetRegistry::GetCubeMesh() const
+MeshHandle AssetRegistry::GetCubeMeshHandle() const
 {
-    return _meshes.at(_cubeMeshHandle);
+    return _cubeMeshHandle;
 }
 
-const Mesh& AssetRegistry::GetWireCubeMesh() const
+MeshHandle AssetRegistry::GetWireCubeMeshHandle() const
 {
-    return _meshes.at(_wireCubeMeshHandle);
+    return _wireCubeMeshHandle;
 }
 
-const Mesh& AssetRegistry::GetWireSphereMesh() const
+MeshHandle AssetRegistry::GetWireSphereMeshHandle() const
 {
-    return _meshes.at(_wireSphereMeshHandle);
+    return _wireSphereMeshHandle;
 }
 
-const Mesh& AssetRegistry::GetCircleMesh() const
+MeshHandle AssetRegistry::GetCircleMeshHandle() const
 {
-    return _meshes.at(_circleMeshHandle);
+    return _circleMeshHandle;
 }
 
 const Material AssetRegistry::GetSolidMaterialInstance() const

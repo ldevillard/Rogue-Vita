@@ -1,6 +1,6 @@
 #include "engine/component/mesh_renderer.h"
 
-MeshRenderer::MeshRenderer(Entity& entity, const Mesh* mesh, const Material& material)
-    : Component(entity), mesh(mesh), material(material)
+MeshRenderer::MeshRenderer(Entity& entity, MeshHandle meshHandle, const Material& material)
+    : Component(entity), meshHandle(meshHandle), material(material)
 {
 }

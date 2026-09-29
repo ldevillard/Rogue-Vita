@@ -5,21 +5,21 @@
 
 Renderer* DebugDraw::_renderer = nullptr;
 
-Mesh DebugDraw::_lineMesh = {};
-Mesh DebugDraw::_wireCubeMesh = {};
-Mesh DebugDraw::_wireSphereMesh = {};
-Mesh DebugDraw::_circleMesh = {};
+const Mesh* DebugDraw::_lineMesh = {};
+const Mesh* DebugDraw::_wireCubeMesh = {};
+const Mesh* DebugDraw::_wireSphereMesh = {};
+const Mesh* DebugDraw::_circleMesh = {};
 
 Material DebugDraw::_material = {};
 
-void DebugDraw::Initialize(const AssetRegistry& assetRegistry, Renderer* renderer)
+void DebugDraw::Initialize(AssetRegistry& assetRegistry, Renderer* renderer)
 {
     _renderer = renderer;
 
-    _lineMesh = assetRegistry.GetLineMesh();
-    _wireCubeMesh = assetRegistry.GetWireCubeMesh();
-    _wireSphereMesh = assetRegistry.GetWireSphereMesh();
-    _circleMesh = assetRegistry.GetCircleMesh();
+    _lineMesh = assetRegistry.GetMesh(assetRegistry.GetLineMeshHandle());
+    _wireCubeMesh = assetRegistry.GetMesh(assetRegistry.GetWireCubeMeshHandle());
+    _wireSphereMesh = assetRegistry.GetMesh(assetRegistry.GetWireSphereMeshHandle());
+    _circleMesh = assetRegistry.GetMesh(assetRegistry.GetCircleMeshHandle());
 
     _material = assetRegistry.GetDebugMaterialInstance();
 }
@@ -39,7 +39,7 @@ void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::
 
     _material.color = color;
 
-    _renderer->Draw(_lineMesh, _material, mat);
+    _renderer->Draw(*_lineMesh, _material, mat);
 }
 
 void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
@@ -54,7 +54,7 @@ void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, c
     
     _material.color = color;
 
-    _renderer->Draw(_wireCubeMesh, _material, mat);
+    _renderer->Draw(*_wireCubeMesh, _material, mat);
 }
 
 void DebugDraw::DrawWireSphere(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
@@ -70,7 +70,7 @@ void DebugDraw::DrawWireSphere(const dvl::Vec3& position, float radius, const dv
 
     _material.color = color;
 
-    _renderer->Draw(_wireSphereMesh, _material, mat);
+    _renderer->Draw(*_wireSphereMesh, _material, mat);
 }
 
 void DebugDraw::DrawCircle(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
@@ -86,5 +86,5 @@ void DebugDraw::DrawCircle(const dvl::Vec3& position, float radius, const dvl::V
 
     _material.color = color;
 
-    _renderer->Draw(_circleMesh, _material, mat);
+    _renderer->Draw(*_circleMesh, _material, mat);
 }
