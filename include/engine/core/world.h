@@ -15,6 +15,7 @@ public:
     ~World();
 
     Entity* CreateEntity();
+    // TODO: Add a destroy flush system to avoid destroying entities during update loops
     void DestroyEntity(unsigned int id);
     
     Entity* FindEntity(unsigned int id);
