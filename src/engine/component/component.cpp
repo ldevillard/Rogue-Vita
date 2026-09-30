@@ -15,6 +15,27 @@ void Component::Start()
     // void Start SHOULDN'T Add/Remove components or Entity deletion for nwow
 }
 
+std::unique_ptr<Component> Component::CreateEmpty(Entity&) const
+{
+    dvl::Log(dvl::LogLevel::Error, "Component does not support Instantiate");
+
+    return nullptr;
+}
+
+void Component::CopyFrom(const Component&, const ReferenceMapping&)
+{
+}
+
+std::tuple<> Component::Fields()
+{
+    return std::tie();
+}
+
+std::tuple<> Component::Fields() const
+{
+    return std::tie();
+}
+
 const Entity* Component::GetEntity() const
 {
     return &entity;

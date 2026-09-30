@@ -23,6 +23,8 @@ public:
     void RegisterComponent(Component* component);
     void UnRegisterComponent(Component* component);
 
+    Entity* Instantiate(const Entity& source);
+
     void StartPendingComponents();
     
     const std::vector<std::unique_ptr<Entity>>& GetEntities() const;

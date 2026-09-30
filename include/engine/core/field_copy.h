@@ -38,12 +38,12 @@ void CopyField(const ComponentRef<T>& source, ComponentRef<T>& destination, cons
 template <typename Source, typename Destination, std::size_t... I>
 void CopyFieldsImpl(const Source& source, Destination& destination, const ReferenceMapping& remap, std::index_sequence<I...>)
 {
-    (CopyField(std::get<I>(destination), std::get<I>(source), remap), ...);
+    (CopyField(std::get<I>(source), std::get<I>(destination), remap), ...);
 }
 
 // The generic call that will forward source and destination to the implementation method
 template <typename Source, typename Destination>
-void CopyFields(Destination destination, const Source& source, const ReferenceMapping& remap)
+void CopyFields(const Source& source, Destination destination, const ReferenceMapping& remap)
 {
     static_assert(std::tuple_size_v<Destination> == std::tuple_size_v<Source>, "Field lists must have the same size");
 

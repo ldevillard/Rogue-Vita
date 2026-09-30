@@ -9,5 +9,6 @@ namespace dvl
         Error
     };
 
+    // TODO: Refacto to support variadic args, like printf
     void Log(LogLevel level, const char* message);
 }

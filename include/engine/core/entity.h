@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
 #include <type_traits>
 #include <utility>
@@ -17,8 +18,10 @@ public:
     Entity(World& world);
     ~Entity();
 
-    World& GetWorld();
+    World& GetWorld() const;
     EntityRef ToRef() const;
+
+    Component* AttachComponent(std::unique_ptr<Component> component);
 
     template <typename T, typename... Args>
     T& AddComponent(Args&&... args)
@@ -27,13 +30,12 @@ public:
         static_assert(std::is_same_v<typename T::RegisteredType, T>, "T must declare COMPONENT_TYPES for its own type");
 
         std::unique_ptr<T> component = std::make_unique<T>(*this, std::forward<Args>(args)...);
-        T& componentReference = *component;
 
-        _components.push_back(std::move(component));
+        Component* result = AttachComponent(std::move(component));
 
-        _world.RegisterComponent(&componentReference);
+        assert(result != nullptr);
 
-        return componentReference;
+        return *static_cast<T*>(result);
     }
 
     template <typename T>

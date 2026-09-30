@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <dvl/log/log.h>
+#include <string>
+#include <typeinfo>
 
 #include "engine/core/entity.h"
 
@@ -28,7 +30,7 @@ Entity* World::CreateEntity()
 
 void World::DestroyEntity(unsigned int id)
 {
-     for (auto it = _entities.begin(); it != _entities.end(); ++it)
+     for (auto it = _entities.begin(); it != _entities.end(); it++)
     {
         if ((*it)->id == id)
         {
@@ -104,6 +106,65 @@ void World::UnRegisterComponent(Component* component)
     }
 
     _componentsById.erase(component->id);
+}
+
+Entity* World::Instantiate(const Entity& source)
+{
+    assert(&source.GetWorld() == this && "Instantiate requires the source to belong to this world");
+    
+    Entity* clonedEntity = CreateEntity();
+    clonedEntity->transform = source.transform;
+
+    ReferenceMapping refMap;
+    refMap.entityIds[source.id] = clonedEntity->id;
+
+    const std::vector<std::unique_ptr<Component>>& sourceComponents = source.GetComponents();
+    std::vector<Component*> clonedComponents(sourceComponents.size(), nullptr);
+
+    // First step, creation and attachment of cloned components
+    for (size_t i = 0; i < sourceComponents.size(); i++)
+    {
+        const Component& original = *sourceComponents[i];
+
+        refMap.componentIds[original.id] = 0;
+
+        std::unique_ptr<Component> clone = original.CreateEmpty(*clonedEntity);
+
+        if (clone == nullptr)
+        {
+            const std::string message = "Instantiate: failed to clone component of type " + std::string(typeid(original).name());
+            dvl::Log(dvl::LogLevel::Error, message.c_str());
+            continue;
+        }
+
+        if (typeid(*clone) != typeid(original))
+        {
+            dvl::Log(dvl::LogLevel::Error, "Instantiate: CreateEmpty returned a different component type");
+            continue;
+        }
+
+        Component* attached = clonedEntity->AttachComponent(std::move(clone));
+        if (attached == nullptr)
+        {
+            const std::string message = "Instantiate: failed to attach component of type " + std::string(typeid(original).name());
+            dvl::Log(dvl::LogLevel::Error, message.c_str());
+            continue;
+        }
+
+        clonedComponents[i] = attached;
+        refMap.componentIds[original.id] = attached->id;
+    }
+
+    // Second steps, resolve references, copy fields..
+    for (std::size_t i = 0; i < sourceComponents.size(); i++)
+    {
+        Component* cloned = clonedComponents[i];
+
+        if (cloned != nullptr)
+            cloned->CopyFrom(*sourceComponents[i], refMap);
+    }
+
+    return clonedEntity;
 }
 
 void World::StartPendingComponents()
