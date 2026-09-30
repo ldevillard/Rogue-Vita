@@ -49,15 +49,10 @@ Entity* World::FindEntity(unsigned int id)
     return nullptr;
 }
 
-const Entity* World::FindEntity(unsigned int id) const
+Component* World::FindComponent(unsigned int id)
 {
-    for (const std::unique_ptr<Entity>& entity : _entities)
-    {
-        if (entity->id == id)
-            return entity.get();
-    }
-
-    return nullptr;
+    auto it = _componentsById.find(id);
+    return it != _componentsById.end() ? it->second : nullptr;
 }
 
 void World::RegisterComponent(Component* component)

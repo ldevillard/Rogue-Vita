@@ -24,3 +24,8 @@ const Transform& Component::GetTransform() const
 {
     return entity.transform;
 }
+
+World& Component::GetWorld() const
+{
+    return entity.GetWorld();
+}

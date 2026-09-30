@@ -9,11 +9,16 @@
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
 
+class EntityRef;
+
 class Entity
 {
 public:
     Entity(World& world);
     ~Entity();
+
+    World& GetWorld();
+    EntityRef ToRef() const;
 
     template <typename T, typename... Args>
     T& AddComponent(Args&&... args)

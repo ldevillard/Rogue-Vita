@@ -18,7 +18,7 @@ public:
     void DestroyEntity(unsigned int id);
     
     Entity* FindEntity(unsigned int id);
-    const Entity* FindEntity(unsigned int id) const;
+    Component* FindComponent(unsigned int id);
 
     void RegisterComponent(Component* component);
     void UnRegisterComponent(Component* component);
