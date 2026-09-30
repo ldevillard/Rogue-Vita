@@ -8,8 +8,12 @@
 SpringArm::SpringArm(Entity& entity, const Transform& target)
     : Behavior(entity), _target(target)
 {
+}
+
+void SpringArm::Start()
+{
     const dvl::Vec3 forward = entity.transform.GetForward();
-    const dvl::Vec3 toTarget = target.position - entity.transform.position;
+    const dvl::Vec3 toTarget = _target.position - entity.transform.position;
 
     const float springLength = dvl::Dot(toTarget, forward);
 

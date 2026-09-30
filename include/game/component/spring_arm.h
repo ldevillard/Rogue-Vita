@@ -12,6 +12,8 @@ public:
     SpringArm(Entity& entity, const Transform& target);
     COMPONENT_TYPES(SpringArm, Behavior, Component)
 
+    void Start() override;
+
     void Update(float deltaTime) override;
 
     float movementSpeed = 3;
