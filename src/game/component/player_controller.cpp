@@ -12,6 +12,11 @@
 #include "engine/debug/debug_draw.h"
 #include "engine/physics/physics.h"
 
+PlayerController::PlayerController(Entity& entity)
+    : Behavior(entity)
+{
+}
+
 PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations)
     : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
 {
@@ -21,6 +26,13 @@ PlayerController::~PlayerController()
 {
     if (_dashTween != nullptr)
         _dashTween->Kill();
+}
+
+void PlayerController::Start()
+{
+    Animator* animator = _animator.Get(GetWorld());
+    if (animator != nullptr && animator->GetEntity() == &entity)
+        animator->Play(_animations.idle);
 }
 
 void PlayerController::Update(float deltaTime)

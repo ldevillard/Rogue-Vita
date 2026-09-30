@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstddef>
+#include <tuple>
 #include <type_traits>
+#include <utility>
 #include <unordered_map>
 
 #include "engine/component/component_ref.h"

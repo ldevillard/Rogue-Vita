@@ -29,8 +29,11 @@ struct AnimationState
 class Animator : public Component
 {
 public:
+    Animator(Entity& entity);
     Animator(Entity& entity, const SkeletonHandle& skeletonHandle, const AnimationHandle& animationHandle);
+    
     COMPONENT_TYPES(Animator, Component)
+    COMPONENT_FIELDS(Component, _skeletonHandle, _current.clip)
 
     void Update(float deltaTime, const Skeleton& skeleton, const Animation& currentAnimation, const Animation* nextAnimation = nullptr);
 

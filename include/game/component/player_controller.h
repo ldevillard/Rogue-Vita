@@ -19,10 +19,15 @@ struct PlayerAnimation
 class PlayerController : public Behavior
 {
 public:
+    PlayerController(Entity& entity);
     PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations);
-    COMPONENT_TYPES(PlayerController, Behavior, Component)
     ~PlayerController() override;
+    
+    COMPONENT_TYPES(PlayerController, Behavior, Component)
+    COMPONENT_FIELDS(Behavior, moveSpeed, rotationSpeed, detectionRadius, minDistance, 
+                        dashDistance, dashDuration, animationTransitionDuration, _camera, _animator, _animations)
 
+    void Start() override;
     void Update(float deltaTime) override;
 
     float moveSpeed = 5.0f;

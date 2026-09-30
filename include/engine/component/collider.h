@@ -8,5 +8,7 @@ class Collider : public Component
 {
 public:
     Collider(Entity& entity);
+    
     COMPONENT_TYPES(Collider, Component)
+    COMPONENT_FIELDS(Component, )
 };

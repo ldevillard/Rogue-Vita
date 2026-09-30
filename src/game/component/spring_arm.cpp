@@ -5,6 +5,11 @@
 #include "engine/core/entity.h"
 #include "engine/core/transform.h"
 
+SpringArm::SpringArm(Entity& entity)
+    : Behavior(entity)
+{
+}
+
 SpringArm::SpringArm(Entity& entity, EntityRef target)
     : Behavior(entity), _target(target)
 {

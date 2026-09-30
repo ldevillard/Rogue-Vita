@@ -5,6 +5,11 @@
 
 #include <cmath>
 
+Animator::Animator(Entity& entity)
+    : Component(entity)
+{
+}
+
 Animator::Animator(Entity& entity, const SkeletonHandle& skeletonHandle, const AnimationHandle& animationHandle)
     : Component(entity), _skeletonHandle(skeletonHandle)
 {

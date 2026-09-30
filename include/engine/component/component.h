@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <memory>
+#include <tuple>
+#include <typeinfo>
 #include <typeindex>
 #include <type_traits>
 #include <vector>

@@ -4,15 +4,24 @@
 
 #include "engine/core/entity.h"
 
-Camera::Camera(Entity& entity, float screenWidth, float screenHeight, ProjectionType projectionType)
+Camera::Camera(Entity& entity)
     : Component(entity)
+{
+}
+
+Camera::Camera(Entity& entity, float screenWidth, float screenHeight, ProjectionType projectionType)
+    : Component(entity), _screenWidth(screenWidth), _screenHeight(screenHeight), _projectionType(projectionType)
+{
+}
+
+void Camera::Start()
 {
     constexpr float NearPlane = 0.1f;
     constexpr float FarPlane = 100.0f;
     
-    const float aspectRatio = screenWidth / screenHeight;
+    const float aspectRatio = _screenWidth / _screenHeight;
     
-    switch (projectionType)
+    switch (_projectionType)
     {
     case Perspective:
         _projection = dvl::Mat4::Perspective(dvl::Radians(60.0f), aspectRatio, NearPlane, FarPlane);
@@ -33,7 +42,7 @@ Camera::Camera(Entity& entity, float screenWidth, float screenHeight, Projection
         break;
     }
 
-    _view = dvl::Mat4::Identity();
+    UpdateViewMatrix();
 }
 
 void Camera::UpdateViewMatrix()

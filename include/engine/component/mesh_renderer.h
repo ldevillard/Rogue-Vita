@@ -8,11 +8,14 @@
 class MeshRenderer : public Component
 {
 public:
+    MeshRenderer(Entity& entity);
     MeshRenderer(Entity& entity, MeshHandle meshHandle, const Material& material);
+    
     COMPONENT_TYPES(MeshRenderer, Component)
+    COMPONENT_FIELDS(Component, localTransform, meshHandle, material)
 
     Transform localTransform;
 
     MeshHandle meshHandle;
-    const Material material;
+    Material material;
 };

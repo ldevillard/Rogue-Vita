@@ -108,11 +108,10 @@ int main()
         const float deltaTime = dvl::Time::GetDeltaTime();
 
         dvl::Tweener::Update(deltaTime);
+        world.StartPendingComponents();
 
         renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
         renderer.BeginScene(mainCamera);
-        
-        world.StartPendingComponents();
 
         // Gameplay logic
         {
@@ -121,6 +120,8 @@ int main()
                 behavior->Update(deltaTime);
             }
 
+            // Initialize components instantiated during gameplay before rendering
+            world.StartPendingComponents();
             mainCamera.UpdateViewMatrix();
         }
         

@@ -10,8 +10,11 @@ class Transform;
 class SpringArm : public Behavior
 {
 public:
+    SpringArm(Entity& entity);
     SpringArm(Entity& entity, EntityRef target);
+    
     COMPONENT_TYPES(SpringArm, Behavior, Component)
+    COMPONENT_FIELDS(Behavior, movementSpeed, _target)
 
     void Start() override;
 
@@ -22,5 +25,5 @@ public:
 private:
     EntityRef _target;
 
-    dvl::Vec3 _targetOffset;
+    dvl::Vec3 _targetOffset = dvl::Vec3::Zero();
 };
