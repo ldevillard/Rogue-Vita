@@ -4,6 +4,8 @@
 
 #include "engine/component/animator.h"
 #include "engine/component/behavior.h"
+#include "engine/component/component_ref.h"
+#include "engine/core/entity_ref.h"
 
 class Camera;
 
@@ -17,7 +19,7 @@ struct PlayerAnimation
 class PlayerController : public Behavior
 {
 public:
-    PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations);
+    PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations);
     COMPONENT_TYPES(PlayerController, Behavior, Component)
     ~PlayerController() override;
 
@@ -38,9 +40,9 @@ private:
 
     void drawDebugFov();
 
-    const Camera& _camera;
+    EntityRef _camera;
+    ComponentRef<Animator> _animator;
     
-    Animator& _animator;
     PlayerAnimation _animations;
 
     bool _isAttacking = false;

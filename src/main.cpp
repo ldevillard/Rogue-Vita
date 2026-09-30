@@ -69,10 +69,10 @@ int main()
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerAttackAnimation, AnimationLoopMode::Once, 1.5f}
     };
-    playerEntity->AddComponent<PlayerController>(mainCamera, playerAnimator, playerAnimations);
+    playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations);
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
 
-    cameraEntity->AddComponent<SpringArm>(playerEntity->transform);
+    cameraEntity->AddComponent<SpringArm>(playerEntity->ToRef());
 
     Entity* practiceDummyEntity = world.CreateEntity();
     practiceDummyEntity->transform.position = dvl::Vec3(0.0f, 0.5f, 0.0f);

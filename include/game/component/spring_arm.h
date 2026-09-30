@@ -3,13 +3,14 @@
 #include <dvl/math/vec.h>
 
 #include "engine/component/behavior.h"
+#include "engine/core/entity_ref.h"
 
 class Transform;
 
 class SpringArm : public Behavior
 {
 public:
-    SpringArm(Entity& entity, const Transform& target);
+    SpringArm(Entity& entity, EntityRef target);
     COMPONENT_TYPES(SpringArm, Behavior, Component)
 
     void Start() override;
@@ -19,7 +20,7 @@ public:
     float movementSpeed = 3;
 
 private:
-    const Transform& _target;
+    EntityRef _target;
 
     dvl::Vec3 _targetOffset;
 };

@@ -12,7 +12,7 @@
 #include "engine/debug/debug_draw.h"
 #include "engine/physics/physics.h"
 
-PlayerController::PlayerController(Entity& entity, const Camera& camera, Animator& animator, const PlayerAnimation& animations)
+PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations)
     : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
 {
 }
@@ -30,6 +30,12 @@ void PlayerController::Update(float deltaTime)
     if (_dashTween != nullptr)
         return;
 
+    Entity* camera = _camera.Get(GetWorld());
+    Animator* animator = _animator.Get(GetWorld());
+
+    if (camera == nullptr || animator == nullptr)
+        return;
+
     const dvl::StickState& stick = dvl::Input::GetState().leftStick;
 
     dvl::Vec2 input{stick.x, stick.y};
@@ -37,11 +43,11 @@ void PlayerController::Update(float deltaTime)
     input = input / std::max(1.0f, input.Length());
 
     // Projection on XZ plane
-    dvl::Vec3 forward = _camera.GetEntity()->transform.GetForward();
+    dvl::Vec3 forward = camera->transform.GetForward();
     forward = dvl::Vec3(forward.x, 0.0f, forward.z).Normalized();
 
     // Projection on XZ plane
-    dvl::Vec3 right = _camera.GetEntity()->transform.GetRight();
+    dvl::Vec3 right = camera->transform.GetRight();
     right = dvl::Vec3(right.x, 0.0f, right.z).Normalized();
 
     const dvl::Vec3 movement = right * input.x + forward * input.y;
@@ -50,13 +56,13 @@ void PlayerController::Update(float deltaTime)
     {
         attack();
 
-        _animator.Play(_animations.attack, animationTransitionDuration);
+        animator->Play(_animations.attack, animationTransitionDuration);
         _isAttacking = true;
     }
 
     if (_isAttacking)
     {
-        if (!_animator.IsFinished())
+        if (!animator->IsFinished())
         {
             entity.transform.rotation = dvl::Nlerp(entity.transform.rotation, _aimRotation, rotationSpeed * deltaTime);
             return;
@@ -67,11 +73,11 @@ void PlayerController::Update(float deltaTime)
 
     if (movement.LengthSquared() == 0.0f)
     {
-        _animator.Play(_animations.idle, animationTransitionDuration);
+        animator->Play(_animations.idle, animationTransitionDuration);
         return;
     }
 
-    _animator.Play(_animations.run, animationTransitionDuration);
+    animator->Play(_animations.run, animationTransitionDuration);
 
     if (dvl::Input::IsButtonDown(dvl::GamepadButton::Circle))
     {
