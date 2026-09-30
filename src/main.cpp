@@ -112,6 +112,8 @@ int main()
         renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
         renderer.BeginScene(mainCamera);
         
+        world.StartPendingComponents();
+
         // Gameplay logic
         {
             for (Behavior* behavior : world.GetComponents<Behavior>())

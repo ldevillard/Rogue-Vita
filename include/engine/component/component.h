@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <typeindex>
 #include <vector>
 
@@ -12,10 +13,14 @@ public:
     Component(Entity& entity);
     virtual ~Component() = default;
 
+    virtual void Start();
+    
     const Entity* GetEntity() const;
     const Transform& GetTransform() const;
 
     virtual const std::vector<std::type_index>& GetTypes() const = 0;
+
+    unsigned int id = 0;
 
 protected:
     Entity& entity;

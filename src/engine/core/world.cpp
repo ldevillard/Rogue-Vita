@@ -17,7 +17,7 @@ World::~World()
 Entity* World::CreateEntity()
 {
     std::unique_ptr<Entity> entity = std::make_unique<Entity>(*this);
-    entity->id = _nextId++;
+    entity->id = _nextEntityId++;
 
     Entity* result = entity.get();
 
@@ -62,17 +62,21 @@ const Entity* World::FindEntity(unsigned int id) const
 
 void World::RegisterComponent(Component* component)
 {
+    component->id = _nextComponentId++;
+
     for (std::type_index type : component->GetTypes())
     {
         _registeredComponents[type].push_back(component);
     }
+
+    _pendingStartComponents.push_back(component);
+    _componentsById[component->id] = component;
 }
 
 void World::UnRegisterComponent(Component* component)
 {
     for (std::type_index type : component->GetTypes())
     {
-
         auto componentGroup = _registeredComponents.find(type);
         if (componentGroup == _registeredComponents.end())
         {
@@ -97,6 +101,24 @@ void World::UnRegisterComponent(Component* component)
             _registeredComponents.erase(componentGroup);
         }
     }
+
+    auto it = std::find(_pendingStartComponents.begin(), _pendingStartComponents.end(), component);
+    if (it != _pendingStartComponents.end())
+    {
+        _pendingStartComponents.erase(it);
+    }
+
+    _componentsById.erase(component->id);
+}
+
+void World::StartPendingComponents()
+{
+    for (Component* component : _pendingStartComponents)
+    {
+        component->Start();
+    }
+
+    _pendingStartComponents.clear();
 }
     
 const std::vector<std::unique_ptr<Entity>>& World::GetEntities() const
