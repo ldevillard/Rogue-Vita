@@ -101,6 +101,10 @@ namespace dvl
     float Dot(const Vec3& a, const Vec3& b);
     float Dot(const Vec4& a, const Vec4& b);
 
+    Vec2 Reflect(const Vec2& vec, const Vec2& normal);
+    Vec3 Reflect(const Vec3& vec, const Vec3& normal);
+    Vec4 Reflect(const Vec4& vec, const Vec4& normal);
+
     Vec3 Cross(const Vec3& a, const Vec3& b);
 
     Vec2 Lerp(const Vec2& a, const Vec2& b, float t);

@@ -118,6 +118,20 @@ DVL_TEST(Vec2FreeFunctionsReturnExpectedValues)
     return true;
 }
 
+DVL_TEST(Vec2ReflectMirrorsIncidentAcrossUnitNormal)
+{
+    const dvl::Vec2 reflected = dvl::Reflect(dvl::Vec2(2.0f, -3.0f), dvl::Vec2(0.0f, 1.0f));
+    DVL_EXPECT_EQ(reflected.x, 2.0f);
+    DVL_EXPECT_EQ(reflected.y, 3.0f);
+
+    const dvl::Vec2 diagonalNormal = dvl::Vec2(1.0f, 1.0f).Normalized();
+    const dvl::Vec2 diagonalReflection = dvl::Reflect(dvl::Vec2(1.0f, 0.0f), diagonalNormal);
+    DVL_EXPECT_NEAR(diagonalReflection.x, 0.0f, Epsilon);
+    DVL_EXPECT_NEAR(diagonalReflection.y, -1.0f, Epsilon);
+
+    return true;
+}
+
 DVL_TEST(Vec2LerpSupportsSymmetryAndExtrapolation)
 {
     const dvl::Vec2 a(-2.0f, 4.0f);
@@ -291,6 +305,18 @@ DVL_TEST(Vec3FreeFunctionsReturnExpectedValues)
     return true;
 }
 
+DVL_TEST(Vec3ReflectMirrorsIncidentAcrossUnitNormal)
+{
+    const dvl::Vec3 vec(2.0f, -3.0f, 4.0f);
+    const dvl::Vec3 reflected = dvl::Reflect(vec, dvl::Vec3(0.0f, 1.0f, 0.0f));
+    DVL_EXPECT_EQ(reflected.x, 2.0f);
+    DVL_EXPECT_EQ(reflected.y, 3.0f);
+    DVL_EXPECT_EQ(reflected.z, 4.0f);
+    DVL_EXPECT_EQ(vec.y, -3.0f);
+
+    return true;
+}
+
 DVL_TEST(Vec4ConstructorsInitializeComponents)
 {
     const dvl::Vec4 zero;
@@ -445,6 +471,19 @@ DVL_TEST(Vec4FreeFunctionsReturnExpectedValues)
     DVL_EXPECT_EQ(midpoint.y, 4.0f);
     DVL_EXPECT_EQ(midpoint.z, 5.0f);
     DVL_EXPECT_EQ(midpoint.w, 6.0f);
+
+    return true;
+}
+
+DVL_TEST(Vec4ReflectMirrorsIncidentAcrossUnitNormal)
+{
+    const dvl::Vec4 reflected = dvl::Reflect(
+        dvl::Vec4(1.0f, 2.0f, 3.0f, -4.0f),
+        dvl::Vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    DVL_EXPECT_EQ(reflected.x, 1.0f);
+    DVL_EXPECT_EQ(reflected.y, 2.0f);
+    DVL_EXPECT_EQ(reflected.z, 3.0f);
+    DVL_EXPECT_EQ(reflected.w, 4.0f);
 
     return true;
 }

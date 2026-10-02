@@ -336,6 +336,21 @@ namespace dvl
         return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
     }
 
+    Vec2 Reflect(const Vec2& vec, const Vec2& normal)
+    {
+        return vec - normal * (2.0f * Dot(vec, normal));
+    }
+
+    Vec3 Reflect(const Vec3& vec, const Vec3& normal)
+    {
+        return vec - normal * (2.0f * Dot(vec, normal));
+    }
+
+    Vec4 Reflect(const Vec4& vec, const Vec4& normal)
+    {
+        return vec - normal * (2.0f * Dot(vec, normal));
+    }
+
     Vec3 Cross(const Vec3& a, const Vec3& b)
     {
         return Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
