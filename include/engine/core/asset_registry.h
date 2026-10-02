@@ -40,6 +40,7 @@ public:
     // Primitives
     MeshHandle GetLineMeshHandle() const;
     MeshHandle GetCubeMeshHandle() const;
+    MeshHandle GetSphereMeshHandle() const;
     MeshHandle GetWireCubeMeshHandle() const;
     MeshHandle GetWireSphereMeshHandle() const;
     MeshHandle GetCircleMeshHandle() const;
@@ -83,6 +84,7 @@ private:
     // Primitives
     MeshHandle _lineMeshHandle;
     MeshHandle _cubeMeshHandle;
+    MeshHandle _sphereMeshHandle;
     MeshHandle _wireCubeMeshHandle;
     MeshHandle _wireSphereMeshHandle;
     MeshHandle _circleMeshHandle;

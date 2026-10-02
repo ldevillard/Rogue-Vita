@@ -59,6 +59,13 @@ int main()
     playerEntity->transform.position = dvl::Vec3(0.75f, 0.5f, -0.75f);
     playerEntity->transform.scale = dvl::Vec3::One();
 
+    Entity* bulletPrefab = world.CreateEntity();
+    Material bulletMaterial = assetRegistry.GetSolidMaterialInstance();
+    bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
+    bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
+    bulletPrefab->transform.position = dvl::Vec3(2.0f, 1.0f, 2.0f);
+    bulletPrefab->transform.scale = dvl::Vec3(0.1f, 0.1f, 0.1f);
+
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
     playerEntity->AddComponent<SkinnedMeshRenderer>(playerMesh, playerMaterial, playerSkeleton);
@@ -88,12 +95,50 @@ int main()
     practiceDummyEntity->AddComponent<SkinnedMeshRenderer>(practiceDummyMesh, practiceDummyMaterial, practiceDummySkeleton);
     practiceDummyEntity->AddComponent<Animator>(practiceDummySkeleton, practiceDummyIdleAnimation);
 
-    Entity* planeEntity = world.CreateEntity();
-    planeEntity->transform.position = dvl::Vec3(0.0f, 0.0f, 0.0f);
-    planeEntity->transform.scale = dvl::Vec3(6.0f, 0.1f, 6.0f);
-    Material planeMaterial = assetRegistry.GetSolidMaterialInstance();
-    planeMaterial.color = dvl::Vec4(0.4f, 0.4f, 0.4f, 1.0f);
-    planeEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMeshHandle(), planeMaterial);
+    Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
+    environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
+
+    Material groundMaterial = environmentMaterial;
+    groundMaterial.color = dvl::Vec4(0.8f, 0.8f, 0.8f, 1.0f);
+    Entity* groundEntity = world.CreateEntity();
+    groundEntity->transform.scale = dvl::Vec3(6.0f, 0.5f, 6.0f);
+    groundEntity->transform.rotation = dvl::Quat(0.0f, 1.0f, 0.0f, 0.0f);
+    groundEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_battleground_01.dvlmesh"), renderer), groundMaterial);
+
+    const MeshHandle wallEndMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/border_end_02.dvlmesh"), renderer);
+    const MeshHandle wallMiddleMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/border_middle_02.dvlmesh"), renderer);
+
+    Entity* wallEntity = world.CreateEntity();
+    wallEntity->transform.position = dvl::Vec3(2.3f, 0.05f, 0.0f);
+    wallEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(90.0f));
+    wallEntity->transform.scale = dvl::Vec3(0.8f, 0.8f, 0.8f);
+
+    MeshRenderer& wallLeftPillar = wallEntity->AddComponent<MeshRenderer>(wallEndMesh, environmentMaterial);
+    wallLeftPillar.localTransform.position = dvl::Vec3(-1.7f, 0.7f, 0.0f);
+    wallLeftPillar.localTransform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(270.0f));
+    wallLeftPillar.localTransform.scale = dvl::Vec3(1.4f, 1.4f, 1.4f);
+
+    MeshRenderer& wallLeftSection = wallEntity->AddComponent<MeshRenderer>(wallMiddleMesh, environmentMaterial);
+    wallLeftSection.localTransform.position = dvl::Vec3(-0.85f, 0.55f, 0.0f);
+    wallLeftSection.localTransform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(180.0f));
+    wallLeftSection.localTransform.scale = dvl::Vec3(1.4f, 1.3f, 1.3f);
+
+    MeshRenderer& wallCenterPillar = wallEntity->AddComponent<MeshRenderer>(wallEndMesh, environmentMaterial);
+    wallCenterPillar.localTransform.position = dvl::Vec3(0.0f, 0.7f, 0.0f);
+    wallCenterPillar.localTransform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(270.0f));
+    wallCenterPillar.localTransform.scale = dvl::Vec3(1.4f, 1.4f, 1.4f);
+
+    MeshRenderer& wallRightSection = wallEntity->AddComponent<MeshRenderer>(wallMiddleMesh, environmentMaterial);
+    wallRightSection.localTransform.position = dvl::Vec3(0.85f, 0.55f, 0.0f);
+    wallRightSection.localTransform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(180.0f));
+    wallRightSection.localTransform.scale = dvl::Vec3(1.4f, 1.3f, 1.3f);
+
+    MeshRenderer& wallRightPillar = wallEntity->AddComponent<MeshRenderer>(wallEndMesh, environmentMaterial);
+    wallRightPillar.localTransform.position = dvl::Vec3(1.7f, 0.7f, 0.0f);
+    wallRightPillar.localTransform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(270.0f));
+    wallRightPillar.localTransform.scale = dvl::Vec3(1.4f, 1.4f, 1.4f);
+
+    wallEntity->AddComponent<BoxCollider>(dvl::Vec3(0.0f, 0.7f, 0.0f), dvl::Vec3(4.0f, 1.4f, 0.6f));
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();

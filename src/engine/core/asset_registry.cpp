@@ -12,6 +12,7 @@
 #include "engine/render/render_pipeline.h"
 
 #include "engine/render/primitive/cube_mesh_data.h"
+#include "engine/render/primitive/sphere_mesh_data.h"
 #include "engine/render/primitive/line_mesh_data.h"
 #include "engine/render/primitive/wire_cube_mesh_data.h"
 #include "engine/render/primitive/wire_sphere_mesh_data.h"
@@ -21,6 +22,7 @@ void AssetRegistry::Initialize(Renderer& renderer)
 {
     _lineMeshHandle = loadPrimitive<LineMeshData>(renderer);
     _cubeMeshHandle = loadPrimitive<CubeMeshData>(renderer);
+    _sphereMeshHandle = loadPrimitive<SphereMeshData>(renderer);
     _wireCubeMeshHandle = loadPrimitive<WireCubeMeshData>(renderer);
     _wireSphereMeshHandle = loadPrimitive<WireSphereMeshData>(renderer);
     _circleMeshHandle = loadPrimitive<CircleMeshData>(renderer);
@@ -480,6 +482,11 @@ MeshHandle AssetRegistry::GetLineMeshHandle() const
 MeshHandle AssetRegistry::GetCubeMeshHandle() const
 {
     return _cubeMeshHandle;
+}
+
+MeshHandle AssetRegistry::GetSphereMeshHandle() const
+{
+    return _sphereMeshHandle;
 }
 
 MeshHandle AssetRegistry::GetWireCubeMeshHandle() const
