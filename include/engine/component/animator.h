@@ -40,6 +40,7 @@ public:
     bool IsValid() const;
 
     void Play(const AnimationClip& clip, float transitionDuration = 0.0f);
+    void Restart(const AnimationClip& clip, float transitionDuration = 0.0f);
     void Stop();
 
     bool IsPlaying() const;

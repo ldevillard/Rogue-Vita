@@ -108,6 +108,27 @@ void Animator::Play(const AnimationClip& clip, float transitionDuration)
     _transitionDuration = transitionDuration;
 }
 
+void Animator::Restart(const AnimationClip& clip, float transitionDuration)
+{
+    if (!clip.animation.IsValid())
+        return;
+
+    if (!IsPlaying() || transitionDuration <= 0.0f)
+    {
+        _current = {clip, 0.0f, false};
+        _next = {};
+        _transitioning = false;
+        _transitionTime = 0.0f;
+        _transitionDuration = 0.0f;
+        return;
+    }
+
+    _next = {clip, 0.0f, false};
+    _transitioning = true;
+    _transitionTime = 0.0f;
+    _transitionDuration = transitionDuration;
+}
+
 void Animator::Stop()
 {
     _current = {};
