@@ -20,12 +20,12 @@ class PlayerController : public Behavior
 {
 public:
     PlayerController(Entity& entity);
-    PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations);
+    PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations, EntityRef bulletPrefab);
     ~PlayerController() override;
     
     COMPONENT_TYPES(PlayerController, Behavior, Component)
     COMPONENT_FIELDS(Behavior, moveSpeed, rotationSpeed, detectionRadius, minDistance, 
-                        dashDistance, dashDuration, animationTransitionDuration, _camera, _animator, _animations)
+                        dashDistance, dashDuration, animationTransitionDuration, _camera, _animator, _animations, _bulletPrefab)
 
     void Start() override;
     void Update(float deltaTime) override;
@@ -47,6 +47,7 @@ private:
 
     EntityRef _camera;
     ComponentRef<Animator> _animator;
+    EntityRef _bulletPrefab;
     
     PlayerAnimation _animations;
 

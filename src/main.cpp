@@ -17,6 +17,7 @@
 #include "engine/system/animation_system.h"
 
 #include "game/component/player_controller.h"
+#include "game/component/projectile.h"
 #include "game/component/spring_arm.h"
 
 int main()
@@ -64,7 +65,8 @@ int main()
     bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
     bulletPrefab->transform.position = dvl::Vec3(2.0f, 1.0f, 2.0f);
-    bulletPrefab->transform.scale = dvl::Vec3(0.1f, 0.1f, 0.1f);
+    bulletPrefab->transform.scale = dvl::Vec3(0.13f, 0.13f, 0.13f);
+    bulletPrefab->AddComponent<Projectile>();
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
@@ -76,7 +78,7 @@ int main()
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerAttackAnimation, AnimationLoopMode::Once, 1.5f}
     };
-    playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations);
+    playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations, bulletPrefab->ToRef());
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->ToRef());

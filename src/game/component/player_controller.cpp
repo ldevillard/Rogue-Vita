@@ -12,13 +12,15 @@
 #include "engine/debug/debug_draw.h"
 #include "engine/physics/physics.h"
 
+#include "game/component/projectile.h"
+
 PlayerController::PlayerController(Entity& entity)
     : Behavior(entity)
 {
 }
 
-PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations)
-    : Behavior(entity), _camera(camera), _animator(animator), _animations(animations)
+PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations, EntityRef bulletPrefab)
+    : Behavior(entity), _camera(camera), _animator(animator), _bulletPrefab(bulletPrefab), _animations(animations)
 {
 }
 
@@ -159,8 +161,17 @@ void PlayerController::attack()
     if (target != nullptr)
     {
         dvl::Vec3 direction = (target->position - entity.transform.position).Normalized();
+        direction.y = 0.0f;
         _aimRotation = dvl::Quat::LookRotation(direction);
     }
+
+    World& world = GetWorld();
+    Entity* cube = world.Instantiate(*_bulletPrefab.Get(world));
+    cube->transform.rotation = _aimRotation;
+    cube->transform.position = entity.transform.position + cube->transform.GetForward() * 0.4f;
+    
+    Projectile* projectile = cube->GetComponent<Projectile>();
+    projectile->Launch();
 }
 
 void PlayerController::drawDebugFov()
