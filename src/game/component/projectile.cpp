@@ -2,10 +2,13 @@
 
 #include <algorithm>
 
+#include "engine/component/collider.h"
 #include "engine/core/entity.h"
 #include "engine/debug/debug_draw.h"
 #include "engine/physics/physics.h"
 #include "engine/physics/raycast_hit.h"
+
+#include "game/interface/idamageable.h"
 
 Projectile::Projectile(Entity& entity)
     : Behavior(entity)
@@ -37,6 +40,11 @@ void Projectile::Update(float deltaTime)
     RaycastHit hit;
     if (Physics::Raycast(entity.transform.position, _direction, hit, detectionDistance))
     {
+        if (IDamageable* damageable = hit.collider->GetEntity()->GetInterface<IDamageable>())
+        {
+            damageable->TakeDamage(1.0f);
+        }
+
         _direction = dvl::Reflect(_direction, hit.normal);
         return;
     }

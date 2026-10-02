@@ -7,20 +7,15 @@
 #include "engine/component/component_ref.h"
 #include "engine/core/entity_ref.h"
 
-class Camera;
+#include "game/animation/character_animations.h"
 
-struct PlayerAnimation
-{
-    AnimationClip idle;
-    AnimationClip run;
-    AnimationClip attack;
-};
+class Camera;
 
 class PlayerController : public Behavior
 {
 public:
     PlayerController(Entity& entity);
-    PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations, EntityRef bulletPrefab);
+    PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const CharacterAnimations& animations, EntityRef bulletPrefab);
     ~PlayerController() override;
     
     COMPONENT_TYPES(PlayerController, Behavior, Component)
@@ -49,7 +44,7 @@ private:
     ComponentRef<Animator> _animator;
     EntityRef _bulletPrefab;
     
-    PlayerAnimation _animations;
+    CharacterAnimations _animations;
 
     bool _isAttacking = false;
     dvl::Quat _aimRotation;

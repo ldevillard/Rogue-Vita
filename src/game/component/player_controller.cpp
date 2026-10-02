@@ -19,7 +19,7 @@ PlayerController::PlayerController(Entity& entity)
 {
 }
 
-PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const PlayerAnimation& animations, EntityRef bulletPrefab)
+PlayerController::PlayerController(Entity& entity, EntityRef camera, ComponentRef<Animator> animator, const CharacterAnimations& animations, EntityRef bulletPrefab)
     : Behavior(entity), _camera(camera), _animator(animator), _bulletPrefab(bulletPrefab), _animations(animations)
 {
 }
@@ -32,9 +32,7 @@ PlayerController::~PlayerController()
 
 void PlayerController::Start()
 {
-    Animator* animator = _animator.Get(GetWorld());
-    if (animator != nullptr && animator->GetEntity() == &entity)
-        animator->Play(_animations.idle);
+    _animator.Get(GetWorld())->Play(_animations.idle);
 }
 
 void PlayerController::Update(float deltaTime)

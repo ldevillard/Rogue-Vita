@@ -39,7 +39,7 @@ public:
     }
 
     template <typename T>
-    T* GetComponent()
+    T* GetComponent() const
     {
         static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
 
@@ -53,13 +53,11 @@ public:
     }
 
     template <typename T>
-    const T* GetComponent() const
+    T* GetInterface() const
     {
-        static_assert(std::is_base_of_v<Component, T>, "T must derive from Component");
-
         for (const std::unique_ptr<Component>& component : _components)
         {
-            if (const T* matchingComponent = dynamic_cast<const T*>(component.get()))
+            if (T* matchingComponent = dynamic_cast<T*>(component.get()))
                 return matchingComponent;
         }
 

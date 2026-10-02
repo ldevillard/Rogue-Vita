@@ -16,6 +16,7 @@
 #include "engine/render/renderer.h"
 #include "engine/system/animation_system.h"
 
+#include "game/component/enemy.h"
 #include "game/component/player_controller.h"
 #include "game/component/projectile.h"
 #include "game/component/spring_arm.h"
@@ -50,6 +51,7 @@ int main()
     const MeshHandle practiceDummyMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/practice_dummy.dvlmesh"), renderer);
     const SkeletonHandle practiceDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/practice_dummy.dvlskel"));
     const AnimationHandle practiceDummyIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@idle.dvlanim"));
+    const AnimationHandle practiceDummyTakeDamageAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@take_damage.dvlanim"));
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
@@ -65,18 +67,19 @@ int main()
     bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
     bulletPrefab->transform.position = dvl::Vec3(2.0f, 1.0f, 2.0f);
-    bulletPrefab->transform.scale = dvl::Vec3(0.13f, 0.13f, 0.13f);
+    bulletPrefab->transform.scale = dvl::Vec3(0.15f, 0.15f, 0.15f);
     bulletPrefab->AddComponent<Projectile>();
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
     playerEntity->AddComponent<SkinnedMeshRenderer>(playerMesh, playerMaterial, playerSkeleton);
     Animator& playerAnimator = playerEntity->AddComponent<Animator>(playerSkeleton, playerIdleAnimation);
-    const PlayerAnimation playerAnimations =
+    const CharacterAnimations playerAnimations =
     {
         {playerIdleAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
-        {playerAttackAnimation, AnimationLoopMode::Once, 1.5f}
+        {playerAttackAnimation, AnimationLoopMode::Once, 3.0f},
+        { /* TODO: Add take damage animation*/ }
     };
     playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations, bulletPrefab->ToRef());
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
@@ -96,6 +99,11 @@ int main()
     practiceDummyMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/practice_dummy.dvltex"), renderer);
     practiceDummyEntity->AddComponent<SkinnedMeshRenderer>(practiceDummyMesh, practiceDummyMaterial, practiceDummySkeleton);
     practiceDummyEntity->AddComponent<Animator>(practiceDummySkeleton, practiceDummyIdleAnimation);
+    CharacterAnimations practiceDummyAnimations = {};
+    practiceDummyAnimations.idle = {practiceDummyIdleAnimation, AnimationLoopMode::Loop, 1.0f};
+    practiceDummyAnimations.takeDamage = {practiceDummyTakeDamageAnimation, AnimationLoopMode::Once, 1.0f};
+
+    practiceDummyEntity->AddComponent<Enemy>(practiceDummyAnimations);
 
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
