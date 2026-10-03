@@ -4,6 +4,7 @@
 
 #include "engine/component/component.h"
 
+// It is assumed that a camera should live in an entity that has no parent, so the camera lives in world space
 class Camera : public Component
 {
 public:

@@ -74,7 +74,9 @@ public:
 
     dvl::Mat4 GetWorldMatrix() const;
 
+    // Transform is local to the entity's parent, or world space if it has no parent
     Transform transform;
+    
     unsigned int id = 0;
 
 private:

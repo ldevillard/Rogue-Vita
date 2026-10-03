@@ -108,60 +108,17 @@ void World::UnRegisterComponent(Component* component)
 Entity* World::Instantiate(const Entity& source)
 {
     assert(&source.GetWorld() == this && "Instantiate requires the source to belong to this world");
-    
-    Entity* clonedEntity = CreateEntity();
-    clonedEntity->transform = source.transform;
 
     ReferenceMapping refMap;
-    refMap.entityIds[source.id] = clonedEntity->id;
+    std::vector<std::pair<const Component*, Component*>> clonedComponents;
+    Entity* clonedRoot = instantiateRecursive(source, nullptr, refMap, clonedComponents);
 
-    const std::vector<std::unique_ptr<Component>>& sourceComponents = source.GetComponents();
-    std::vector<Component*> clonedComponents(sourceComponents.size(), nullptr);
-
-    // First step, creation and attachment of cloned components
-    for (size_t i = 0; i < sourceComponents.size(); i++)
+    for (const std::pair<const Component*, Component*>& clonedComponent : clonedComponents)
     {
-        const Component& original = *sourceComponents[i];
-
-        refMap.componentIds[original.id] = 0;
-
-        std::unique_ptr<Component> clone = original.CreateEmpty(*clonedEntity);
-
-        if (clone == nullptr)
-        {
-            const std::string message = "Instantiate: failed to clone component of type " + std::string(typeid(original).name());
-            dvl::Log(dvl::LogLevel::Error, message.c_str());
-            continue;
-        }
-
-        if (typeid(*clone) != typeid(original))
-        {
-            dvl::Log(dvl::LogLevel::Error, "Instantiate: CreateEmpty returned a different component type");
-            continue;
-        }
-
-        Component* attached = clonedEntity->AttachComponent(std::move(clone));
-        if (attached == nullptr)
-        {
-            const std::string message = "Instantiate: failed to attach component of type " + std::string(typeid(original).name());
-            dvl::Log(dvl::LogLevel::Error, message.c_str());
-            continue;
-        }
-
-        clonedComponents[i] = attached;
-        refMap.componentIds[original.id] = attached->id;
+        clonedComponent.second->CopyFrom(*clonedComponent.first, refMap);
     }
 
-    // Second steps, resolve references, copy fields..
-    for (std::size_t i = 0; i < sourceComponents.size(); i++)
-    {
-        Component* cloned = clonedComponents[i];
-
-        if (cloned != nullptr)
-            cloned->CopyFrom(*sourceComponents[i], refMap);
-    }
-
-    return clonedEntity;
+    return clonedRoot;
 }
 
 void World::StartPendingComponents()
@@ -213,4 +170,54 @@ void World::destroyEntity(EntityRef entityRef)
             return;
         }
     }
+}
+
+Entity* World::instantiateRecursive(const Entity& source, Entity* parent, ReferenceMapping& refMap,
+                                    std::vector<std::pair<const Component*, Component*>>& clonedComponents)
+{
+    Entity* clonedEntity = CreateEntity();
+    clonedEntity->transform = source.transform;
+    clonedEntity->SetParent(parent);
+
+    refMap.entityIds[source.id] = clonedEntity->id;
+
+    for (const std::unique_ptr<Component>& sourceComponent : source.GetComponents())
+    {
+        const Component& original = *sourceComponent;
+        refMap.componentIds[original.id] = 0;
+
+        std::unique_ptr<Component> clone = original.CreateEmpty(*clonedEntity);
+        if (clone == nullptr)
+        {
+            const std::string message = "Instantiate: failed to clone component of type " + std::string(typeid(original).name());
+            dvl::Log(dvl::LogLevel::Error, message.c_str());
+            continue;
+        }
+
+        if (typeid(*clone) != typeid(original))
+        {
+            dvl::Log(dvl::LogLevel::Error, "Instantiate: CreateEmpty returned a different component type");
+            continue;
+        }
+
+        Component* attached = clonedEntity->AttachComponent(std::move(clone));
+        if (attached == nullptr)
+        {
+            const std::string message = "Instantiate: failed to attach component of type " + std::string(typeid(original).name());
+            dvl::Log(dvl::LogLevel::Error, message.c_str());
+            continue;
+        }
+
+        refMap.componentIds[original.id] = attached->id;
+        clonedComponents.emplace_back(&original, attached);
+    }
+
+    for (const EntityRef& childRef : source.GetChildren())
+    {
+        Entity* child = childRef.Get(*this);
+        if (child != nullptr)
+            instantiateRecursive(*child, clonedEntity, refMap, clonedComponents);
+    }
+
+    return clonedEntity;
 }

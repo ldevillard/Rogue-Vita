@@ -4,6 +4,7 @@
 
 #include "engine/component/component.h"
 
+// It is assumed that a collider should live in an entity that has no parent, so the collider lives in world space
 class Collider : public Component
 {
 public:

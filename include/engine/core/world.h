@@ -3,16 +3,19 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "engine/core/entity_ref.h"
 
 class Component;
 class Entity;
+struct ReferenceMapping;
 
 template<typename T>
 struct ComponentRef;
 
+// It is assumed that multi world is not supported
 class World
 {
 public:
@@ -54,6 +57,8 @@ public:
 
 private:
     void destroyEntity(EntityRef entityRef);
+    Entity* instantiateRecursive(const Entity& source, Entity* parent, ReferenceMapping& refMap, 
+                                    std::vector<std::pair<const Component*, Component*>>& clonedComponents);
 
     unsigned int _nextEntityId = 1;
     unsigned int _nextComponentId = 1;

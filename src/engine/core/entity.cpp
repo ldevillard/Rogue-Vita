@@ -61,12 +61,6 @@ void Entity::SetParent(Entity* parent)
 
     if (parent != nullptr)
     {
-        if (&parent->GetWorld() != &_world)
-        {
-            dvl::Log(dvl::LogLevel::Error, "Cannot parent entities from different worlds");
-            return;
-        }
-
         for (Entity* ancestor = parent; ancestor != nullptr; ancestor = ancestor->GetParent())
         {
             if (ancestor == this)
