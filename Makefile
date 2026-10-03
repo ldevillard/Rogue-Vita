@@ -34,7 +34,7 @@ RESET  := \033[0m
 
 # ----- Make Helpers -----
 
-.PHONY: all package clean clean-desktop re emul remul run rrun desktop rdesktop test cook
+.PHONY: all package clean clean-desktop re emul remul run rrun desktop rdesktop test test-dvl test-engine cook
 
 COOKER_DIR := dvl/tool/cooker
 COOKER := $(COOKER_DIR)/build/dvl-cooker
@@ -237,10 +237,18 @@ rrun:
 
 # ----- Tests -----
 
-test:
+test: test-dvl test-engine
+
+test-dvl:
 	@$(MAKE) -C dvl/tests run; \
 		test_status=$$?; \
 		$(MAKE) -C dvl/tests clean; \
+		exit $$test_status
+
+test-engine:
+	@$(MAKE) -C tests run; \
+		test_status=$$?; \
+		$(MAKE) -C tests clean; \
 		exit $$test_status
 
 $(OBJS) $(DESKTOP_OBJS): Makefile

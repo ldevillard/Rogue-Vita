@@ -11,18 +11,23 @@
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/dvl/include",
                 "${workspaceFolder}/dvl/include/**",
+                "${workspaceFolder}/dvl/tests",
                 "${workspaceFolder}/dvl/tool/cooker/include",
                 "${workspaceFolder}/dvl/tool/cooker/third_party",
                 "${workspaceFolder}/src",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/tests",
+                "${workspaceFolder}/tests/**"
             ],
             "browse": {
                 "path": [
                     "${workspaceFolder}/include",
                     "${workspaceFolder}/dvl/include",
+                    "${workspaceFolder}/dvl/tests",
                     "${workspaceFolder}/dvl/tool/cooker/include",
                     "${workspaceFolder}/dvl/tool/cooker/third_party",
-                    "${workspaceFolder}/src"
+                    "${workspaceFolder}/src",
+                    "${workspaceFolder}/tests"
                 ],
                 "limitSymbolsToIncludedHeaders": true
             }
@@ -38,10 +43,13 @@
                 "${workspaceFolder}/include/**",
                 "${workspaceFolder}/dvl/include",
                 "${workspaceFolder}/dvl/include/**",
+                "${workspaceFolder}/dvl/tests",
                 "${workspaceFolder}/dvl/tool/cooker/include",
                 "${workspaceFolder}/dvl/tool/cooker/third_party",
                 "${workspaceFolder}/src",
                 "${workspaceFolder}/src/**",
+                "${workspaceFolder}/tests",
+                "${workspaceFolder}/tests/**",
                 "/usr/local/vitasdk/arm-vita-eabi/include",
                 "/usr/local/vitasdk/arm-vita-eabi/include/**",
                 "/usr/local/vitasdk/include",
@@ -55,9 +63,11 @@
                     "${workspaceFolder}/include/**",
                     "${workspaceFolder}/dvl/include",
                     "${workspaceFolder}/dvl/include/**",
+                    "${workspaceFolder}/dvl/tests",
                     "${workspaceFolder}/dvl/tool/cooker/include",
                     "${workspaceFolder}/dvl/tool/cooker/third_party",
                     "${workspaceFolder}/src",
+                    "${workspaceFolder}/tests",
                     "/usr/local/vitasdk/arm-vita-eabi/include",
                     "/usr/local/vitasdk/include"
                 ],

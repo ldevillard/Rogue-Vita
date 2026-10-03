@@ -35,5 +35,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - name: Build and run tests
-        run: make test
+      - name: Install test dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes libglew-dev libglfw3-dev
+
+      - name: Build and run DVL tests
+        run: make test-dvl
+
+      - name: Build and run engine tests
+        run: make test-engine

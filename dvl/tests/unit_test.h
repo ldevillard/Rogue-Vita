@@ -42,19 +42,16 @@ namespace dvl
 
         for (const UnitTest& test : tests)
         {
-            std::cout << '[' << cyan << "RUN" << reset << "] "
-                      << test.name << '\n';
+            std::cout << '[' << cyan << "RUN" << reset << "] " << test.name << '\n';
 
             if (test.method())
             {
                 passed++;
-                std::cout << '[' << green << "PASS" << reset << "] "
-                          << test.name << "\n\n";
+                std::cout << '[' << green << "PASS" << reset << "] " << test.name << "\n\n";
             }
             else
             {
-                std::cout << '[' << red << "FAIL" << reset << "] "
-                          << test.name << "\n\n";
+                std::cout << '[' << red << "FAIL" << reset << "] " << test.name << "\n\n";
             }
         }
 
