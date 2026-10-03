@@ -18,6 +18,8 @@ public:
     static void DrawWireSphere(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform = dvl::Mat4::Identity());
     static void DrawCircle(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform = dvl::Mat4::Identity());
 
+    static constexpr bool GizmosEnabled = false;
+
 private:
     static Renderer* _renderer;
     

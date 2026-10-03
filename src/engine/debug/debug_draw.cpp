@@ -26,6 +26,9 @@ void DebugDraw::Initialize(AssetRegistry& assetRegistry, Renderer* renderer)
 
 void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::Vec4& color)
 {
+    if (GizmosEnabled == false)
+        return;
+
     if (_renderer == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "DebugDraw is not initialized, draw call canceled!");
@@ -45,6 +48,9 @@ void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::
 
 void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
 {
+    if (GizmosEnabled == false)
+        return;
+
     if (_renderer == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "DebugDraw is not initialized, draw call canceled!");
@@ -60,6 +66,9 @@ void DebugDraw::DrawWireCube(const dvl::Vec3& position, const dvl::Vec3& size, c
 
 void DebugDraw::DrawWireSphere(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
 {
+    if (GizmosEnabled == false)
+        return;
+
     if (_renderer == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "DebugDraw is not initialized, draw call canceled!");
@@ -76,6 +85,9 @@ void DebugDraw::DrawWireSphere(const dvl::Vec3& position, float radius, const dv
 
 void DebugDraw::DrawCircle(const dvl::Vec3& position, float radius, const dvl::Vec4& color, const dvl::Mat4& parentTransform)
 {
+    if (GizmosEnabled == false)
+        return;
+
     if (_renderer == nullptr)
     {
         dvl::Log(dvl::LogLevel::Error, "DebugDraw is not initialized, draw call canceled!");
