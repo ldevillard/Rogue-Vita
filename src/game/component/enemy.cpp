@@ -27,6 +27,11 @@ void Enemy::Start()
 
 void Enemy::Update(float)
 {
+    if (_health.Get(GetWorld())->IsDead())
+    {
+        return;
+    }
+
     Animator* animator = _animator.Get(GetWorld());
 
     if (animator->IsFinished())
@@ -37,8 +42,30 @@ void Enemy::Update(float)
 
 void Enemy::TakeDamage(float amount)
 {
+    if (_health.Get(GetWorld())->IsDead())
+    {
+        return;
+    }
+
     _animator.Get(GetWorld())->Restart(_animations.takeDamage, 0.1f);
     _health.Get(GetWorld())->Damage(amount);
+
+    if (_health.Get(GetWorld())->IsDead())
+    {
+        _animator.Get(GetWorld())->Play(_animations.die, 0.1f);
+        
+        dvl::Tweener::Create(_baseScale, dvl::Vec3::Zero(), 0.5f, dvl::Easing::InBack)
+        .Delay(0.5f)
+        .OnUpdate([this](const dvl::Vec3& value)
+        {
+            entity.transform.scale = value;
+        }).OnComplete([this]()
+        {
+            GetWorld().DestroyEntity(entity.ToRef());
+        });
+        
+        return;
+    }
 
     dvl::Tweener::Create(_baseScale * 1.25f, _baseScale, 0.2f, dvl::Easing::OutBack).OnUpdate([this](const dvl::Vec3& value)
     {

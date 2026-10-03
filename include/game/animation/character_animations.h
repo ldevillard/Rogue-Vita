@@ -8,4 +8,5 @@ struct CharacterAnimations
     AnimationClip run;
     AnimationClip attack;
     AnimationClip takeDamage;
+    AnimationClip die;
 };

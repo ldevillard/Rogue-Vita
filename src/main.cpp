@@ -53,6 +53,7 @@ int main()
     const SkeletonHandle practiceDummySkeleton = assetRegistry.LoadSkeleton(dvl::Filesystem::GetAssetPath("cooked/skeleton/practice_dummy.dvlskel"));
     const AnimationHandle practiceDummyIdleAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@idle.dvlanim"));
     const AnimationHandle practiceDummyTakeDamageAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@take_damage.dvlanim"));
+    const AnimationHandle practiceDummyDieAnimation = assetRegistry.LoadAnimation(dvl::Filesystem::GetAssetPath("cooked/animation/practice_dummy@die.dvlanim"));
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
@@ -82,7 +83,8 @@ int main()
         {playerIdleAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerRunAnimation, AnimationLoopMode::Loop, 1.0f},
         {playerAttackAnimation, AnimationLoopMode::Once, 3.0f},
-        { /* TODO: Add take damage animation*/ }
+        { /* TODO: Add take damage animation*/ },
+        { /* TODO: die animation*/ }
     };
     playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations, bulletPrefab->ToRef());
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
@@ -105,7 +107,7 @@ int main()
     CharacterAnimations practiceDummyAnimations = {};
     practiceDummyAnimations.idle = {practiceDummyIdleAnimation, AnimationLoopMode::Loop, 1.0f};
     practiceDummyAnimations.takeDamage = {practiceDummyTakeDamageAnimation, AnimationLoopMode::Once, 1.0f};
-
+    practiceDummyAnimations.die = {practiceDummyDieAnimation, AnimationLoopMode::Once, 1.5f};
     practiceDummyEntity->AddComponent<Enemy>(practiceDummyAnimations);
     practiceDummyEntity->AddComponent<Health>(100.0f);
 

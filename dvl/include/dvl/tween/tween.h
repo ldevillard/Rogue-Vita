@@ -49,6 +49,12 @@ namespace dvl
             return *this;
         }
 
+        Tween& Delay(float delay)
+        {
+            _delay = std::max(delay, 0.0f);
+            return *this;
+        }
+
         void Kill() override
         {
             _finished = true;
@@ -59,6 +65,12 @@ namespace dvl
         {
             if (_finished)
                 return;
+
+            if (_elapsedDelay < _delay)
+            {
+                _elapsedDelay += deltaTime;
+                return;
+            }
 
             if (!_started)
             {
@@ -118,6 +130,9 @@ namespace dvl
 
         float _duration;
         float _elapsedTime = 0.0f;
+
+        float _delay = 0.0f;
+        float _elapsedDelay = 0.0f;
 
         Easing _easing;
 
