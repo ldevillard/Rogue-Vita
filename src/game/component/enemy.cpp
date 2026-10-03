@@ -1,5 +1,7 @@
 #include "game/component/enemy.h"
 
+#include <dvl/tween/tweener.h>
+
 #include "engine/core/entity.h"
 
 Enemy::Enemy(Entity& entity)
@@ -18,6 +20,7 @@ void Enemy::Start()
 
     animator->Play(_animations.idle);
     _animator = animator->ToRef<Animator>();
+    _baseScale = entity.transform.scale;
 }
 
 void Enemy::Update(float)
@@ -33,4 +36,9 @@ void Enemy::Update(float)
 void Enemy::TakeDamage(float)
 {
     _animator.Get(GetWorld())->Restart(_animations.takeDamage, 0.1f);
+    
+    dvl::Tweener::Create(_baseScale * 1.25f, _baseScale, 0.2f, dvl::Easing::OutBack).OnUpdate([this](const dvl::Vec3& value)
+    {
+        entity.transform.scale = value;
+    });
 }

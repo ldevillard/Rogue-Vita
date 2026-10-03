@@ -1,5 +1,7 @@
 #pragma once
 
+#include <dvl/math/vec.h>
+
 #include "engine/component/animator.h"
 #include "engine/component/behavior.h"
 #include "engine/component/component_ref.h"
@@ -24,4 +26,6 @@ public:
 private:
     ComponentRef<Animator> _animator;
     CharacterAnimations _animations;
+
+    dvl::Vec3 _baseScale;
 };
