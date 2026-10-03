@@ -363,6 +363,11 @@ void Renderer::bindParameter(const ShaderParameterBinding& parameter, const Draw
                 _device.SetShaderParameter(parameter.handle, &context.material->color.x, 1);
             break;
 
+        case ShaderParameterSemantic::MaterialUnlit:
+            if (context.material != nullptr)
+                _device.SetShaderParameter(parameter.handle, &context.material->unlit, 1);
+            break;
+
         case ShaderParameterSemantic::AlbedoTexture:
         {
             if (context.material == nullptr)

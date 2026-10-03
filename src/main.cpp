@@ -65,6 +65,7 @@ int main()
     Entity* bulletPrefab = world.CreateEntity();
     Material bulletMaterial = assetRegistry.GetSolidMaterialInstance();
     bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
+    bulletMaterial.unlit = true;
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
     bulletPrefab->transform.position = dvl::Vec3(0.0f, 0.0f, 1.0f);
     bulletPrefab->transform.scale = dvl::Vec3(0.15f, 0.15f, 0.15f);

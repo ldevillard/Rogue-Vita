@@ -10,6 +10,7 @@ enum class ShaderParameterSemantic
     ModelMatrix,
 
     MaterialColor,
+    MaterialUnlit,
     AlbedoTexture,
 
     LightCount,

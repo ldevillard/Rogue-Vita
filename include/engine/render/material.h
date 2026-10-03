@@ -43,4 +43,5 @@ struct Material
     TextureHandle textureHandle;
     
     dvl::Vec4 color = dvl::Vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    bool unlit = false;
 };
