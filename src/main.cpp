@@ -55,20 +55,21 @@ int main()
 
     Entity* cameraEntity = world.CreateEntity();
     Camera& mainCamera = cameraEntity->AddComponent<Camera>(static_cast<float>(ScreenWidth), static_cast<float>(ScreenHeight), Camera::Orthographic);
-    cameraEntity->transform.position = dvl::Vec3(-5.0f, 5.0f, -5.0f);
+    cameraEntity->transform.position = dvl::Vec3(5.0f, 5.0f, 5.0f);
     cameraEntity->transform.LookAt(dvl::Vec3::Zero());
 
     Entity* playerEntity = world.CreateEntity();
-    playerEntity->transform.position = dvl::Vec3(0.75f, 0.5f, -0.75f);
+    playerEntity->transform.position = dvl::Vec3(-0.75f, 0.5f, 0.75f);
     playerEntity->transform.scale = dvl::Vec3::One();
 
     Entity* bulletPrefab = world.CreateEntity();
     Material bulletMaterial = assetRegistry.GetSolidMaterialInstance();
     bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
-    bulletPrefab->transform.position = dvl::Vec3(2.0f, 1.0f, 2.0f);
+    bulletPrefab->transform.position = dvl::Vec3(0.0f, 0.0f, 1.0f);
     bulletPrefab->transform.scale = dvl::Vec3(0.15f, 0.15f, 0.15f);
     bulletPrefab->AddComponent<Projectile>();
+    bulletPrefab->SetParent(playerEntity);
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
@@ -112,15 +113,15 @@ int main()
     groundMaterial.color = dvl::Vec4(0.8f, 0.8f, 0.8f, 1.0f);
     Entity* groundEntity = world.CreateEntity();
     groundEntity->transform.scale = dvl::Vec3(6.0f, 0.5f, 6.0f);
-    groundEntity->transform.rotation = dvl::Quat(0.0f, 1.0f, 0.0f, 0.0f);
+    groundEntity->transform.rotation = dvl::Quat::Identity();
     groundEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_battleground_01.dvlmesh"), renderer), groundMaterial);
 
     const MeshHandle wallEndMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/border_end_02.dvlmesh"), renderer);
     const MeshHandle wallMiddleMesh = assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/border_middle_02.dvlmesh"), renderer);
 
     Entity* wallEntity = world.CreateEntity();
-    wallEntity->transform.position = dvl::Vec3(2.3f, 0.05f, 0.0f);
-    wallEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(90.0f));
+    wallEntity->transform.position = dvl::Vec3(-2.3f, 0.05f, 0.0f);
+    wallEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(270.0f));
     wallEntity->transform.scale = dvl::Vec3(0.8f, 0.8f, 0.8f);
 
     MeshRenderer& wallLeftPillar = wallEntity->AddComponent<MeshRenderer>(wallEndMesh, environmentMaterial);
@@ -152,7 +153,7 @@ int main()
 
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
-    light.direction = dvl::Vec3(0.35f, -1.0f, 0.45f);
+    light.direction = dvl::Vec3(-0.35f, -1.0f, -0.45f);
     light.intensity = 1.3f;
 
     while (renderer.ShouldClose() == false)
@@ -204,21 +205,29 @@ int main()
                 if (animator == nullptr || !animator->IsValid())
                     continue;
 
-                const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
+                const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
                 renderer.DrawSkinned(*mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
                 
                 continue;
             }
 
-            const dvl::Mat4 modelMatrix = entity->transform.GetMatrix() * meshRenderer->localTransform.GetMatrix();
+            const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * meshRenderer->localTransform.GetMatrix();
             renderer.Draw(*mesh, meshRenderer->material, modelMatrix);
         }
 
         // Debug editor only logic
-        for (BoxCollider* boxCollider : world.GetComponents<BoxCollider>())
         {
-            const Transform& transform = boxCollider->GetTransform();
-            DebugDraw::DrawWireCube(boxCollider->box.center, boxCollider->box.size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
+            const dvl::Vec3 worldOrigin = dvl::Vec3(2.0f, 0.5f, 2.0f);
+            constexpr float worldAxisLength = 1.0f;
+            DebugDraw::DrawLine(worldOrigin, worldOrigin + dvl::Vec3(1.0f, 0.0f, 0.0f) * worldAxisLength, dvl::Vec4(1.0f, 0.0f, 0.0f, 1.0f));
+            DebugDraw::DrawLine(worldOrigin, worldOrigin + dvl::Vec3(0.0f, 1.0f, 0.0f) * worldAxisLength, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f));
+            DebugDraw::DrawLine(worldOrigin, worldOrigin + dvl::Vec3(0.0f, 0.0f, 1.0f) * worldAxisLength, dvl::Vec4(0.0f, 0.0f, 1.0f, 1.0f));
+            
+            for (BoxCollider* boxCollider : world.GetComponents<BoxCollider>())
+            {
+                const Transform& transform = boxCollider->GetTransform();
+                DebugDraw::DrawWireCube(boxCollider->box.center, boxCollider->box.size, dvl::Vec4(0.0f, 1.0f, 0.0f, 1.0f), transform.GetMatrix());
+            }
         }
 
         renderer.EndFrame();

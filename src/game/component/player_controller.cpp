@@ -12,6 +12,7 @@
 #include "engine/debug/debug_draw.h"
 #include "engine/physics/physics.h"
 
+#include "game/component/enemy.h"
 #include "game/component/projectile.h"
 
 PlayerController::PlayerController(Entity& entity)
@@ -133,7 +134,7 @@ void PlayerController::attack()
 
     for (Collider* collider : colliders)
     {
-        if (collider->GetEntity() == &entity)
+        if (collider->GetEntity() == &entity || collider->GetEntity()->GetComponent<Enemy>() == nullptr)
         {
             continue;
         }

@@ -7,10 +7,9 @@
 #include <vector>
 
 #include "engine/component/component.h"
+#include "engine/core/entity_ref.h"
 #include "engine/core/transform.h"
 #include "engine/core/world.h"
-
-class EntityRef;
 
 class Entity
 {
@@ -66,6 +65,15 @@ public:
 
     const std::vector<std::unique_ptr<Component>>& GetComponents() const;
 
+    void SetParent(Entity* parent);
+    Entity* GetParent() const;
+
+    void AddChild(Entity* child);
+    void RemoveChild(Entity* child);
+    const std::vector<EntityRef>& GetChildren() const;
+
+    dvl::Mat4 GetWorldMatrix() const;
+
     Transform transform;
     unsigned int id = 0;
 
@@ -73,4 +81,8 @@ private:
     World& _world;
 
     std::vector<std::unique_ptr<Component>> _components;
+
+    // Hierarchy
+    EntityRef _parent;
+    std::vector<EntityRef> _children;
 };
