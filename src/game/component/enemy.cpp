@@ -21,6 +21,8 @@ void Enemy::Start()
     animator->Play(_animations.idle);
     _animator = animator->ToRef<Animator>();
     _baseScale = entity.transform.scale;
+
+    _health = entity.GetComponent<Health>()->ToRef<Health>();
 }
 
 void Enemy::Update(float)
@@ -33,10 +35,11 @@ void Enemy::Update(float)
     }
 }
 
-void Enemy::TakeDamage(float)
+void Enemy::TakeDamage(float amount)
 {
     _animator.Get(GetWorld())->Restart(_animations.takeDamage, 0.1f);
-    
+    _health.Get(GetWorld())->Damage(amount);
+
     dvl::Tweener::Create(_baseScale * 1.25f, _baseScale, 0.2f, dvl::Easing::OutBack).OnUpdate([this](const dvl::Vec3& value)
     {
         entity.transform.scale = value;

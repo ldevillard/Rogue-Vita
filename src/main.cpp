@@ -17,6 +17,7 @@
 #include "engine/system/animation_system.h"
 
 #include "game/component/enemy.h"
+#include "game/component/health.h"
 #include "game/component/player_controller.h"
 #include "game/component/projectile.h"
 #include "game/component/spring_arm.h"
@@ -106,6 +107,7 @@ int main()
     practiceDummyAnimations.takeDamage = {practiceDummyTakeDamageAnimation, AnimationLoopMode::Once, 1.0f};
 
     practiceDummyEntity->AddComponent<Enemy>(practiceDummyAnimations);
+    practiceDummyEntity->AddComponent<Health>(100.0f);
 
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);

@@ -7,6 +7,7 @@
 #include "engine/component/component_ref.h"
 
 #include "game/animation/character_animations.h"
+#include "game/component/health.h"
 #include "game/interface/idamageable.h"
 
 class Enemy : public Behavior, public IDamageable
@@ -16,7 +17,7 @@ public:
     Enemy(Entity& entity, const CharacterAnimations& animations);
 
     COMPONENT_TYPES(Enemy, Behavior, Component)
-    COMPONENT_FIELDS(Behavior, _animator, _animations)
+    COMPONENT_FIELDS(Behavior, _animator, _animations, _health)
 
     void Start() override;
     void Update(float deltaTime) override;
@@ -26,6 +27,8 @@ public:
 private:
     ComponentRef<Animator> _animator;
     CharacterAnimations _animations;
+
+    ComponentRef<Health> _health;
 
     dvl::Vec3 _baseScale;
 };
