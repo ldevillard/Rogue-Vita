@@ -62,3 +62,50 @@ DVL_TEST(TransformLookDirectionUpdatesLocalAxes)
 
     return true;
 }
+
+DVL_TEST(TransformDefaultAxesUseNegativeZAsForward)
+{
+    const Transform transform;
+    const dvl::Vec3 forward = transform.GetForward();
+    const dvl::Vec3 right = transform.GetRight();
+    const dvl::Vec3 up = transform.GetUp();
+
+    DVL_EXPECT_NEAR(forward.x, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(forward.y, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(forward.z, -1.0f, Tolerance);
+    DVL_EXPECT_NEAR(right.x, 1.0f, Tolerance);
+    DVL_EXPECT_NEAR(right.y, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(right.z, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(up.x, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(up.y, 1.0f, Tolerance);
+    DVL_EXPECT_NEAR(up.z, 0.0f, Tolerance);
+
+    return true;
+}
+
+DVL_TEST(TransformDirectionsAreNormalizedDespiteScale)
+{
+    Transform transform;
+    transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Pi / 3.0f);
+    transform.scale = dvl::Vec3(2.0f, 3.0f, 4.0f);
+
+    DVL_EXPECT_NEAR(transform.GetForward().Length(), 1.0f, Tolerance);
+    DVL_EXPECT_NEAR(transform.GetRight().Length(), 1.0f, Tolerance);
+    DVL_EXPECT_NEAR(transform.GetUp().Length(), 1.0f, Tolerance);
+
+    return true;
+}
+
+DVL_TEST(TransformLookAtUsesTheTransformPosition)
+{
+    Transform transform;
+    transform.position = dvl::Vec3(4.0f, -2.0f, 7.0f);
+    transform.LookAt(dvl::Vec3(4.0f, -2.0f, 2.0f));
+
+    const dvl::Vec3 forward = transform.GetForward();
+    DVL_EXPECT_NEAR(forward.x, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(forward.y, 0.0f, Tolerance);
+    DVL_EXPECT_NEAR(forward.z, -1.0f, Tolerance);
+
+    return true;
+}
