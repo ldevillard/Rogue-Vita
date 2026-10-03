@@ -50,6 +50,11 @@ void Enemy::TakeDamage(float amount)
     _animator.Get(GetWorld())->Restart(_animations.takeDamage, 0.1f);
     _health.Get(GetWorld())->Damage(amount);
 
+    dvl::Tweener::Create(_baseScale * 1.25f, _baseScale, 0.2f, dvl::Easing::OutBack).OnUpdate([this](const dvl::Vec3& value)
+    {
+        entity.transform.scale = value;
+    });
+
     if (_health.Get(GetWorld())->IsDead())
     {
         _animator.Get(GetWorld())->Play(_animations.die, 0.1f);
@@ -66,9 +71,4 @@ void Enemy::TakeDamage(float amount)
         
         return;
     }
-
-    dvl::Tweener::Create(_baseScale * 1.25f, _baseScale, 0.2f, dvl::Easing::OutBack).OnUpdate([this](const dvl::Vec3& value)
-    {
-        entity.transform.scale = value;
-    });
 }

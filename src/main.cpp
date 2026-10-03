@@ -119,6 +119,9 @@ int main()
     healthDisplayerEntity->transform.scale = dvl::Vec3(0.5f, 0.05f, 0.1f);
     healthDisplayerEntity->SetParent(practiceDummyEntity);
 
+    Entity* clonedPracticeDummy = world.Instantiate(*practiceDummyEntity);
+    clonedPracticeDummy->transform.position = dvl::Vec3(1.5f, 0.5f, 0.0f);
+
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
 
