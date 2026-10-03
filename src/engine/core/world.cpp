@@ -5,6 +5,7 @@
 #include <string>
 #include <typeinfo>
 
+#include "engine/component/component_ref.h"
 #include "engine/core/entity.h"
 
 World::World()
@@ -28,16 +29,18 @@ Entity* World::CreateEntity()
     return result;
 }
 
-void World::DestroyEntity(unsigned int id)
+void World::DestroyEntity(EntityRef entityRef)
 {
-     for (auto it = _entities.begin(); it != _entities.end(); it++)
+    if (entityRef.Get(*this) == nullptr)
+        return;
+
+    for (const EntityRef& pendingEntity : _pendingDestroyEntities)
     {
-        if ((*it)->id == id)
-        {
-            _entities.erase(it);
+        if (pendingEntity.id == entityRef.id)
             return;
-        }
     }
+
+    _pendingDestroyEntities.push_back(entityRef);
 }
 
 Entity* World::FindEntity(unsigned int id)
@@ -66,8 +69,8 @@ void World::RegisterComponent(Component* component)
         _registeredComponents[type].push_back(component);
     }
 
-    _pendingStartComponents.push_back(component);
     _componentsById[component->id] = component;
+    _pendingStartComponents.push_back(component->ToRef<Component>());
 }
 
 void World::UnRegisterComponent(Component* component)
@@ -97,12 +100,6 @@ void World::UnRegisterComponent(Component* component)
         {
             _registeredComponents.erase(componentGroup);
         }
-    }
-
-    auto it = std::find(_pendingStartComponents.begin(), _pendingStartComponents.end(), component);
-    if (it != _pendingStartComponents.end())
-    {
-        _pendingStartComponents.erase(it);
     }
 
     _componentsById.erase(component->id);
@@ -169,15 +166,51 @@ Entity* World::Instantiate(const Entity& source)
 
 void World::StartPendingComponents()
 {
-    for (Component* component : _pendingStartComponents)
+    for (const ComponentRef<Component>& componentRef : _pendingStartComponents)
     {
-        component->Start();
+        Component* component = componentRef.Get(*this);
+        if (component != nullptr)
+            component->Start();
     }
 
     _pendingStartComponents.clear();
 }
     
+void World::FlushDestroyedEntities()
+{
+    for (const EntityRef& entityRef : _pendingDestroyEntities)
+    {
+        destroyEntity(entityRef);
+    }
+
+    _pendingDestroyEntities.clear();
+}
+
 const std::vector<std::unique_ptr<Entity>>& World::GetEntities() const
 {
     return _entities;
+}
+
+void World::destroyEntity(EntityRef entityRef)
+{
+    Entity* entity = entityRef.Get(*this);
+    if (entity == nullptr)
+        return;
+
+    entity->SetParent(nullptr);
+
+    const std::vector<EntityRef> children = entity->GetChildren();
+    for (const EntityRef& child : children)
+    {
+        destroyEntity(child);
+    }
+
+    for (std::size_t i = 0; i < _entities.size(); i++)
+    {
+        if (_entities[i]->id == entityRef.id)
+        {
+            _entities.erase(_entities.begin() + i);
+            return;
+        }
+    }
 }

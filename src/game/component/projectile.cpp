@@ -30,7 +30,7 @@ void Projectile::Update(float deltaTime)
     _remainingLifetime -= deltaTime;
     if (_remainingLifetime <= 0.0f)
     {
-        GetWorld().DestroyEntity(entity.id);
+        GetWorld().DestroyEntity(entity.ToRef());
         return;
     }
 

@@ -5,8 +5,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "engine/core/entity_ref.h"
+
 class Component;
 class Entity;
+
+template<typename T>
+struct ComponentRef;
 
 class World
 {
@@ -15,18 +20,18 @@ public:
     ~World();
 
     Entity* CreateEntity();
-    // TODO: Add a destroy flush system to avoid destroying entities during update loops
-    void DestroyEntity(unsigned int id);
+    void DestroyEntity(EntityRef entityRef);
     
     Entity* FindEntity(unsigned int id);
     Component* FindComponent(unsigned int id);
-
+    
     void RegisterComponent(Component* component);
     void UnRegisterComponent(Component* component);
-
+    
     Entity* Instantiate(const Entity& source);
-
+    
     void StartPendingComponents();
+    void FlushDestroyedEntities();
     
     const std::vector<std::unique_ptr<Entity>>& GetEntities() const;
 
@@ -48,13 +53,16 @@ public:
     }
 
 private:
+    void destroyEntity(EntityRef entityRef);
+
     unsigned int _nextEntityId = 1;
     unsigned int _nextComponentId = 1;
 
     std::vector<std::unique_ptr<Entity>> _entities;
     std::unordered_map<unsigned int, Component*> _componentsById;
 
-    std::vector<Component*> _pendingStartComponents;
+    std::vector<ComponentRef<Component>> _pendingStartComponents;
+    std::vector<EntityRef> _pendingDestroyEntities;
 
     // This is a filtered view of all components, there is no ownership on them
     std::unordered_map<std::type_index, std::vector<Component*>> _registeredComponents;

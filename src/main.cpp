@@ -64,11 +64,11 @@ int main()
 
     Entity* bulletPrefab = world.CreateEntity();
     Material bulletMaterial = assetRegistry.GetSolidMaterialInstance();
-    bulletMaterial.color = dvl::Vec4(1.0f, 0.6f, 0.0f, 1.0f);
+    bulletMaterial.color = dvl::Vec4(1.0f, 0.7f, 0.2f, 1.0f);
     bulletMaterial.unlit = true;
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
     bulletPrefab->transform.position = dvl::Vec3(0.0f, 0.0f, 1.0f);
-    bulletPrefab->transform.scale = dvl::Vec3(0.15f, 0.15f, 0.15f);
+    bulletPrefab->transform.scale = dvl::Vec3(0.13f, 0.13f, 0.13f);
     bulletPrefab->AddComponent<Projectile>();
     bulletPrefab->SetParent(playerEntity);
 
@@ -176,6 +176,8 @@ int main()
             {
                 behavior->Update(deltaTime);
             }
+
+            world.FlushDestroyedEntities();
 
             // Initialize components instantiated during gameplay before rendering
             world.StartPendingComponents();
