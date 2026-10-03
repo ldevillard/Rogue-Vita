@@ -34,8 +34,9 @@ void DebugDraw::DrawLine(const dvl::Vec3& from, const dvl::Vec3& to, const dvl::
 
     float length = (to - from).Length();
     dvl::Vec3 direction = (to - from).Normalized();
+    const dvl::Vec3 up = direction.y > 0.999f || direction.y < -0.999f ? dvl::Vec3(0.0f, 0.0f, 1.0f) : dvl::Vec3(0.0f, 1.0f, 0.0f);
 
-    const dvl::Mat4 mat = dvl::Mat4::Translation(from) * dvl::Mat4::LookRotation(direction) * dvl::Mat4::Scale(dvl::Vec3(1.0f, 1.0f, length));
+    const dvl::Mat4 mat = dvl::Mat4::Translation(from) * dvl::Mat4::LookRotation(direction, up) * dvl::Mat4::Scale(dvl::Vec3(1.0f, 1.0f, length));
 
     _material.color = color;
 
