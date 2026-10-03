@@ -18,6 +18,7 @@ public:
 
     float GetHealth() const;
     float GetMaxHealth() const;
+    float GetHealthPercentage() const;
     bool IsDead() const;
     
 private:

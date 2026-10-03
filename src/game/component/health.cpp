@@ -40,6 +40,16 @@ float Health::GetMaxHealth() const
     return _maxHealth;
 }
 
+float Health::GetHealthPercentage() const
+{
+    if (_maxHealth <= 0.0f)
+    {
+        return 0.0f;
+    }
+
+    return _health / _maxHealth;
+}
+
 bool Health::IsDead() const
 {
     return _health <= 0.0f;

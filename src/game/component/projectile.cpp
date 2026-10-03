@@ -42,7 +42,7 @@ void Projectile::Update(float deltaTime)
     {
         if (IDamageable* damageable = hit.collider->GetEntity()->GetInterface<IDamageable>())
         {
-            damageable->TakeDamage(1.0f);
+            damageable->TakeDamage(10.0f);
         }
 
         _direction = dvl::Reflect(_direction, hit.normal);

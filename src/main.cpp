@@ -18,6 +18,7 @@
 
 #include "game/component/enemy.h"
 #include "game/component/health.h"
+#include "game/component/health_displayer.h"
 #include "game/component/player_controller.h"
 #include "game/component/projectile.h"
 #include "game/component/spring_arm.h"
@@ -109,7 +110,14 @@ int main()
     practiceDummyAnimations.takeDamage = {practiceDummyTakeDamageAnimation, AnimationLoopMode::Once, 1.0f};
     practiceDummyAnimations.die = {practiceDummyDieAnimation, AnimationLoopMode::Once, 1.5f};
     practiceDummyEntity->AddComponent<Enemy>(practiceDummyAnimations);
-    practiceDummyEntity->AddComponent<Health>(100.0f);
+    Health& health = practiceDummyEntity->AddComponent<Health>(100.0f);
+
+    Entity* healthDisplayerEntity = world.CreateEntity();
+    healthDisplayerEntity->AddComponent<HealthDisplayer>(health.ToRef<Health>());
+    healthDisplayerEntity->AddComponent<MeshRenderer>(assetRegistry.GetCubeMeshHandle(), assetRegistry.GetSolidMaterialInstance());
+    healthDisplayerEntity->transform.position = dvl::Vec3(0.0f, 1.0f, 0.0f);
+    healthDisplayerEntity->transform.scale = dvl::Vec3(0.5f, 0.05f, 0.1f);
+    healthDisplayerEntity->SetParent(practiceDummyEntity);
 
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
