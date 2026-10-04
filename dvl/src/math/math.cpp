@@ -19,6 +19,11 @@ namespace dvl
         return value < minimum ? minimum : (value > maximum ? maximum : value);
     }
 
+    float Lerp(float a, float b, float t)
+    {
+        return a + (b - a) * t;
+    }
+
     float InverseSqrt(float value)
     {
         return 1.0f / std::sqrt(value);

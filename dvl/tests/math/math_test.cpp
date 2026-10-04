@@ -69,6 +69,16 @@ DVL_TEST(ClampRestrictsValuesToTheRequestedRange)
     return true;
 }
 
+DVL_TEST(FloatLerpInterpolatesAndExtrapolates)
+{
+    DVL_EXPECT_NEAR(dvl::Lerp(2.0f, 6.0f, 0.0f), 2.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Lerp(2.0f, 6.0f, 0.5f), 4.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Lerp(2.0f, 6.0f, 1.0f), 6.0f, Epsilon);
+    DVL_EXPECT_NEAR(dvl::Lerp(2.0f, 6.0f, 1.5f), 8.0f, Epsilon);
+
+    return true;
+}
+
 DVL_TEST(InverseSqrtReturnsReciprocalSquareRoot)
 {
     DVL_EXPECT_NEAR(dvl::InverseSqrt(1.0f), 1.0f, Epsilon);

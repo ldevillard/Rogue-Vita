@@ -15,5 +15,6 @@ namespace dvl
     float Radians(float degrees);
     float Degrees(float radians);
     float Clamp(float value, float minimum, float maximum);
+    float Lerp(float a, float b, float t);
     float InverseSqrt(float value);
 }
