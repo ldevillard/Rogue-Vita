@@ -68,7 +68,7 @@ int main()
     Entity* bulletPrefab = world.CreateEntity();
     Material bulletMaterial = assetRegistry.GetSolidMaterialInstance();
     bulletMaterial.color = dvl::Vec4(1.0f, 0.7f, 0.2f, 1.0f);
-    bulletMaterial.unlit = true;
+    bulletMaterial.unlit = false;
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
     bulletPrefab->transform.position = dvl::Vec3(0.0f, 0.0f, 1.0f);
     bulletPrefab->transform.scale = dvl::Vec3(0.13f, 0.13f, 0.13f);
@@ -125,6 +125,24 @@ int main()
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
 
+    Entity* flagEntity = world.CreateEntity();
+    flagEntity->transform.position = dvl::Vec3(-1.9f, 0.8f, -2.0f);
+    flagEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(45.0f));
+    flagEntity->transform.scale = dvl::Vec3(1.5f, 1.5f, 1.5f);
+    flagEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_flag_blue.dvlmesh"), renderer), environmentMaterial);
+
+    Entity* urnEntity = world.CreateEntity();
+    urnEntity->transform.position = dvl::Vec3(-1.75f, 0.3f, -0.9f);
+    urnEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(20.0f));
+    urnEntity->transform.scale = dvl::Vec3(0.55f, 0.55f, 0.55f);
+    urnEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_urn_02.dvlmesh"), renderer), environmentMaterial);
+
+    Entity* secondUrnEntity = world.CreateEntity();
+    secondUrnEntity->transform.position = dvl::Vec3(-1.45f, 0.275f, -1.85f);
+    secondUrnEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(-25.0f));
+    secondUrnEntity->transform.scale = dvl::Vec3(0.4f, 0.4f, 0.4f);
+    secondUrnEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_urn_03.dvlmesh"), renderer), environmentMaterial);
+
     Material groundMaterial = environmentMaterial;
     groundMaterial.color = dvl::Vec4(0.8f, 0.8f, 0.8f, 1.0f);
     Entity* groundEntity = world.CreateEntity();
@@ -170,7 +188,8 @@ int main()
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
     light.direction = dvl::Vec3(-0.35f, -1.0f, -0.45f);
-    light.intensity = 1.3f;
+    light.color = dvl::Vec3(1.0f, 0.8f, 0.8f);
+    light.intensity = 1.2f;
 
     while (renderer.ShouldClose() == false)
     {
