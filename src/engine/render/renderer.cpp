@@ -259,7 +259,7 @@ void Renderer::SubmitLight(const DirectionalLight& light)
 
 void Renderer::SubmitLight(const PointLight& light)
 {
-    if (_lightCount >= MaxLights)
+        if (_lightCount >= MaxLights)
     {
         return;
     }

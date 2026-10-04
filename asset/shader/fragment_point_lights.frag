@@ -10,11 +10,16 @@ const int MAX_LIGHTS = 4;
 
 uniform int lightCount;
 
-// xyz = light direction
+// xyz = direction for DirectionalLight
+// xyz = position for PointLight
+// w   = type : 0 directional, 1 point
 uniform vec4 lightVectors[MAX_LIGHTS];
 // rgb = color
 // a   = intensity
 uniform vec4 lightColors[MAX_LIGHTS];
+// x = radius for PointLight
+// y = falloff for PointLight
+uniform vec4 lightParams[MAX_LIGHTS];
 
 uniform vec3 cameraPosition;
 
@@ -65,6 +70,37 @@ vec3 computeToonColor(vec3 objectColor, float ndl)
     return color;
 }
 
+float computeStylizedAttenuation(float distanceToLight, float radius, float fallOff)
+{
+    float normalizedDistance = distanceToLight / radius;
+
+    if (normalizedDistance >= 1.0)
+        return 0.0;
+
+    float fadeStart = clamp(fallOff, 0.0, 1.0);
+
+    float attenuation = 1.0 - smoothstep(fadeStart, 1.0, normalizedDistance);
+
+    const float BAND_SMOOTHNESS = 0.1;
+
+    float outerBand = smoothstep(
+        0.20 - BAND_SMOOTHNESS,
+        0.20 + BAND_SMOOTHNESS,
+        attenuation
+    );
+
+    float innerBand = smoothstep(
+        0.6 - BAND_SMOOTHNESS,
+        0.6 + BAND_SMOOTHNESS,
+        attenuation
+    );
+
+    float result = mix(0.0, 0.55, outerBand);
+    result = mix(result, 1.0, innerBand);
+
+    return result;
+}
+
 vec3 computeLighting(vec3 objectColor)
 {
     vec3 normal = normalize(vNormal);
@@ -77,18 +113,41 @@ vec3 computeLighting(vec3 objectColor)
         if (i >= lightCount)
             continue;
 
-        vec3 lightDirection = normalize(-lightVectors[i].xyz);
+        bool isPointLight = lightVectors[i].w == 1.0;
+        vec3 lightDirection;
+        float lightStrength = SECONDARY_LIGHT_STRENGTH;
+
+        if (isPointLight)
+        {
+            vec3 toLight = lightVectors[i].xyz - vWorldPosition;
+            float distanceToLight = length(toLight);
+
+            float radius = lightParams[i].x;
+            float fallOff = lightParams[i].y;
+
+            if (distanceToLight > radius)
+                continue;
+
+            lightDirection = toLight / distanceToLight;
+
+            lightStrength = computeStylizedAttenuation(distanceToLight, radius, fallOff);
+        }
+        else
+        {
+            lightDirection = normalize(-lightVectors[i].xyz);
+        }
+
         vec3 lightColor = lightColors[i].rgb * lightColors[i].a;
 
         float ndl = max(dot(normal, lightDirection), 0.0);
 
-        if (i == 0)
+        if (i == 0 && !isPointLight)
         {
             result += computeToonColor(objectColor, ndl) * lightColor;
         }
         else
         {
-            result += objectColor * lightColor * ndl * SECONDARY_LIGHT_STRENGTH;
+            result += objectColor * lightColor * ndl * lightStrength;
         }
     }
 

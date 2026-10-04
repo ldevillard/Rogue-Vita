@@ -554,7 +554,6 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
         {"lightVectors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightVectors},
         {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
-        {"lightParams", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightParams},
         {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
         {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture}
     };
@@ -622,7 +621,6 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
         {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
         {"lightVectors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightVectors},
         {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
-        {"lightParams", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightParams},
         {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
         {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture},
         {"skinningMatrices", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::SkinningMatrices}

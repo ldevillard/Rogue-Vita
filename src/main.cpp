@@ -260,10 +260,11 @@ int main()
             renderer.SubmitLight(*directionalLight);
         }
 
-        for (PointLight* pointLight : world.GetComponents<PointLight>())
-        {
-            renderer.SubmitLight(*pointLight);
-        }
+        // Point lights are currently disabled due to performance issues
+        //for (PointLight* pointLight : world.GetComponents<PointLight>())
+        //{
+        //    renderer.SubmitLight(*pointLight);
+        //}
 
         // Render logic
         for (const MeshRenderer* meshRenderer : world.GetComponents<MeshRenderer>())
