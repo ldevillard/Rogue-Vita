@@ -20,6 +20,7 @@
 #include "game/component/enemy.h"
 #include "game/component/health.h"
 #include "game/component/health_displayer.h"
+#include "game/component/light_flicker.h"
 #include "game/component/player_controller.h"
 #include "game/component/projectile.h"
 #include "game/component/spring_arm.h"
@@ -71,10 +72,9 @@ int main()
     bulletMaterial.color = dvl::Vec4(1.0f, 0.7f, 0.2f, 1.0f);
     bulletMaterial.unlit = false;
     bulletPrefab->AddComponent<MeshRenderer>(assetRegistry.GetSphereMeshHandle(), bulletMaterial);
-    bulletPrefab->transform.position = dvl::Vec3(0.0f, 0.0f, 1.0f);
+    bulletPrefab->transform.position = dvl::Vec3(0.0f, -1.0f, 0.0f);
     bulletPrefab->transform.scale = dvl::Vec3(0.13f, 0.13f, 0.13f);
     bulletPrefab->AddComponent<Projectile>();
-    bulletPrefab->SetParent(playerEntity);
 
     Material playerMaterial = assetRegistry.GetSolidMaterialInstance();
     playerMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/target_dummy.dvltex"), renderer);
@@ -90,13 +90,17 @@ int main()
     };
     playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations, bulletPrefab->ToRef());
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
+    PointLight& playerPointLight = playerEntity->AddComponent<PointLight>();
+    playerPointLight.intensity = 0.2f;
+    playerPointLight.radius = 1.0f;
+    playerPointLight.falloff = 0.0f;
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->ToRef());
 
     Entity* practiceDummyEntity = world.CreateEntity();
     practiceDummyEntity->transform.position = dvl::Vec3(0.0f, 0.5f, 0.0f);
     practiceDummyEntity->transform.scale = dvl::Vec3::One();
-    practiceDummyEntity->AddComponent<BoxCollider>(dvl::Vec3(0.0f, 0.25f, 0.0f), dvl::Vec3(0.5f, 0.8f, 0.5f));
+    practiceDummyEntity->AddComponent<BoxCollider>(dvl::Vec3(0.0f, 0.25f, 0.0f), dvl::Vec3(0.3f, 0.6f, 0.3f));
 
     dvl::Vec3 practiceDummyCameraDirection = cameraEntity->transform.position - practiceDummyEntity->transform.position;
     practiceDummyCameraDirection.y = 0.0f;
@@ -126,6 +130,9 @@ int main()
     Material environmentMaterial = assetRegistry.GetSolidMaterialInstance();
     environmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/small_scene_forest_ruins.dvltex"), renderer);
 
+    Material dungeonEnvironmentMaterial = assetRegistry.GetSolidMaterialInstance();
+    dungeonEnvironmentMaterial.textureHandle = assetRegistry.LoadTexture(dvl::Filesystem::GetAssetPath("cooked/texture/environment_dungeon.dvltex"), renderer);
+
     Entity* flagEntity = world.CreateEntity();
     flagEntity->transform.position = dvl::Vec3(-1.9f, 0.8f, -2.0f);
     flagEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(45.0f));
@@ -143,6 +150,22 @@ int main()
     secondUrnEntity->transform.rotation = dvl::Quat::FromAxisAngle(dvl::Vec3(0.0f, 1.0f, 0.0f), dvl::Radians(-25.0f));
     secondUrnEntity->transform.scale = dvl::Vec3(0.4f, 0.4f, 0.4f);
     secondUrnEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/small_scene_urn_03.dvlmesh"), renderer), environmentMaterial);
+
+    Entity* potEntity = world.CreateEntity();
+    potEntity->transform.position = dvl::Vec3(1.75f, 0.25f, 1.45f);
+    potEntity->transform.scale = dvl::Vec3(0.5f, 0.5f, 0.5f);
+    potEntity->AddComponent<MeshRenderer>(assetRegistry.LoadMesh(dvl::Filesystem::GetAssetPath("cooked/mesh/dungeon_cute_pot_01.dvlmesh"), renderer), dungeonEnvironmentMaterial);
+    
+    Entity* potPointLightEntity = world.CreateEntity();
+    potPointLightEntity->transform.position = dvl::Vec3(0.0f, 0.14f, 0.0f);
+    potPointLightEntity->SetParent(potEntity);
+    PointLight& potPointLight = potPointLightEntity->AddComponent<PointLight>();
+    potPointLight.color = dvl::Vec3(0.0f, 0.6f, 1.0f);
+    potPointLight.falloff = 0.0f;
+    potPointLight.intensity = 2.0f;
+    potPointLight.radius = 1.0f;
+    LightFlicker& potLightFlicker = potPointLightEntity->AddComponent<LightFlicker>();
+    potLightFlicker.duration = 0.2f;
 
     Material groundMaterial = environmentMaterial;
     groundMaterial.color = dvl::Vec4(0.8f, 0.8f, 0.8f, 1.0f);
@@ -190,15 +213,18 @@ int main()
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
     light.direction = dvl::Vec3(-0.35f, -1.0f, -0.45f);
     light.color = dvl::Vec3(0.6f, 0.6f, 1.0f);
-    light.intensity = 1.2f;
+    light.intensity = 1.4f;
 
     Entity* pointlightEntity = world.CreateEntity();
     pointlightEntity->transform.position = dvl::Vec3(-1.5f, 1.5f, -1.5f);
     PointLight& pointLight = pointlightEntity->AddComponent<PointLight>();
     pointLight.color = dvl::Vec3(1.0f, 0.6f, 0.6f);
-    pointLight.falloff = 0.85f;
+    pointLight.falloff = 0.7f;
     pointLight.intensity = 1.0f;
     pointLight.radius = 2.0f;
+    LightFlicker& pointLightFlicker = pointlightEntity->AddComponent<LightFlicker>();
+    pointLightFlicker.duration = 1.0f;
+    pointLightFlicker.factor = 1.02f;
 
     while (renderer.ShouldClose() == false)
     {

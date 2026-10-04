@@ -70,6 +70,37 @@ vec3 computeToonColor(vec3 objectColor, float ndl)
     return color;
 }
 
+float computeStylizedAttenuation(float distanceToLight, float radius, float fallOff)
+{
+    float normalizedDistance = distanceToLight / radius;
+
+    if (normalizedDistance >= 1.0)
+        return 0.0;
+
+    float fadeStart = clamp(fallOff, 0.0, 1.0);
+
+    float attenuation = 1.0 - smoothstep(fadeStart, 1.0, normalizedDistance);
+
+    const float BAND_SMOOTHNESS = 0.1;
+
+    float outerBand = smoothstep(
+        0.20 - BAND_SMOOTHNESS,
+        0.20 + BAND_SMOOTHNESS,
+        attenuation
+    );
+
+    float innerBand = smoothstep(
+        0.6 - BAND_SMOOTHNESS,
+        0.6 + BAND_SMOOTHNESS,
+        attenuation
+    );
+
+    float result = mix(0.0, 0.55, outerBand);
+    result = mix(result, 1.0, innerBand);
+
+    return result;
+}
+
 vec3 computeLighting(vec3 objectColor)
 {
     vec3 normal = normalize(vNormal);
@@ -90,14 +121,16 @@ vec3 computeLighting(vec3 objectColor)
         {
             vec3 toLight = lightVectors[i].xyz - vWorldPosition;
             float distanceToLight = length(toLight);
+
             float radius = lightParams[i].x;
             float fallOff = lightParams[i].y;
 
             if (distanceToLight > radius)
                 continue;
 
-            lightDirection = normalize(toLight);
-            lightStrength = 1.0 - smoothstep(radius * fallOff, radius, distanceToLight);
+            lightDirection = toLight / distanceToLight;
+
+            lightStrength = computeStylizedAttenuation(distanceToLight, radius, fallOff);        
         }
         else
         {

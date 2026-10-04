@@ -43,6 +43,8 @@ void Projectile::Update(float deltaTime)
         if (IDamageable* damageable = hit.collider->GetEntity()->GetInterface<IDamageable>())
         {
             damageable->TakeDamage(10.0f);
+            GetWorld().DestroyEntity(entity.ToRef());
+            return;
         }
 
         _direction = dvl::Reflect(_direction, hit.normal);
