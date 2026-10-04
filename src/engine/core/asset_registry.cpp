@@ -552,8 +552,9 @@ void AssetRegistry::loadMaterials(Renderer& renderer)
         {"materialColor", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::MaterialColor},
         {"materialUnlit", dvl::ShaderParameterType::Int, ShaderParameterSemantic::MaterialUnlit},
         {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
-        {"lightDirections", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightDirections},
+        {"lightVectors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightVectors},
         {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
+        {"lightParams", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightParams},
         {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
         {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture}
     };
@@ -619,8 +620,9 @@ void AssetRegistry::loadSkinnedMaterials(Renderer& renderer)
         {"materialColor", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::MaterialColor},
         {"materialUnlit", dvl::ShaderParameterType::Int, ShaderParameterSemantic::MaterialUnlit},
         {"lightCount", dvl::ShaderParameterType::Int, ShaderParameterSemantic::LightCount},
-        {"lightDirections", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightDirections},
+        {"lightVectors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightVectors},
         {"lightColors", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightColors},
+        {"lightParams", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::LightParams},
         {"cameraPosition", dvl::ShaderParameterType::Float3, ShaderParameterSemantic::CameraPosition},
         {"albedoTexture", dvl::ShaderParameterType::Int, ShaderParameterSemantic::AlbedoTexture},
         {"skinningMatrices", dvl::ShaderParameterType::Float4, ShaderParameterSemantic::SkinningMatrices}

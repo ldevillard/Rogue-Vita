@@ -14,8 +14,9 @@ enum class ShaderParameterSemantic
     AlbedoTexture,
 
     LightCount,
-    LightDirections,
+    LightVectors,
     LightColors,
+    LightParams,
 
     SkinningMatrices
 };

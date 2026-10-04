@@ -9,8 +9,17 @@ uniform int materialUnlit;
 const int MAX_LIGHTS = 4;
 
 uniform int lightCount;
-uniform vec4 lightDirections[MAX_LIGHTS];
+
+// xyz = direction for DirectionalLight
+// xyz = position for PointLight
+// w   = type : 0 directional, 1 point
+uniform vec4 lightVectors[MAX_LIGHTS];
+// rgb = color
+// a   = intensity
 uniform vec4 lightColors[MAX_LIGHTS];
+// x = radius for PointLight
+// y = falloff for PointLight
+uniform vec4 lightParams[MAX_LIGHTS];
 
 uniform vec3 cameraPosition;
 
@@ -73,18 +82,39 @@ vec3 computeLighting(vec3 objectColor)
         if (i >= lightCount)
             continue;
 
-        vec3 lightDirection = normalize(-lightDirections[i].xyz);
+        bool isPointLight = lightVectors[i].w == 1.0;
+        vec3 lightDirection;
+        float lightStrength = SECONDARY_LIGHT_STRENGTH;
+
+        if (isPointLight)
+        {
+            vec3 toLight = lightVectors[i].xyz - vWorldPosition;
+            float distanceToLight = length(toLight);
+            float radius = lightParams[i].x;
+            float fallOff = lightParams[i].y;
+
+            if (distanceToLight > radius)
+                continue;
+
+            lightDirection = normalize(toLight);
+            lightStrength = 1.0 - smoothstep(radius * fallOff, radius, distanceToLight);
+        }
+        else
+        {
+            lightDirection = normalize(-lightVectors[i].xyz);
+        }
+
         vec3 lightColor = lightColors[i].rgb * lightColors[i].a;
 
         float ndl = max(dot(normal, lightDirection), 0.0);
 
-        if (i == 0)
+        if (i == 0 && !isPointLight)
         {
             result += computeToonColor(objectColor, ndl) * lightColor;
         }
         else
         {
-            result += objectColor * lightColor * ndl * SECONDARY_LIGHT_STRENGTH;
+            result += objectColor * lightColor * ndl * lightStrength;
         }
     }
 

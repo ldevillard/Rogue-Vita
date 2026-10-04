@@ -16,6 +16,7 @@ struct TextureDesc;
 class AssetRegistry;
 class Camera;
 class DirectionalLight;
+class PointLight;
 class Transform;
 
 struct DrawContext
@@ -52,7 +53,9 @@ public:
     bool ShouldClose() const;
 
     void BeginScene(const Camera& camera);
+
     void SubmitLight(const DirectionalLight& light);
+    void SubmitLight(const PointLight& light);
 
     void Draw(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix);
     void DrawSkinned(const Mesh& mesh, const Material& material, const dvl::Mat4& modelMatrix, const dvl::Mat4* skinningMatrices, int boneCount);
@@ -67,8 +70,16 @@ private:
     const Camera* _activeCamera = nullptr;
     const AssetRegistry& _assetRegistry;
 
-    dvl::Vec4 _lightDirections[MaxLights]{};
+    // xyz = direction for DirectionalLight
+    // xyz = position for PointLight
+    // w   = type : 0 directional, 1 point
+    dvl::Vec4 _lightVectors[MaxLights]{};
+    // rgb = color
+    // a   = intensity
     dvl::Vec4 _lightColors[MaxLights]{};
+    // x = radius for PointLight
+    // y = falloff for PointLight
+    dvl::Vec4 _lightParams[MaxLights]{};
 
     int _lightCount = 0;
 };

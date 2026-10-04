@@ -6,6 +6,7 @@
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
 #include "engine/component/mesh_renderer.h"
+#include "engine/component/point_light.h"
 #include "engine/component/skinned_mesh_renderer.h"
 #include "engine/core/asset_registry.h"
 #include "engine/core/entity.h"
@@ -188,8 +189,16 @@ int main()
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
     light.direction = dvl::Vec3(-0.35f, -1.0f, -0.45f);
-    light.color = dvl::Vec3(1.0f, 0.8f, 0.8f);
+    light.color = dvl::Vec3(0.6f, 0.6f, 1.0f);
     light.intensity = 1.2f;
+
+    Entity* pointlightEntity = world.CreateEntity();
+    pointlightEntity->transform.position = dvl::Vec3(-1.5f, 1.5f, -1.5f);
+    PointLight& pointLight = pointlightEntity->AddComponent<PointLight>();
+    pointLight.color = dvl::Vec3(1.0f, 0.6f, 0.6f);
+    pointLight.falloff = 0.85f;
+    pointLight.intensity = 1.0f;
+    pointLight.radius = 2.0f;
 
     while (renderer.ShouldClose() == false)
     {
@@ -223,6 +232,11 @@ int main()
         for (DirectionalLight* directionalLight : world.GetComponents<DirectionalLight>())
         {
             renderer.SubmitLight(*directionalLight);
+        }
+
+        for (PointLight* pointLight : world.GetComponents<PointLight>())
+        {
+            renderer.SubmitLight(*pointLight);
         }
 
         // Render logic

@@ -2,9 +2,12 @@
 
 #include "engine/component/camera.h"
 #include "engine/component/directional_light.h"
+#include "engine/component/point_light.h"
+
 #include "engine/core/asset_registry.h"
 #include "engine/core/entity.h"
 #include "engine/core/transform.h"
+
 #include "engine/render/material.h"
 #include "engine/render/mesh.h"
 #include "engine/render/render_pipeline.h"
@@ -248,8 +251,24 @@ void Renderer::SubmitLight(const DirectionalLight& light)
     }
 
     const dvl::Vec3 direction = light.direction.Normalized();
-    _lightDirections[_lightCount] = dvl::Vec4(direction.x, direction.y, direction.z, 0.0f);
+    _lightVectors[_lightCount] = dvl::Vec4(direction.x, direction.y, direction.z, 0.0f);
     _lightColors[_lightCount] = dvl::Vec4(light.color.x, light.color.y, light.color.z, light.intensity);
+    _lightParams[_lightCount] = dvl::Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    _lightCount++;
+}
+
+void Renderer::SubmitLight(const PointLight& light)
+{
+    if (_lightCount >= MaxLights)
+    {
+        return;
+    }
+
+    const dvl::Mat4 worldMatrix = light.GetEntity()->GetWorldMatrix();
+    const dvl::Vec3 position(worldMatrix[3][0], worldMatrix[3][1], worldMatrix[3][2]);
+    _lightVectors[_lightCount] = dvl::Vec4(position.x, position.y, position.z, 1.0f);
+    _lightColors[_lightCount] = dvl::Vec4(light.color.x, light.color.y, light.color.z, light.intensity);
+    _lightParams[_lightCount] = dvl::Vec4(light.radius, light.falloff, 0.0f, 0.0f);
     _lightCount++;
 }
 
@@ -393,14 +412,19 @@ void Renderer::bindParameter(const ShaderParameterBinding& parameter, const Draw
             _device.SetShaderParameter(parameter.handle, &_lightCount, 1);
             break;
 
-        case ShaderParameterSemantic::LightDirections:
+        case ShaderParameterSemantic::LightVectors:
             if (_lightCount > 0)
-                _device.SetShaderParameter(parameter.handle, &_lightDirections[0].x, _lightCount);
+                _device.SetShaderParameter(parameter.handle, &_lightVectors[0].x, _lightCount);
             break;
 
         case ShaderParameterSemantic::LightColors:
             if (_lightCount > 0)
                 _device.SetShaderParameter(parameter.handle, &_lightColors[0].x, _lightCount);
+            break;
+
+        case ShaderParameterSemantic::LightParams:
+            if (_lightCount > 0)
+                _device.SetShaderParameter(parameter.handle, &_lightParams[0].x, _lightCount);
             break;
 
         case ShaderParameterSemantic::SkinningMatrices:
