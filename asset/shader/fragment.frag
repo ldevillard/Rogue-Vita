@@ -10,109 +10,95 @@ const int MAX_LIGHTS = 4;
 
 uniform int lightCount;
 
-// xyz = light direction
+// xyz = normalized direction or point position, w = 0 directional, 1 point
 uniform vec4 lightVectors[MAX_LIGHTS];
-// rgb = color
-// a   = intensity
+
+// rgb = color * intensity, precomputed on CPU
 uniform vec4 lightColors[MAX_LIGHTS];
 
-uniform vec3 cameraPosition;
+// CPU precomputed attenuation: clamp(y - distanceSquared * x, 0, 1)
+uniform vec2 lightParams[MAX_LIGHTS];
 
 const vec3 SHADOW_TINT = vec3(0.52, 0.58, 0.72);
-const vec3 MID_TINT = vec3(0.76, 0.79, 0.84);
-const float SHADOW_THRESHOLD = 0.35;
 const float LIGHT_THRESHOLD = 0.70;
-const float BAND_SMOOTHNESS = 0.025;
 
-const vec3 RIM_COLOR = vec3(0.35, 0.55, 0.85);
-const float RIM_STRENGTH = 0.4;
-
-const vec3 SKY_AMBIENT = vec3(0.12, 0.15, 0.20);
-const vec3 GROUND_AMBIENT = vec3(0.07, 0.065, 0.07);
-const float AMBIENT_STRENGTH = 0.20;
+const vec3 AMBIENT_COLOR = vec3(0.019, 0.0215, 0.027);
 
 const float SECONDARY_LIGHT_STRENGTH = 0.18;
 
-vec3 computeAmbient(vec3 normal)
+vec3 computeToonTint(float ndl)
 {
-    float up = normal.y * 0.5 + 0.5;
-    vec3 ambientColor = mix(GROUND_AMBIENT, SKY_AMBIENT, up);
-
-    return ambientColor * AMBIENT_STRENGTH;
+    return mix(SHADOW_TINT, vec3(1.0), step(LIGHT_THRESHOLD, ndl));
 }
 
-vec3 computeToonColor(vec3 objectColor, float ndl)
+vec3 computePointLight(vec3 position, vec3 color, vec2 params)
 {
-    float shadowToMid = smoothstep(
-        SHADOW_THRESHOLD - BAND_SMOOTHNESS,
-        SHADOW_THRESHOLD + BAND_SMOOTHNESS,
-        ndl
-    );
+    vec3 toLight = position - vWorldPosition;
+    float distanceSquared = dot(toLight, toLight);
 
-    float midToLight = smoothstep(
-        LIGHT_THRESHOLD - BAND_SMOOTHNESS,
-        LIGHT_THRESHOLD + BAND_SMOOTHNESS,
-        ndl
-    );
+    // Short edge fade with CPU precomputed coefficients, no bands or smoothstep
+    float attenuation = clamp(params.y - distanceSquared * params.x, 0.0, 1.0);
+    
+    return color * attenuation;
+}
 
-    vec3 shadowColor = objectColor * SHADOW_TINT;
-    vec3 midColor = objectColor * MID_TINT;
-    vec3 lightColor = objectColor;
+vec3 computeDirectionalLight(vec3 normal, vec3 direction, vec3 color, float primary)
+{
+    // Direction is normalized on CPU, no distance or attenuation calculation
+    float ndl = max(dot(normal, -direction), 0.0);
+    
+    vec3 diffuse = mix(vec3(ndl * SECONDARY_LIGHT_STRENGTH), computeToonTint(ndl), primary);
+    
+    return diffuse * color;
+}
 
-    vec3 color = mix(shadowColor, midColor, shadowToMid);
-    color = mix(color, lightColor, midToLight);
-
-    return color;
+vec3 computeLight(vec3 normal, vec4 lightData, vec3 color, vec2 params, float primary)
+{
+    if (lightData.w == 1.0)
+    {
+        return computePointLight(lightData.xyz, color, params);
+    }
+    
+    return computeDirectionalLight(normal, lightData.xyz, color, primary);
 }
 
 vec3 computeLighting(vec3 objectColor)
 {
-    vec3 normal = normalize(vNormal);
-    vec3 viewDirection = normalize(cameraPosition - vWorldPosition);
+    vec3 result = AMBIENT_COLOR;
 
-    vec3 result = objectColor * computeAmbient(normal);
-
-    for (int i = 0; i < MAX_LIGHTS; i++)
+    // Unrolled loop for shader performances
+    if (lightCount > 0)
     {
-        if (i >= lightCount)
-            continue;
-
-        vec3 lightDirection = normalize(-lightVectors[i].xyz);
-        vec3 lightColor = lightColors[i].rgb * lightColors[i].a;
-
-        float ndl = max(dot(normal, lightDirection), 0.0);
-
-        if (i == 0)
+        result += computeLight(vNormal, lightVectors[0], lightColors[0].rgb, lightParams[0], 1.0);
+        
+        if (lightCount > 1)
         {
-            result += computeToonColor(objectColor, ndl) * lightColor;
-        }
-        else
-        {
-            result += objectColor * lightColor * ndl * SECONDARY_LIGHT_STRENGTH;
+            result += computeLight(vNormal, lightVectors[1], lightColors[1].rgb, lightParams[1], 0.0);
+            
+            if (lightCount > 2)
+            {
+                result += computeLight(vNormal, lightVectors[2], lightColors[2].rgb, lightParams[2], 0.0);
+                
+                if (lightCount > 3)
+                {
+                    result += computeLight(vNormal, lightVectors[3], lightColors[3].rgb, lightParams[3], 0.0);
+                }
+            }
         }
     }
 
-    float rim = 1.0 - max(dot(normal, viewDirection), 0.0);
-    rim = smoothstep(0.74, 0.94, rim);
-    result += RIM_COLOR * rim * RIM_STRENGTH;
-
-    return result;
+    return result * objectColor;
 }
 
 void main()
 {
     vec4 albedo = texture2D(albedoTexture, vUV);
-
     vec3 objectColor = albedo.rgb * materialColor.rgb;
     float alpha = albedo.a * materialColor.a;
 
-    vec3 result;
+    vec3 result = objectColor;
 
-    if (materialUnlit != 0)
-    {
-        result = objectColor;
-    }
-    else
+    if (materialUnlit == 0)
     {
         result = computeLighting(objectColor);
     }

@@ -74,12 +74,12 @@ private:
     // xyz = position for PointLight
     // w   = type : 0 directional, 1 point
     dvl::Vec4 _lightVectors[MaxLights]{};
-    // rgb = color
-    // a   = intensity
+    
+    // rgb = color * intensity, a = 1
     dvl::Vec4 _lightColors[MaxLights]{};
-    // x = radius for PointLight
-    // y = falloff for PointLight
-    dvl::Vec4 _lightParams[MaxLights]{};
+
+    // PointLight: x = distance-squared scale, y = fade bias
+    dvl::Vec2 _lightParams[MaxLights]{};
 
     int _lightCount = 0;
 };

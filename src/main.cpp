@@ -93,7 +93,7 @@ int main()
     PointLight& playerPointLight = playerEntity->AddComponent<PointLight>();
     playerPointLight.intensity = 0.2f;
     playerPointLight.radius = 1.0f;
-    playerPointLight.falloff = 0.0f;
+    playerPointLight.falloff = 0.8f;
 
     cameraEntity->AddComponent<SpringArm>(playerEntity->ToRef());
 
@@ -162,8 +162,8 @@ int main()
     PointLight& potPointLight = potPointLightEntity->AddComponent<PointLight>();
     potPointLight.color = dvl::Vec3(0.0f, 0.6f, 1.0f);
     potPointLight.falloff = 0.0f;
-    potPointLight.intensity = 2.0f;
-    potPointLight.radius = 1.0f;
+    potPointLight.intensity = 1.5f;
+    potPointLight.radius = 0.5f;
     LightFlicker& potLightFlicker = potPointLightEntity->AddComponent<LightFlicker>();
     potLightFlicker.duration = 0.2f;
 
@@ -212,15 +212,15 @@ int main()
     Entity* lightEntity = world.CreateEntity();
     DirectionalLight& light = lightEntity->AddComponent<DirectionalLight>();
     light.direction = dvl::Vec3(-0.35f, -1.0f, -0.45f);
-    light.color = dvl::Vec3(0.6f, 0.6f, 1.0f);
-    light.intensity = 1.4f;
+    light.color = dvl::Vec3(0.7f, 0.7f, 1.0f);
+    light.intensity = 1.1f;
 
     Entity* pointlightEntity = world.CreateEntity();
-    pointlightEntity->transform.position = dvl::Vec3(-1.5f, 1.5f, -1.5f);
+    pointlightEntity->transform.position = dvl::Vec3(-1.7f, 1.7f, -1.7f);
     PointLight& pointLight = pointlightEntity->AddComponent<PointLight>();
     pointLight.color = dvl::Vec3(1.0f, 0.6f, 0.6f);
-    pointLight.falloff = 0.7f;
-    pointLight.intensity = 1.0f;
+    pointLight.falloff = 0.9f;
+    pointLight.intensity = 0.8f;
     pointLight.radius = 2.0f;
     LightFlicker& pointLightFlicker = pointlightEntity->AddComponent<LightFlicker>();
     pointLightFlicker.duration = 1.0f;
@@ -235,9 +235,6 @@ int main()
 
         dvl::Tweener::Update(deltaTime);
         world.StartPendingComponents();
-
-        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
-        renderer.BeginScene(mainCamera);
 
         // Gameplay logic
         {
@@ -255,42 +252,49 @@ int main()
         
         animationSystem.Update(world, assetRegistry, deltaTime);
 
-        for (DirectionalLight* directionalLight : world.GetComponents<DirectionalLight>())
+        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
+        renderer.BeginScene(mainCamera);
+
+        // Lighting submission logic
         {
-            renderer.SubmitLight(*directionalLight);
+            for (DirectionalLight* directionalLight : world.GetComponents<DirectionalLight>())
+            {
+                renderer.SubmitLight(*directionalLight);
+            }
+            
+            for (PointLight* pointLight : world.GetComponents<PointLight>())
+            {
+                renderer.SubmitLight(*pointLight);
+            }
         }
 
-        // Point lights are currently disabled due to performance issues
-        //for (PointLight* pointLight : world.GetComponents<PointLight>())
-        //{
-        //    renderer.SubmitLight(*pointLight);
-        //}
-
         // Render logic
-        for (const MeshRenderer* meshRenderer : world.GetComponents<MeshRenderer>())
         {
-            const Mesh* mesh = assetRegistry.GetMesh(meshRenderer->meshHandle);
-            if (mesh == nullptr)
-                continue;
-
-            const Entity* entity = meshRenderer->GetEntity();
-
-            const SkinnedMeshRenderer* skinnedMeshRenderer = dynamic_cast<const SkinnedMeshRenderer*>(meshRenderer);
-
-            if (skinnedMeshRenderer != nullptr)
+            for (const MeshRenderer* meshRenderer : world.GetComponents<MeshRenderer>())
             {
-                const Animator* animator = entity->GetComponent<Animator>();
-                if (animator == nullptr || !animator->IsValid())
+                const Mesh* mesh = assetRegistry.GetMesh(meshRenderer->meshHandle);
+                if (mesh == nullptr)
                     continue;
 
-                const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
-                renderer.DrawSkinned(*mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
-                
-                continue;
-            }
+                const Entity* entity = meshRenderer->GetEntity();
 
-            const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * meshRenderer->localTransform.GetMatrix();
-            renderer.Draw(*mesh, meshRenderer->material, modelMatrix);
+                const SkinnedMeshRenderer* skinnedMeshRenderer = dynamic_cast<const SkinnedMeshRenderer*>(meshRenderer);
+
+                if (skinnedMeshRenderer != nullptr)
+                {
+                    const Animator* animator = entity->GetComponent<Animator>();
+                    if (animator == nullptr || !animator->IsValid())
+                        continue;
+
+                    const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * skinnedMeshRenderer->localTransform.GetMatrix();
+                    renderer.DrawSkinned(*mesh, skinnedMeshRenderer->material, modelMatrix, animator->GetSkinningMatrices(), animator->GetBoneCount());
+
+                    continue;
+                }
+
+                const dvl::Mat4 modelMatrix = entity->GetWorldMatrix() * meshRenderer->localTransform.GetMatrix();
+                renderer.Draw(*mesh, meshRenderer->material, modelMatrix);
+            }
         }
 
         // Debug editor only logic

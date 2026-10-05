@@ -252,14 +252,14 @@ void Renderer::SubmitLight(const DirectionalLight& light)
 
     const dvl::Vec3 direction = light.direction.Normalized();
     _lightVectors[_lightCount] = dvl::Vec4(direction.x, direction.y, direction.z, 0.0f);
-    _lightColors[_lightCount] = dvl::Vec4(light.color.x, light.color.y, light.color.z, light.intensity);
-    _lightParams[_lightCount] = dvl::Vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    _lightColors[_lightCount] = dvl::Vec4(light.color.x * light.intensity, light.color.y * light.intensity, light.color.z * light.intensity, 1.0f);
+    _lightParams[_lightCount] = dvl::Vec2(0.0f, 0.0f);
     _lightCount++;
 }
 
 void Renderer::SubmitLight(const PointLight& light)
 {
-        if (_lightCount >= MaxLights)
+    if (_lightCount >= MaxLights)
     {
         return;
     }
@@ -267,8 +267,13 @@ void Renderer::SubmitLight(const PointLight& light)
     const dvl::Mat4 worldMatrix = light.GetEntity()->GetWorldMatrix();
     const dvl::Vec3 position(worldMatrix[3][0], worldMatrix[3][1], worldMatrix[3][2]);
     _lightVectors[_lightCount] = dvl::Vec4(position.x, position.y, position.z, 1.0f);
-    _lightColors[_lightCount] = dvl::Vec4(light.color.x, light.color.y, light.color.z, light.intensity);
-    _lightParams[_lightCount] = dvl::Vec4(light.radius, light.falloff, 0.0f, 0.0f);
+    _lightColors[_lightCount] = dvl::Vec4(light.color.x * light.intensity, light.color.y * light.intensity, light.color.z * light.intensity, 1.0f);
+    
+    // Short edge fade: full intensity until 80..95% of the radius
+    const float fadeStart = std::clamp(light.falloff, 0.8f, 0.95f);
+    const float fadeBias = 1.0f / (1.0f - fadeStart * fadeStart);
+    
+    _lightParams[_lightCount] = light.radius >= 0.0001f ? dvl::Vec2(fadeBias / (light.radius * light.radius), fadeBias) : dvl::Vec2(0.0f, 0.0f);
     _lightCount++;
 }
 
