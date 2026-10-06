@@ -5,10 +5,10 @@
 Rogue Vita project aims to create an isometric rogue-lite game using a custom engine!
 
 <p>
-  <img src="showcases/rogue-vita.gif" width="404">
+  <img src="showcases/rogue-vita-small-gameplay.gif" width="404">
   <img src="showcases/rogue-vita-animation.gif" width="400">
 </p>
-<p align="center"><i>Player controller with animations using custom engine and <code>dvl</code> framework</i></p>
+<p align="center"><i>Player controller with animations and gameplay using custom engine and <code>dvl</code> framework</i></p>
 
 ## dvl 🛠️
 
@@ -18,19 +18,22 @@ It enables cross-platform development and currently supports the `PlayStation Vi
 
 ## Implemented features
 
-- 🎨 3D rendering with textured meshes and Phong lighting
-- 🧩 Entity-component framework
-- 🎮 Simple player controller
+- 🎨 3D rendering with textured meshes and toon lighting
+- 🧩 Entity-component and hybrid ECS framework
+- 🎮 Simple player controller with basic gameplay systems
 - 📦 Custom asset cookers
 - 🧮 Skeletal animation
 - 💻 PC and PS Vita support
+- 💥 Physics queries support
 
 ## Planned Next Features 🚀
 
-- 🎮 Basic gameplay
+- 🎮 Improved gameplay
 - 🧭 NavMesh pathfinding
 - ✨ Particle system
-- 🪵 Physics API
+- 🪵 Physics collision detection
+- 👓 UI framework
+- 🎵 Audio framework
 
 ## Build & Run
 
