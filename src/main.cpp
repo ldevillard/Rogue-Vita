@@ -91,7 +91,7 @@ int main()
     playerEntity->AddComponent<PlayerController>(cameraEntity->ToRef(), playerAnimator.ToRef<Animator>(), playerAnimations, bulletPrefab->ToRef());
     playerEntity->AddComponent<BoxCollider>(dvl::Vec3::Zero(), dvl::Vec3(0.5f, 0.8f, 0.5f));
     PointLight& playerPointLight = playerEntity->AddComponent<PointLight>();
-    playerPointLight.intensity = 0.2f;
+    playerPointLight.intensity = 0.3f;
     playerPointLight.radius = 1.0f;
     playerPointLight.falloff = 0.8f;
 
@@ -236,6 +236,9 @@ int main()
         dvl::Tweener::Update(deltaTime);
         world.StartPendingComponents();
 
+        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
+        renderer.BeginScene(mainCamera);
+
         // Gameplay logic
         {
             for (Behavior* behavior : world.GetComponents<Behavior>())
@@ -251,9 +254,6 @@ int main()
         }
         
         animationSystem.Update(world, assetRegistry, deltaTime);
-
-        renderer.BeginFrame(dvl::Vec4(0.32f, 0.45f, 0.65f, 1.0f));
-        renderer.BeginScene(mainCamera);
 
         // Lighting submission logic
         {

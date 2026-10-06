@@ -18,8 +18,6 @@ void HealthDisplayer::Start()
 {
     _meshRenderer = entity.GetComponent<MeshRenderer>()->ToRef<MeshRenderer>();
     _baseScaleX = entity.transform.scale.x;
-
-    Update(0.0f);
 }
 
 void HealthDisplayer::Update(float)
